@@ -1,7 +1,12 @@
-// ===== CREDIT SYSTEM UTILITIES =====
-// Client-side helpers only.
-// Actual credit balances are stored in Clerk publicMetadata (source of truth).
-// Transaction log is stored in Supabase via /api/credits.
+// ===== CREDIT SYSTEM UTILITIES (client-side helpers) =====
+//
+// SOURCE OF TRUTH: credit_balances table in Postgres (via lib/credits-server.ts).
+// Clerk publicMetadata.credits is a read-only display cache — never write to it
+// directly and never treat it as authoritative.
+//
+// All balance mutations (deduct, add, seed) must go through lib/credits-server.ts
+// which wraps every operation in a DB transaction to keep the balance and the
+// transaction log permanently in sync.
 
 // ===== PRICING TABLE =====
 export const EXPERT_SESSION_COSTS: Record<string, number> = {
@@ -10,7 +15,7 @@ export const EXPERT_SESSION_COSTS: Record<string, number> = {
   "5+yr":  350,
 };
 
-export const EXPERT_SESSION_EARN = 80; // 80 credits per session to expert
+export const EXPERT_SESSION_EARN = 80; // 80 credits earned per session by expert
 
 // ===== CREDIT TIER LABELS =====
 export function getCreditTierLabel(credits: number): string {

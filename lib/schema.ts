@@ -1,8 +1,14 @@
 // ===== DRIZZLE ORM SCHEMA =====
-// Tables: ventures, expert_profiles, sessions, credit_transactions
+// Tables: ventures, expert_profiles, sessions, credit_transactions, credit_balances
 // Identity (name, email, PFP) lives in Clerk.
 // Profile extras (bio, location, links) live in Clerk unsafeMetadata.
-// App data (ventures, sessions, credits log) lives here in Supabase.
+// App data (ventures, sessions, credits log, credit balances) lives here in Supabase.
+//
+// CREDIT SYSTEM NOTE:
+// credit_balances is the canonical source of truth for a user's credit balance.
+// Clerk publicMetadata.credits is a read-only cache for display purposes only.
+// All balance mutations go through lib/credits-server.ts which wraps the
+// balance update + transaction log insert in a single DB transaction.
 
 import {
   pgTable, text, integer, boolean,
@@ -91,6 +97,15 @@ export const creditTransactions = pgTable("credit_transactions", {
 });
 
 // ===================================================
+// CREDIT BALANCES  (one row per user — source of truth)
+// ===================================================
+export const creditBalances = pgTable("credit_balances", {
+  clerkUserId: text("clerk_user_id").primaryKey(),
+  balance:     integer("balance").notNull().default(0),
+  updatedAt:   timestamp("updated_at").defaultNow(),
+});
+
+// ===================================================
 // TYPE EXPORTS
 // ===================================================
 export type Venture              = typeof ventures.$inferSelect;
@@ -101,3 +116,4 @@ export type Session              = typeof sessions.$inferSelect;
 export type NewSession           = typeof sessions.$inferInsert;
 export type CreditTransaction    = typeof creditTransactions.$inferSelect;
 export type NewCreditTransaction = typeof creditTransactions.$inferInsert;
+export type CreditBalance        = typeof creditBalances.$inferSelect;
