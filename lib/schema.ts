@@ -29,6 +29,14 @@ export const ventures = pgTable("ventures", {
   teamMembers:     jsonb("team_members").$type<any[]>().default([]),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tractionMetrics: jsonb("traction_metrics").$type<any[]>().default([]),
+  
+  // Marketplace UI Enhancements
+  founderName:     text("founder_name").default(""),
+  fundingStage:    text("funding_stage").default("Pre-seed"),
+  tags:            jsonb("tags").$type<string[]>().default([]),
+  views:           integer("views").default(0),
+  campaignEndsAt:  timestamp("campaign_ends_at"),
+
   createdAt:       timestamp("created_at").defaultNow(),
   updatedAt:       timestamp("updated_at").defaultNow(),
 });
@@ -91,6 +99,18 @@ export const creditTransactions = pgTable("credit_transactions", {
 });
 
 // ===================================================
+// INVESTMENT INTERESTS
+// ===================================================
+export const investmentInterests = pgTable("investment_interests", {
+  id:             uuid("id").defaultRandom().primaryKey(),
+  ventureId:      uuid("venture_id").notNull(), // should reference ventures.id, keeping simple
+  expertClerkId:  text("expert_clerk_id").notNull(),
+  status:         text("status").default("pending"), // pending, accepted, rejected
+  message:        text("message"),
+  createdAt:      timestamp("created_at").defaultNow(),
+});
+
+// ===================================================
 // TYPE EXPORTS
 // ===================================================
 export type Venture              = typeof ventures.$inferSelect;
@@ -101,3 +121,5 @@ export type Session              = typeof sessions.$inferSelect;
 export type NewSession           = typeof sessions.$inferInsert;
 export type CreditTransaction    = typeof creditTransactions.$inferSelect;
 export type NewCreditTransaction = typeof creditTransactions.$inferInsert;
+export type InvestmentInterest   = typeof investmentInterests.$inferSelect;
+export type NewInvestmentInterest= typeof investmentInterests.$inferInsert;
