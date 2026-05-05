@@ -17,10 +17,10 @@ const paddingStyles = {
 };
 
 const variantStyles = {
-  default: "bg-white border border-border shadow-card",
-  elevated: "bg-white border border-border shadow-soft-md",
-  bordered: "bg-white border-2 border-border",
-  ghost: "bg-canvas border border-border",
+  default: "bg-white dark:bg-slate-800 border border-border dark:border-slate-700 shadow-card dark:shadow-lg",
+  elevated: "bg-white dark:bg-slate-800 border border-border dark:border-slate-700 shadow-soft-md dark:shadow-lg",
+  bordered: "bg-white dark:bg-slate-800 border-2 border-border dark:border-slate-700",
+  ghost: "bg-canvas dark:bg-slate-900 border border-border dark:border-slate-700",
 };
 
 export function Card({

@@ -44,7 +44,7 @@ const EXPERTS = [
 
 export function ExpertNetworkSection() {
   return (
-    <section className="section-padding bg-white">
+    <section className="section-padding bg-white dark:bg-slate-900">
       <div className="section-container">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* Left */}

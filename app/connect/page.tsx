@@ -77,13 +77,13 @@ export default function ConnectPage() {
               Talk to experts who&apos;ve{" "}
               <em className="not-italic text-gradient-primary">actually built it</em>
             </h1>
-            <p className="text-xl text-[#4A5668] max-w-2xl mx-auto mb-8">
+            <p className="text-xl text-[#4A5668] dark:text-slate-300 max-w-2xl mx-auto mb-8">
               Book 1-on-1 video calls with domain-expert advisors. Continue via direct chat. No middlemen, no gatekeeping.
             </p>
-            <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-white border border-[#D2C4B4] shadow-soft-sm mb-12">
+            <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-white dark:bg-slate-800 border border-[#D2C4B4] dark:border-slate-700 shadow-soft-sm mb-12">
               <Shield className="size-5 text-[#81A6C6]" />
-              <span className="text-sm text-[#4A5668]">
-                <span className="text-[#1A2332] font-semibold">Basic plan free for 30 days</span> — full access. Then from ₹499/month.
+              <span className="text-sm text-[#4A5668] dark:text-slate-300">
+                <span className="text-[#1A2332] dark:text-slate-100 font-semibold">Basic plan free for 30 days</span> — full access. Then from ₹499/month.
               </span>
             </div>
           </div>
@@ -91,40 +91,40 @@ export default function ConnectPage() {
 
         {/* How it works */}
         <section className="section-container pb-20">
-          <h2 className="text-2xl font-semibold text-[#1A2332] mb-8 text-center">How it works</h2>
+          <h2 className="text-2xl font-semibold text-[#1A2332] dark:text-slate-100 mb-8 text-center">How it works</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {HOW_IT_WORKS.map(({ step, icon: Icon, title, desc }) => (
-              <div key={step} className="card p-6 relative">
-                <div className="text-4xl font-bold text-[#F3E3D0] absolute top-4 right-4 select-none" style={{ fontFamily: "'Playfair Display', serif" }}>{step}</div>
-                <div className="size-10 rounded-xl bg-[#EEF4F9] border border-[#AACDDC] flex items-center justify-center mb-4">
-                  <Icon className="size-5 text-[#81A6C6]" />
+              <div key={step} className="card p-6 relative bg-white dark:bg-slate-800">
+                <div className="text-4xl font-bold text-[#D2C4B4] dark:text-slate-700 absolute top-4 right-4 select-none" style={{ fontFamily: "'Playfair Display', serif" }}>{step}</div>
+                <div className="size-10 rounded-xl bg-[#EEF4F9] dark:bg-slate-700 border border-[#AACDDC] dark:border-slate-600 flex items-center justify-center mb-4">
+                  <Icon className="size-5 text-[#81A6C6] dark:text-blue-300" />
                 </div>
-                <h3 className="font-semibold text-[#1A2332] mb-2">{title}</h3>
-                <p className="text-sm text-[#4A5668] leading-relaxed">{desc}</p>
+                <h3 className="font-semibold text-[#1A2332] dark:text-slate-100 mb-2">{title}</h3>
+                <p className="text-sm text-[#4A5668] dark:text-slate-300 leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* Expert listing */}
-        <section className="bg-[#F7F2EC] border-y border-[#D2C4B4] py-16">
+        <section className="bg-slate-950 border-y border-slate-800 py-16">
           <div className="section-container">
             {/* Search + filters */}
             <div className="flex flex-col sm:flex-row gap-3 mb-6">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#8A95A3]" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
                 <input
                   id="expert-search"
                   type="text"
                   placeholder="Search by name, company, or expertise..."
-                  className="input pl-10"
+                  className="input pl-10 bg-slate-900 border-slate-700 text-slate-100 placeholder:text-slate-500"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                 />
               </div>
               <select
                 id="domain-filter"
-                className="input sm:w-56"
+                className="input sm:w-56 bg-slate-900 border-slate-700 text-slate-100"
                 value={domain}
                 onChange={e => setDomain(e.target.value)}
               >
@@ -132,7 +132,7 @@ export default function ConnectPage() {
               </select>
               <button
                 onClick={() => setAvailOnly(v => !v)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all whitespace-nowrap ${availOnly ? "bg-green-600 text-white border-green-600" : "bg-white text-[#4A5668] border-[#D2C4B4] hover:border-[#81A6C6]"}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all whitespace-nowrap ${availOnly ? "bg-emerald-600 text-white border-emerald-600" : "bg-slate-900 text-slate-300 border-slate-700 hover:border-slate-500"}`}
               >
                 <Zap className="size-3.5" />
                 Available only
@@ -141,10 +141,10 @@ export default function ConnectPage() {
 
             {/* Results count */}
             <div className="flex items-center justify-between mb-6">
-              <p className="text-sm text-[#4A5668]">
-                Showing <strong className="text-[#1A2332]">{filtered.length}</strong> of <strong className="text-[#1A2332]">{EXPERTS.length}</strong> experts
+              <p className="text-sm text-slate-300">
+                Showing <strong className="text-slate-100">{filtered.length}</strong> of <strong className="text-slate-100">{EXPERTS.length}</strong> experts
               </p>
-              <div className="flex items-center gap-1.5 text-xs text-[#8A95A3]">
+              <div className="flex items-center gap-1.5 text-xs text-slate-400">
                 <Filter className="size-3.5" />
                 {domain !== "All domains" || search || availOnly ? "Filtered" : "All experts"}
               </div>
@@ -153,7 +153,7 @@ export default function ConnectPage() {
             {/* Expert grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {filtered.map((expert) => (
-                <div key={expert.name} className="card p-6 card-hover flex flex-col gap-4 bg-white">
+                <div key={expert.name} className="card p-6 card-hover flex flex-col gap-4 bg-slate-900 border-slate-800">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className="size-12 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
@@ -161,29 +161,29 @@ export default function ConnectPage() {
                         {expert.initials}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-[#1A2332] text-sm">{expert.name}</h3>
-                        <p className="text-xs text-[#4A5668]">{expert.role}</p>
-                        <p className="text-xs font-semibold text-[#3D74A0] mt-0.5">{expert.company}</p>
+                        <h3 className="font-semibold text-slate-100 text-sm">{expert.name}</h3>
+                        <p className="text-xs text-slate-300">{expert.role}</p>
+                        <p className="text-xs font-semibold text-blue-300 mt-0.5">{expert.company}</p>
                         <span className="badge badge-blue mt-1 text-[10px]">{expert.domain}</span>
                       </div>
                     </div>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${expert.available ? "bg-green-50 text-green-700 border border-green-200" : "bg-[#F3E3D0] text-[#8A95A3]"}`}>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${expert.available ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : "bg-slate-800 text-slate-400 border border-slate-700"}`}>
                       {expert.available ? "● Available" : "Busy"}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-3 text-xs text-[#8A95A3]">
+                  <div className="flex items-center gap-3 text-xs text-slate-400">
                     <span className="flex items-center gap-1"><Star className="size-3 text-amber-400 fill-amber-400" />{expert.rating}</span>
                     <span className="flex items-center gap-1"><Clock className="size-3" />{expert.sessions} sessions</span>
                   </div>
 
                   <div className="flex flex-wrap gap-1.5">
                     {expert.tags.map((tag) => (
-                      <span key={tag} className="text-xs text-[#4A5668] bg-[#F3E3D0] px-2 py-0.5 rounded-full border border-[#D2C4B4]">{tag}</span>
+                      <span key={tag} className="text-xs text-slate-300 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">{tag}</span>
                     ))}
                   </div>
 
-                  <div className="flex items-center gap-2 pt-3 border-t border-[#D2C4B4]">
+                  <div className="flex items-center gap-2 pt-3 border-t border-slate-800">
                     <Link href="/sign-up" className="flex-1 btn-primary py-2 text-sm justify-center">
                       <Video className="size-3.5" /> Book Call
                     </Link>

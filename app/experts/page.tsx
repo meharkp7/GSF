@@ -53,13 +53,13 @@ export default function ExpertsPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-24 min-h-screen bg-[#FDFAF7]">
+      <main className="pt-24 min-h-screen bg-[#FDFAF7] dark:bg-slate-950">
         {/* Hero */}
-        <section className="relative section-padding bg-soft-pattern overflow-hidden">
+        <section className="relative section-padding bg-soft-pattern dark:bg-gradient-to-b dark:from-slate-950 dark:to-slate-900 overflow-hidden">
           <div className="absolute inset-0 bg-dot-grid opacity-25" />
           <div className="section-container relative z-10 text-center">
             <span className="badge badge-blue mb-6"><Star className="size-3.5" /> {ALL_EXPERTS.length}+ world-class experts</span>
-            <h1 className="text-5xl sm:text-6xl text-[#1A2332] tracking-tight mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <h1 className="text-5xl sm:text-6xl text-[#1A2332] dark:text-slate-100 tracking-tight mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
               Learn from founders{" "}
               <em className="not-italic text-gradient-primary">who&apos;ve done it</em>
             </h1>
@@ -70,22 +70,22 @@ export default function ExpertsPage() {
             {/* Search bar */}
             <div className="flex flex-col sm:flex-row items-center gap-3 max-w-2xl mx-auto">
               <div className="relative flex-1 w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#8A95A3]" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#8A95A3] dark:text-slate-400" />
                 <input
                   id="expert-search"
                   type="text"
                   placeholder="Search by name, company, or expertise..."
-                  className="input pl-10 w-full"
+                  className="input pl-10 w-full bg-white dark:bg-slate-900 border-[#D2C4B4] dark:border-slate-700"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                 />
                 {search && (
-                  <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A95A3] hover:text-[#1A2332]">
+                  <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A95A3] hover:text-[#1A2332] dark:hover:text-slate-100">
                     <X className="size-3.5" />
                   </button>
                 )}
               </div>
-              <select className="input sm:w-52 w-full" value={domain} onChange={e => setDomain(e.target.value)}>
+              <select className="input sm:w-52 w-full bg-white dark:bg-slate-900 border-[#D2C4B4] dark:border-slate-700" value={domain} onChange={e => setDomain(e.target.value)}>
                 {DOMAINS.map(d => <option key={d}>{d}</option>)}
               </select>
               <Link href="/sign-up" className="btn-primary whitespace-nowrap w-full sm:w-auto justify-center">Join to Book</Link>
@@ -94,12 +94,12 @@ export default function ExpertsPage() {
             <div className="flex items-center justify-center gap-4 mt-4">
               <button
                 onClick={() => setAvailOnly(v => !v)}
-                className={`text-sm px-3 py-1.5 rounded-full border transition-all ${availOnly ? "bg-green-600 text-white border-green-600" : "bg-white text-[#4A5668] border-[#D2C4B4]"}`}
+                className={`text-sm px-3 py-1.5 rounded-full border transition-all ${availOnly ? "bg-green-600 text-white border-green-600" : "bg-white dark:bg-slate-900 text-[#4A5668] dark:text-slate-300 border-[#D2C4B4] dark:border-slate-700"}`}
               >
                 ● Available now only
               </button>
               {(search || domain !== "All" || availOnly) && (
-                <button onClick={clearFilters} className="text-xs text-[#8A95A3] hover:text-[#1A2332] flex items-center gap-1">
+                <button onClick={clearFilters} className="text-xs text-[#8A95A3] hover:text-[#1A2332] dark:hover:text-slate-100 flex items-center gap-1">
                   <X className="size-3" /> Clear filters
                 </button>
               )}
@@ -109,11 +109,11 @@ export default function ExpertsPage() {
 
         {/* Results bar */}
         <div className="section-container py-4 flex items-center justify-between">
-          <p className="text-sm text-[#4A5668]">
-            Showing <strong className="text-[#1A2332]">{filtered.length}</strong> of <strong className="text-[#1A2332]">{ALL_EXPERTS.length}</strong> experts
-            {domain !== "All" && <> in <strong className="text-[#3D74A0]">{domain}</strong></>}
+          <p className="text-sm text-[#4A5668] dark:text-slate-300">
+            Showing <strong className="text-[#1A2332] dark:text-slate-100">{filtered.length}</strong> of <strong className="text-[#1A2332] dark:text-slate-100">{ALL_EXPERTS.length}</strong> experts
+            {domain !== "All" && <> in <strong className="text-[#3D74A0] dark:text-blue-300">{domain}</strong></>}
           </p>
-          <div className="flex items-center gap-1.5 text-xs text-[#8A95A3]"><Filter className="size-3.5" /> {filtered.length} results</div>
+          <div className="flex items-center gap-1.5 text-xs text-[#8A95A3] dark:text-slate-400"><Filter className="size-3.5" /> {filtered.length} results</div>
         </div>
 
         {/* Expert grid */}
@@ -121,7 +121,7 @@ export default function ExpertsPage() {
           {filtered.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((expert) => (
-                <div key={expert.name} className="card p-6 card-hover flex flex-col gap-4">
+                <div key={expert.name} className="card p-6 card-hover flex flex-col gap-4 bg-white dark:bg-slate-800">
                   {/* Header */}
                   <div className="flex items-start gap-3">
                     <div className="size-14 rounded-2xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
@@ -130,37 +130,37 @@ export default function ExpertsPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
-                        <h2 className="text-sm font-semibold text-[#1A2332] leading-tight">{expert.name}</h2>
-                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${expert.available ? "bg-green-50 text-green-700 border border-green-200" : "bg-[#F3E3D0] text-[#8A95A3]"}`}>
+                        <h2 className="text-sm font-semibold text-[#1A2332] dark:text-slate-100 leading-tight">{expert.name}</h2>
+                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${expert.available ? "bg-green-50 text-green-700 border border-green-200 dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/20" : "bg-[#F3E3D0] text-[#8A95A3] dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600"}`}>
                           {expert.available ? "● Available" : "Away"}
                         </span>
                       </div>
-                      <p className="text-xs text-[#4A5668] truncate mt-0.5">{expert.role}</p>
-                      <p className="text-xs font-semibold text-[#3D74A0] truncate">{expert.company}</p>
+                      <p className="text-xs text-[#4A5668] dark:text-slate-300 truncate mt-0.5">{expert.role}</p>
+                      <p className="text-xs font-semibold text-[#3D74A0] dark:text-blue-300 truncate">{expert.company}</p>
                       <div className="flex items-center gap-2 mt-1 flex-wrap">
                         <span className="badge badge-blue text-[10px]">{expert.domain}</span>
-                        <span className="text-[10px] text-[#8A95A3]">{expert.experience} exp</span>
+                        <span className="text-[10px] text-[#8A95A3] dark:text-slate-400">{expert.experience} exp</span>
                       </div>
                     </div>
                   </div>
 
-                  <p className="text-sm text-[#4A5668] leading-relaxed line-clamp-2">{expert.bio}</p>
+                  <p className="text-sm text-[#4A5668] dark:text-slate-300 leading-relaxed line-clamp-2">{expert.bio}</p>
 
                   {/* Tags */}
                   <div className="flex flex-wrap gap-1.5">
                     {expert.tags.map((tag) => (
-                      <span key={tag} className="text-xs text-[#4A5668] bg-[#F3E3D0] border border-[#D2C4B4] px-2 py-0.5 rounded-full">{tag}</span>
+                      <span key={tag} className="text-xs text-[#4A5668] dark:text-slate-300 bg-[#F3E3D0] dark:bg-slate-700 border border-[#D2C4B4] dark:border-slate-600 px-2 py-0.5 rounded-full">{tag}</span>
                     ))}
                   </div>
 
                   {/* Rating + sessions */}
-                  <div className="flex items-center gap-3 text-xs text-[#8A95A3]">
+                  <div className="flex items-center gap-3 text-xs text-[#8A95A3] dark:text-slate-400">
                     <span className="flex items-center gap-1"><Star className="size-3 text-amber-400 fill-amber-400" />{expert.rating}</span>
                     <span>{expert.sessions} sessions</span>
                   </div>
 
                   {/* Footer: Book button full-width on its own row, social links below */}
-                  <div className="pt-2 border-t border-[#D2C4B4] space-y-2">
+                  <div className="pt-2 border-t border-[#D2C4B4] dark:border-slate-700 space-y-2">
                     <Link
                       href="/login"
                       className="btn-primary w-full justify-center text-xs py-2 flex items-center gap-1.5"
@@ -169,17 +169,17 @@ export default function ExpertsPage() {
                     </Link>
                     <div className="flex items-center gap-1">
                       <a href={`https://${expert.linkedin}`} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-xs text-[#4A5668] hover:text-[#0077B5] transition-colors px-2 py-1 rounded-lg hover:bg-blue-50 flex-1 justify-center">
+                        className="flex items-center gap-1.5 text-xs text-[#4A5668] dark:text-slate-300 hover:text-[#0077B5] transition-colors px-2 py-1 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 flex-1 justify-center">
                         <svg className="size-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
                         LinkedIn
                       </a>
                       <a href={`mailto:${expert.email}`}
-                        className="flex items-center gap-1.5 text-xs text-[#4A5668] hover:text-[#3D74A0] transition-colors px-2 py-1 rounded-lg hover:bg-[#EEF4F9] flex-1 justify-center">
+                        className="flex items-center gap-1.5 text-xs text-[#4A5668] dark:text-slate-300 hover:text-[#3D74A0] transition-colors px-2 py-1 rounded-lg hover:bg-[#EEF4F9] dark:hover:bg-slate-700 flex-1 justify-center">
                         <Mail className="size-3.5 flex-shrink-0" />
                         Email
                       </a>
                       <Link href="/login"
-                        className="flex items-center gap-1.5 text-xs text-[#4A5668] hover:text-[#3D74A0] transition-colors px-2 py-1 rounded-lg hover:bg-[#EEF4F9] flex-1 justify-center">
+                        className="flex items-center gap-1.5 text-xs text-[#4A5668] dark:text-slate-300 hover:text-[#3D74A0] transition-colors px-2 py-1 rounded-lg hover:bg-[#EEF4F9] dark:hover:bg-slate-700 flex-1 justify-center">
                         <MessageSquare className="size-3.5 flex-shrink-0" />
                         Chat
                       </Link>
@@ -189,23 +189,23 @@ export default function ExpertsPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-24">
+              <div className="text-center py-24">
               <Search className="size-14 text-[#D2C4B4] mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-[#1A2332] mb-2">No experts found</h3>
-              <p className="text-sm text-[#8A95A3] mb-5">Try a different search term or domain filter.</p>
+              <h3 className="text-xl font-semibold text-[#1A2332] dark:text-slate-100 mb-2">No experts found</h3>
+              <p className="text-sm text-[#8A95A3] dark:text-slate-400 mb-5">Try a different search term or domain filter.</p>
               <button onClick={clearFilters} className="btn-outline text-sm py-2 px-5">Clear filters</button>
             </div>
           )}
         </section>
 
         {/* Become expert CTA */}
-        <section className="bg-[#F7F2EC] border-t border-[#D2C4B4] py-20">
+        <section className="bg-[#F7F2EC] dark:bg-slate-950 border-t border-[#D2C4B4] dark:border-slate-800 py-20">
           <div className="section-container text-center max-w-2xl mx-auto">
-            <div className="size-14 rounded-2xl bg-[#EEF4F9] border border-[#AACDDC] flex items-center justify-center mx-auto mb-6">
-              <Briefcase className="size-7 text-[#81A6C6]" />
+            <div className="size-14 rounded-2xl bg-[#EEF4F9] dark:bg-slate-800 border border-[#AACDDC] dark:border-slate-700 flex items-center justify-center mx-auto mb-6">
+              <Briefcase className="size-7 text-[#81A6C6] dark:text-blue-300" />
             </div>
-            <h2 className="text-3xl text-[#1A2332] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>Are you an expert?</h2>
-            <p className="text-[#4A5668] max-w-xl mx-auto mb-8">
+            <h2 className="text-3xl text-[#1A2332] dark:text-slate-100 mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>Are you an expert?</h2>
+            <p className="text-[#4A5668] dark:text-slate-300 max-w-xl mx-auto mb-8">
               Join the GSF expert network and give back to the next generation of founders. We match you with students who need your exact expertise.
             </p>
             <Link href="/sign-up" className="btn-primary px-8 py-3">Apply as an expert</Link>

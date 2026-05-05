@@ -44,7 +44,7 @@ export default function CareersPage() {
         </section>
 
         {/* Perks */}
-        <section className="bg-white border-y border-[#D2C4B4]">
+        <section className="bg-white dark:bg-slate-900 border-y border-[#D2C4B4] dark:border-slate-700">
           <div className="section-container py-14">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
               {PERKS.map(({ icon: Icon, title, desc }) => (

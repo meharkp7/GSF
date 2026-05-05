@@ -13,14 +13,14 @@ export default function HomePage() {
         <HeroSection />
 
         {/* Two core platforms */}
-        <section className="bg-white border-y border-[#D2C4B4] py-20">
+        <section className="bg-white dark:bg-slate-900 border-y border-[#D2C4B4] dark:border-slate-700 py-20">
           <div className="section-container">
             <div className="text-center mb-14">
-              <h2 className="text-4xl sm:text-5xl text-[#1A2332] mb-4"
+              <h2 className="text-4xl sm:text-5xl text-[#1A2332] dark:text-slate-100 mb-4"
                 style={{ fontFamily: "'Playfair Display', serif" }}>
                 Two platforms. One mission.
               </h2>
-              <p className="text-[#4A5668] text-lg max-w-xl mx-auto">
+              <p className="text-[#4A5668] dark:text-slate-300 text-lg max-w-xl mx-auto">
                 Connect with experts who&apos;ve done it. Fund the ideas that will shape tomorrow.
               </p>
             </div>
@@ -175,7 +175,16 @@ export default function HomePage() {
 
                   <div className="font-bold text-lg text-[#1A2332] mb-1">{plan.name}</div>
                   <div className="mb-1">
-                    <span className="text-3xl font-bold text-[#1A2332]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    <span
+                      className="text-3xl font-bold"
+                      style={{
+                        fontFamily: "'Playfair Display', serif",
+                        background: "linear-gradient(90deg, #5B8CFF, #22D3EE)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                      }}
+                    >
                       {plan.price}
                     </span>
                     <span className="text-xs text-[#8A95A3] ml-1">{plan.period}</span>

@@ -16,7 +16,7 @@ export default function ProgramsPage() {
         <section className="relative section-padding bg-soft-pattern overflow-hidden">
           <div className="absolute inset-0 bg-dot-grid opacity-25" />
           <div className="section-container relative z-10 text-center max-w-3xl mx-auto">
-            <h1 className="text-5xl sm:text-6xl text-[#1A2332] tracking-tight mb-6"
+            <h1 className="text-5xl sm:text-6xl text-[#1A2332] dark:text-slate-100 tracking-tight mb-6"
               style={{ fontFamily: "'Playfair Display', serif" }}>
               The GSF <em className="not-italic text-gradient-primary">Platform</em>
             </h1>
@@ -34,7 +34,7 @@ export default function ProgramsPage() {
                     <Icon className={`size-6 ${iconColor}`} />
                   </div>
                   <span className={`badge w-fit mb-3 ${badgeClass}`}>{label}</span>
-                  <h2 className="text-lg font-semibold text-[#1A2332] mb-2">{tagline}</h2>
+                  <h2 className="text-lg font-semibold text-[#1A2332] dark:text-slate-100 mb-2">{tagline}</h2>
                   <p className="text-sm text-[#4A5668] leading-relaxed flex-1 mb-6">{desc}</p>
                   <Link href={href} className="btn-outline text-sm py-2 justify-center">
                     Explore <ArrowRight className="size-3.5" />
@@ -46,7 +46,7 @@ export default function ProgramsPage() {
         </section>
 
         <section className="section-container py-20 text-center">
-          <h2 className="text-3xl text-[#1A2332] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-3xl text-[#1A2332] dark:text-slate-100 mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
             Ready to start?
           </h2>
           <p className="text-[#4A5668] mb-8 max-w-lg mx-auto">Access the full GSF platform free for 30 days. No credit card required.</p>

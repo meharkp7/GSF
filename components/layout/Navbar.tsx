@@ -5,10 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Video, Lightbulb, Users, BookOpen, Rocket, Zap, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, Video, Lightbulb, Users, BookOpen, Rocket, Zap, LogOut, LayoutDashboard, Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { clerkUserToAuthUser } from "@/lib/auth";
+import { useTheme } from "@/components/layout/ThemeProvider";
 
 const NAV_LINKS = [
   { label: "Connect",   href: "/connect",   icon: Video },
@@ -23,6 +24,9 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const router   = useRouter();
+
+  // Theme management
+  const { theme, toggle: toggleTheme } = useTheme();
 
   // Clerk auth state
   const { user: clerkUser, isSignedIn, isLoaded } = useUser();
@@ -44,7 +48,7 @@ export function Navbar() {
 
   const navBg = scrolled
     ? "backdrop-blur-md border-b shadow-[var(--shadow-nav)]"
-    : "bg-transparent border-b border-transparent";
+    : "border-b";
 
   // Determine dashboard link based on role stored in Clerk metadata
   const dashboardHref = user?.role === "expert" ? "/expert-dashboard" : "/dashboard";
@@ -56,7 +60,7 @@ export function Navbar() {
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
           navBg
         )}
-        style={scrolled ? { backgroundColor: "var(--bg-nav)", borderBottomColor: "var(--border-default)" } : {}}
+        style={{ backgroundColor: "var(--bg-nav)", borderBottomColor: "var(--border-default)" }}
       >
         <div className="section-container">
           <div className="flex items-center justify-between h-16">
@@ -155,6 +159,29 @@ export function Navbar() {
                   </Link>
                 </>
               )}
+              
+              {/* Theme toggle button */}
+              <button
+                onClick={toggleTheme}
+                className="ml-2 p-2 rounded-lg transition-all duration-200 flex items-center justify-center"
+                style={{
+                  backgroundColor: "var(--bg-surface-2)",
+                  color: "var(--text-primary)",
+                  border: "1px solid var(--border-default)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "var(--accent-indigo)";
+                  e.currentTarget.style.color = "white";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "var(--bg-surface-2)";
+                  e.currentTarget.style.color = "var(--text-primary)";
+                }}
+                title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                aria-label={theme === "dark" ? "Light mode" : "Dark mode"}
+              >
+                {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+              </button>
             </div>
 
             {/* Mobile hamburger */}
@@ -225,6 +252,28 @@ export function Navbar() {
                     </Link>
                   </>
                 )}
+                
+                {/* Mobile theme toggle */}
+                <button
+                  onClick={() => {
+                    toggleTheme();
+                    setMobileOpen(false);
+                  }}
+                  className="btn-outline w-full justify-center flex items-center gap-2 mt-2"
+                  title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                >
+                  {theme === "dark" ? (
+                    <>
+                      <Sun className="size-4" />
+                      Light Mode
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="size-4" />
+                      Dark Mode
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </motion.div>

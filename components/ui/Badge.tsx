@@ -9,13 +9,13 @@ interface BadgeProps {
 }
 
 const variantStyles = {
-  primary: "bg-primary-50 text-primary-600 ring-primary-200/50",
-  secondary: "bg-secondary-50 text-secondary-600 ring-secondary-200/50",
-  success: "bg-emerald-50 text-emerald-600 ring-emerald-200/50",
-  warning: "bg-amber-50 text-amber-600 ring-amber-200/50",
-  danger: "bg-red-50 text-red-600 ring-red-200/50",
-  gray: "bg-gray-100 text-gray-600 ring-gray-200/50",
-  outline: "bg-transparent border border-border text-text-secondary ring-0",
+  primary: "bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 ring-primary-200/50 dark:ring-primary-700/50",
+  secondary: "bg-secondary-50 dark:bg-secondary-900/30 text-secondary-600 dark:text-secondary-400 ring-secondary-200/50 dark:ring-secondary-700/50",
+  success: "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 ring-emerald-200/50 dark:ring-emerald-700/50",
+  warning: "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 ring-amber-200/50 dark:ring-amber-700/50",
+  danger: "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 ring-red-200/50 dark:ring-red-700/50",
+  gray: "bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 ring-gray-200/50 dark:ring-slate-600/50",
+  outline: "bg-transparent dark:bg-transparent border border-border dark:border-slate-600 text-text-secondary dark:text-slate-300 ring-0",
 };
 
 const dotColors = {

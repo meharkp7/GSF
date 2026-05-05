@@ -19,12 +19,12 @@ export default function PrivacyPage() {
       <Navbar />
       <main className="pt-24 min-h-screen bg-[#FDFAF7]">
         <section className="section-container py-20 max-w-3xl mx-auto">
-          <h1 className="text-4xl text-[#1A2332] mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>Privacy Policy</h1>
+          <h1 className="text-4xl text-[#1A2332] dark:text-slate-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>Privacy Policy</h1>
           <p className="text-[#8A95A3] text-sm mb-10">Last updated: April 2026</p>
           <div className="space-y-8">
             {sections.map(({ heading, body }) => (
               <div key={heading} className="border-t border-[#D2C4B4] pt-8">
-                <h2 className="text-lg font-semibold text-[#1A2332] mb-3">{heading}</h2>
+                <h2 className="text-lg font-semibold text-[#1A2332] dark:text-slate-100 mb-3">{heading}</h2>
                 <p className="text-[#4A5668] leading-relaxed text-sm">{body}</p>
               </div>
             ))}
