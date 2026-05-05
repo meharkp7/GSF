@@ -68,42 +68,59 @@ export default function ExpertsPage() {
               Book video calls and chat directly with operators, investors, and domain experts. Available directly to every GSF member.
             </p>
 
-            {/* Search bar */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 max-w-2xl mx-auto">
-              <div className="relative flex-1 w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#8A95A3] dark:text-slate-400" />
-                <input
-                  id="expert-search"
-                  type="text"
-                  placeholder="Search by name, company, or expertise..."
-                  className="input pl-10 w-full bg-white dark:bg-slate-900 border-[#D2C4B4] dark:border-slate-700"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                />
-                {search && (
-                  <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A95A3] hover:text-[#1A2332] dark:hover:text-slate-100">
-                    <X className="size-3.5" />
+            {/* Search bar and filters */}
+            <div className="flex flex-col gap-4 max-w-4xl mx-auto">
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <div className="relative flex-1 w-full">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#8A95A3] dark:text-slate-400" />
+                  <input
+                    id="expert-search"
+                    type="text"
+                    placeholder="Search by name, company, or expertise..."
+                    className="input pl-10 w-full bg-white dark:bg-slate-900 border-[#D2C4B4] dark:border-slate-700"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                  />
+                  {search && (
+                    <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A95A3] hover:text-[#1A2332] dark:hover:text-slate-100">
+                      <X className="size-3.5" />
+                    </button>
+                  )}
+                </div>
+                <Link href="/sign-up" className="btn-primary whitespace-nowrap w-full sm:w-auto justify-center">Join to Book</Link>
+              </div>
+
+              {/* Category Filter Chips - Enhanced */}
+              <div className="flex flex-wrap gap-2 justify-center">
+                {DOMAINS.map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setDomain(d)}
+                    className={`px-3 py-1.5 rounded-full text-sm transition-all whitespace-nowrap ${
+                      domain === d
+                        ? "bg-[#81A6C6] text-white shadow-md"
+                        : "bg-white dark:bg-slate-800 text-[#4A5668] dark:text-slate-300 border border-[#D2C4B4] dark:border-slate-700 hover:bg-[#EEF4F9] dark:hover:bg-slate-700"
+                    }`}
+                  >
+                    {d}
+                  </button>
+                ))}
+              </div>
+
+              {/* Availability toggle and Clear filters */}
+              <div className="flex items-center justify-center gap-4 mt-2">
+                <button
+                  onClick={() => setAvailOnly(v => !v)}
+                  className={`text-sm px-3 py-1.5 rounded-full border transition-all ${availOnly ? "bg-green-600 text-white border-green-600" : "bg-white dark:bg-slate-900 text-[#4A5668] dark:text-slate-300 border-[#D2C4B4] dark:border-slate-700"}`}
+                >
+                  ● Available now only
+                </button>
+                {(search || domain !== "All" || availOnly) && (
+                  <button onClick={clearFilters} className="text-xs text-[#8A95A3] hover:text-[#1A2332] dark:hover:text-slate-100 flex items-center gap-1">
+                    <X className="size-3" /> Clear filters
                   </button>
                 )}
               </div>
-              <select className="input sm:w-52 w-full bg-white dark:bg-slate-900 border-[#D2C4B4] dark:border-slate-700" value={domain} onChange={e => setDomain(e.target.value)}>
-                {DOMAINS.map(d => <option key={d}>{d}</option>)}
-              </select>
-              <Link href="/sign-up" className="btn-primary whitespace-nowrap w-full sm:w-auto justify-center">Join to Book</Link>
-            </div>
-
-            <div className="flex items-center justify-center gap-4 mt-4">
-              <button
-                onClick={() => setAvailOnly(v => !v)}
-                className={`text-sm px-3 py-1.5 rounded-full border transition-all ${availOnly ? "bg-green-600 text-white border-green-600" : "bg-white dark:bg-slate-900 text-[#4A5668] dark:text-slate-300 border-[#D2C4B4] dark:border-slate-700"}`}
-              >
-                ● Available now only
-              </button>
-              {(search || domain !== "All" || availOnly) && (
-                <button onClick={clearFilters} className="text-xs text-[#8A95A3] hover:text-[#1A2332] dark:hover:text-slate-100 flex items-center gap-1">
-                  <X className="size-3" /> Clear filters
-                </button>
-              )}
             </div>
           </div>
         </section>
