@@ -1,12 +1,16 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import Link from "next/link";
-import { ArrowRight, CheckCircle, Clock, Users, Lightbulb } from "lucide-react";
+import ProgressIndicator from "@/components/apply/ProgressIndicator";
+import Step1 from "@/components/apply/Step1";
+import Step2 from "@/components/apply/Step2";
+import Step3 from "@/components/apply/Step3";
+import Step4 from "@/components/apply/Step4";
+import { CheckCircle, Users, Lightbulb, Clock } from "lucide-react";
 
-export const metadata = {
-  title: "Apply — GSF | Global Society of Founders",
-  description: "Apply to join the GSF community. Free for your first 30 days.",
-};
+const STEPS = ["Personal Info", "Education", "Startup Idea", "Review & Submit"];
 
 const PERKS = [
   { icon: CheckCircle, text: "Full platform access — Connect + Ventures" },
@@ -16,6 +20,52 @@ const PERKS = [
 ];
 
 export default function ApplyPage() {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState({});
+
+  // Load saved progress from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("applyFormData");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setFormData(parsed);
+      if (parsed.currentStep) setCurrentStep(parsed.currentStep);
+    }
+  }, []);
+
+  // Save progress to localStorage
+  const saveProgress = (data: any, step: number) => {
+    const newData = { ...formData, ...data, currentStep: step };
+    setFormData(newData);
+    localStorage.setItem("applyFormData", JSON.stringify(newData));
+  };
+
+  const nextStep = (data: any) => {
+    saveProgress(data, currentStep + 1);
+    setCurrentStep(prev => prev + 1);
+    window.scrollTo(0, 0);
+  };
+
+  const prevStep = () => {
+    setCurrentStep(prev => prev - 1);
+    window.scrollTo(0, 0);
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <Step1 formData={formData} onNext={nextStep} />;
+      case 2:
+        return <Step2 formData={formData} onNext={nextStep} onPrev={prevStep} />;
+      case 3:
+        return <Step3 formData={formData} onNext={nextStep} onPrev={prevStep} />;
+      case 4:
+        return <Step4 formData={formData} onPrev={prevStep} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -61,50 +111,10 @@ export default function ApplyPage() {
                 </div>
               </div>
 
-              {/* Right form */}
+              {/* Right form - Multi-step */}
               <div className="lg:col-span-3 card p-8 bg-white dark:bg-slate-800">
-                <h2 className="text-lg font-semibold text-[#1A2332] mb-6">Create your account</h2>
-                <form className="space-y-5" id="apply-form">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-[#1A2332] mb-1.5" htmlFor="apply-firstname">First name</label>
-                      <input id="apply-firstname" type="text" className="input" placeholder="Aryan" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#1A2332] mb-1.5" htmlFor="apply-lastname">Last name</label>
-                      <input id="apply-lastname" type="text" className="input" placeholder="Kapoor" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1A2332] mb-1.5" htmlFor="apply-email">University email</label>
-                    <input id="apply-email" type="email" className="input" placeholder="you@university.edu" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1A2332] mb-1.5" htmlFor="apply-university">University / College</label>
-                    <input id="apply-university" type="text" className="input" placeholder="IIT Delhi, BITS Pilani..." />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1A2332] mb-1.5" htmlFor="apply-role">I am a...</label>
-                    <select id="apply-role" className="input">
-                      <option value="">Select your current role</option>
-                      <option>Undergraduate student</option>
-                      <option>Postgraduate student</option>
-                      <option>Recent graduate (within 2 years)</option>
-                      <option>First-time founder</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1A2332] mb-1.5" htmlFor="apply-idea">Do you have a startup idea? (optional)</label>
-                    <textarea id="apply-idea" className="input textarea" style={{ minHeight: '88px' }}
-                      placeholder="Briefly describe your idea or the problem you want to solve..." />
-                  </div>
-                  <button id="apply-submit" type="submit" className="btn-primary w-full justify-center py-3 text-sm">
-                    Join GSF Free — 30 Days Access <ArrowRight className="size-4" />
-                  </button>
-                  <p className="text-xs text-[#8A95A3] text-center">
-                    No credit card required. Cancel anytime after trial.
-                  </p>
-                </form>
+                <ProgressIndicator currentStep={currentStep} totalSteps={4} steps={STEPS} />
+                {renderStep()}
               </div>
             </div>
           </div>
