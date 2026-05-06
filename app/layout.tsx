@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { PageTransition } from "@/components/layout/PageTransition";
 import ClientLayout from "@/components/layout/ClientLayout";
+import ToastProvider from "@/components/ui/ToastProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -62,6 +63,7 @@ export default function RootLayout({
         <body className="min-h-full font-sans" style={{ backgroundColor: "var(--bg-base)", color: "var(--text-primary)" }}>
           <ThemeProvider>
             <PageTransition>
+              <ToastProvider />
               <ClientLayout>{children}</ClientLayout>
             </PageTransition>
           </ThemeProvider>
