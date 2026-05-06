@@ -16,6 +16,25 @@ import {
 } from "drizzle-orm/pg-core";
 
 // ===================================================
+// USERS (synced from Clerk via webhooks)
+// ===================================================
+export const users = pgTable("users", {
+  id:            uuid("id").defaultRandom().primaryKey(),
+  clerkId:       text("clerk_id").notNull().unique(),
+  name:          text("name").notNull(),
+  email:         text("email").notNull(),
+  role:          text("role").default("student"),
+  cohortId:      uuid("cohort_id"),
+  avatarUrl:     text("avatar_url"),
+  bio:           text("bio"),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onboarding:    jsonb("onboarding").$type<any>().default({}),
+  isActive:      boolean("is_active").default(true),
+  createdAt:     timestamp("created_at").defaultNow(),
+  updatedAt:     timestamp("updated_at").defaultNow(),
+});
+
+// ===================================================
 // VENTURES  (one per founder)
 // ===================================================
 export const ventures = pgTable("ventures", {
@@ -128,6 +147,8 @@ export const creditBalances = pgTable("credit_balances", {
 // ===================================================
 // TYPE EXPORTS
 // ===================================================
+export type User                 = typeof users.$inferSelect;
+export type NewUser              = typeof users.$inferInsert;
 export type Venture              = typeof ventures.$inferSelect;
 export type NewVenture           = typeof ventures.$inferInsert;
 export type ExpertProfile        = typeof expertProfiles.$inferSelect;
