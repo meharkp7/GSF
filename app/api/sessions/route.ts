@@ -11,10 +11,17 @@ import {
   deductCredits,
   InsufficientCreditsError,
 } from "@/lib/credits-server";
+import {
+  ApiRouteError,
+  errorResponse,
+  parseJsonBody,
+  withRouteErrorHandling,
+} from "@/lib/api/route-helpers";
+import { sessionsPostSchema } from "@/lib/validators/api-routes";
 
 export async function GET() {
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return errorResponse(401, "Unauthorized", { code: "UNAUTHORIZED" });
 
   const rows = await db
     .select()
@@ -30,31 +37,29 @@ export async function GET() {
   return NextResponse.json(rows);
 }
 
-export async function POST(req: Request) {
+export const POST = withRouteErrorHandling(async (req: Request) => {
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return errorResponse(401, "Unauthorized", { code: "UNAUTHORIZED" });
 
-  const body = await req.json();
-
-  // ── Input validation ────────────────────────────────────────────────────
+  const body = await parseJsonBody(req, sessionsPostSchema);
   const { expertClerkId, scheduledAt, duration, creditsCost, creditsEarned } = body;
 
-  if (!expertClerkId || typeof expertClerkId !== "string") {
-    return NextResponse.json({ error: "expertClerkId is required" }, { status: 400 });
-  }
-  if (!scheduledAt || isNaN(Date.parse(scheduledAt))) {
-    return NextResponse.json({ error: "scheduledAt must be a valid ISO date" }, { status: 400 });
-  }
   if (new Date(scheduledAt) <= new Date()) {
-    return NextResponse.json({ error: "scheduledAt must be in the future" }, { status: 400 });
+    throw new ApiRouteError(400, "scheduledAt must be in the future", {
+      code: "VALIDATION_ERROR",
+      fieldErrors: { scheduledAt: ["scheduledAt must be in the future"] },
+    });
   }
   if (expertClerkId === userId) {
-    return NextResponse.json({ error: "Cannot book a session with yourself" }, { status: 400 });
+    throw new ApiRouteError(400, "Cannot book a session with yourself", {
+      code: "VALIDATION_ERROR",
+      fieldErrors: { expertClerkId: ["Cannot book a session with yourself"] },
+    });
   }
 
-  const cost    = typeof creditsCost   === "number" && creditsCost   > 0 ? creditsCost   : 100;
-  const earned  = typeof creditsEarned === "number" && creditsEarned > 0 ? creditsEarned : 80;
-  const dur     = typeof duration      === "number" && duration      > 0 ? duration      : 30;
+  const cost = creditsCost;
+  const earned = creditsEarned;
+  const dur = duration;
 
   // ── Step 1: Insert the session row (status = "pending") ─────────────────
   // We insert first so we have a session ID to attach to the credit transaction.
@@ -67,9 +72,9 @@ export async function POST(req: Request) {
       .values({
         founderClerkId: userId,
         expertClerkId,
-        founderName:    body.founderName  ?? "",
-        expertName:     body.expertName   ?? "",
-        ventureName:    body.ventureName  ?? "",
+        founderName: body.founderName,
+        expertName: body.expertName,
+        ventureName: body.ventureName,
         scheduledAt:    new Date(scheduledAt),
         duration:       dur,
         creditsCost:    cost,
@@ -78,10 +83,7 @@ export async function POST(req: Request) {
       })
       .returning();
   } catch {
-    return NextResponse.json(
-      { error: "Failed to create session" },
-      { status: 500 },
-    );
+    return errorResponse(500, "Failed to create session", { code: "SESSION_CREATE_FAILED" });
   }
 
   // ── Step 2: Atomically deduct credits ───────────────────────────────────
@@ -98,21 +100,11 @@ export async function POST(req: Request) {
     await db.delete(sessions).where(eq(sessions.id, created.id)).catch(() => {});
 
     if (err instanceof InsufficientCreditsError) {
-      return NextResponse.json(
-        {
-          error:    "Insufficient credits",
-          required: err.required,
-          current:  err.current,
-        },
-        { status: 402 },
-      );
+      return errorResponse(402, "Insufficient credits", { code: "INSUFFICIENT_CREDITS" });
     }
 
-    return NextResponse.json(
-      { error: "Credit deduction failed. Please try again." },
-      { status: 500 },
-    );
+    return errorResponse(500, "Credit deduction failed. Please try again.", { code: "CREDIT_DEDUCTION_FAILED" });
   }
 
   return NextResponse.json(created, { status: 201 });
-}
+});
