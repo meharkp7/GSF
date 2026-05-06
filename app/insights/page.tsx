@@ -719,8 +719,6 @@ export default function InsightsPage() {
               <div className="card p-8 lg:p-12 card-hover relative overflow-hidden cursor-pointer"
                 style={{ background: `linear-gradient(${featured.gradient})` }}
                 onClick={() => setOpenArticle(featured)}>
-                <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none opacity-30"
-                  style={{ background: featured.accentColor }} />
                 <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                   <div>
                     <div className="flex items-center gap-3 mb-4">
@@ -783,10 +781,6 @@ export default function InsightsPage() {
             className="mt-16 p-10 rounded-3xl text-center relative overflow-hidden"
             style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-default)" }}
           >
-            <div className="absolute inset-0 pointer-events-none rounded-3xl overflow-hidden">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-40 rounded-full blur-[80px]"
-                style={{ background: "rgba(91,108,255,0.08)" }} />
-            </div>
             <div className="relative z-10">
               <div className="size-12 rounded-2xl flex items-center justify-center mx-auto mb-4"
                 style={{ backgroundColor: "rgba(91,108,255,0.1)", border: "1px solid rgba(91,108,255,0.2)" }}>

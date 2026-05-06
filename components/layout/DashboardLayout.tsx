@@ -45,9 +45,9 @@ export function DashboardLayout({
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top bar */}
-        <header className="h-16 bg-white border-b border-border flex items-center px-4 sm:px-6 gap-4 flex-shrink-0">
+        <header className="h-16 bg-white dark:bg-slate-900 border-b border-border dark:border-slate-700 flex items-center px-4 sm:px-6 gap-4 flex-shrink-0">
           <button
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 text-text-secondary transition-colors"
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 text-text-secondary dark:text-slate-300 transition-colors"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu className="size-5" />

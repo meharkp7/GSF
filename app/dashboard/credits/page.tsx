@@ -50,9 +50,6 @@ export default function CreditsPage() {
           className="p-8 rounded-3xl relative overflow-hidden"
           style={{ backgroundColor: "var(--bg-surface)", border: "1px solid rgba(91,108,255,0.35)" }}
         >
-          <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none" style={{ background: "rgba(91,108,255,0.08)" }} />
-          <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-[60px] pointer-events-none" style={{ background: "rgba(79,209,197,0.06)" }} />
-
           <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-6">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "var(--text-muted)" }}>Current Balance</p>

@@ -60,33 +60,11 @@ export function IntroAnimation({ onComplete }: { onComplete: () => void }) {
       {phase !== "done" && (
         <motion.div
           key="intro"
-          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
-          style={{ backgroundColor: "#0B0F19" }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-gradient-to-b from-slate-950 to-slate-900"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
         >
-          {/* Ambient background blobs */}
-          <motion.div
-            className="absolute inset-0 pointer-events-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-          >
-            <div
-              className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-[120px]"
-              style={{ background: "rgba(91,108,255,0.15)" }}
-            />
-            <div
-              className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-[100px]"
-              style={{ background: "rgba(79,209,197,0.12)" }}
-            />
-            <div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-[80px]"
-              style={{ background: "rgba(132,153,255,0.1)" }}
-            />
-          </motion.div>
-
           {/* Floating particles */}
           {particles.map((p) => (
             <motion.div
@@ -115,15 +93,6 @@ export function IntroAnimation({ onComplete }: { onComplete: () => void }) {
               }}
             />
           ))}
-
-          {/* Grid overlay */}
-          <div
-            className="absolute inset-0 pointer-events-none opacity-10"
-            style={{
-              backgroundImage: "radial-gradient(circle, rgba(91,108,255,0.4) 1px, transparent 1px)",
-              backgroundSize: "32px 32px",
-            }}
-          />
 
           {/* Main logo block */}
           <div className="relative z-10 flex flex-col items-center">
@@ -157,7 +126,7 @@ export function IntroAnimation({ onComplete }: { onComplete: () => void }) {
               {/* Glow orb */}
               <motion.div
                 className="absolute rounded-full"
-                style={{ width: 90, height: 90, background: "radial-gradient(circle, rgba(91,108,255,0.3) 0%, transparent 70%)" }}
+                style={{ width: 90, height: 90, background: "rgba(91,108,255,0.14)" }}
                 animate={{ scale: [1, 1.3, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               />

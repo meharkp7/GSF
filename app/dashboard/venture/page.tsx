@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useVenture } from "@/lib/hooks/useVenture";
 import { Lightbulb, Edit3, TrendingUp, Users, DollarSign, Save, Plus, Trash2 } from "lucide-react";
+import { venturePayloadSchema, type VentureFieldErrors } from "@/lib/validators/venture";
 
 const STAGES  = ["Ideation", "Screening", "Research", "MVP", "Funding", "Launch", "PMF"];
 const SECTORS = ["EdTech", "FinTech", "HealthTech", "AgriTech", "ClimaTech", "SaaS", "Consumer", "DeepTech", "Other"];
@@ -22,7 +23,7 @@ interface FormState {
 }
 
 export default function MyVenturePage() {
-  const { venture, loading, saving, updateVenture } = useVenture();
+  const { venture, loading, saving, updateVenture, fieldErrors, setFieldErrors } = useVenture();
   const [editing, setEditing] = useState(false);
   const [saved,   setSaved]   = useState(false);
 
@@ -51,7 +52,7 @@ export default function MyVenturePage() {
   }, [venture]);
 
   async function handleSave() {
-    const ok = await updateVenture({
+    const payload = {
       name:        form.name,
       tagline:     form.tagline,
       description: form.description,
@@ -62,11 +63,31 @@ export default function MyVenturePage() {
       traction:    form.traction,
       teamSize:    parseInt(form.teamSize) || 1,
       pitchDeckUrl: form.pitchDeckUrl || null,
-    });
+    };
+
+    const parsed = venturePayloadSchema.safeParse(payload);
+    if (!parsed.success) {
+      setFieldErrors(parsed.error.flatten().fieldErrors as VentureFieldErrors);
+      return;
+    }
+
+    setFieldErrors({});
+    const ok = await updateVenture(parsed.data);
     if (ok) {
       setSaved(true);
       setEditing(false);
       setTimeout(() => setSaved(false), 2500);
+    }
+  }
+
+  function getFieldError(name: keyof VentureFieldErrors) {
+    return fieldErrors[name]?.[0];
+  }
+
+  function handleFieldChange(key: keyof FormState, value: string) {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    if (fieldErrors[key as keyof VentureFieldErrors]) {
+      setFieldErrors((prev) => ({ ...prev, [key]: undefined }));
     }
   }
 
@@ -174,8 +195,12 @@ export default function MyVenturePage() {
               <div key={key}>
                 <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>{label}</label>
                 {editing ? (
-                  <input type={type} className="input" value={(form as unknown as Record<string, string>)[key]}
-                    onChange={e => setForm({ ...form, [key]: e.target.value })} />
+                  <input
+                    type={type}
+                    className="input"
+                    value={(form as unknown as Record<string, string>)[key]}
+                    onChange={e => handleFieldChange(key as keyof FormState, e.target.value)}
+                  />
                 ) : (
                   <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
                     {(form as unknown as Record<string, string>)[key] || <span style={{ color: "var(--text-muted)" }}>Not set</span>}
@@ -183,11 +208,14 @@ export default function MyVenturePage() {
                 )}
               </div>
             ))}
+            {getFieldError("name") && (
+              <p className="text-xs text-red-500">{getFieldError("name")}</p>
+            )}
             <div>
               <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Description</label>
               {editing ? (
                 <textarea className="input textarea" value={form.description}
-                  onChange={e => setForm({ ...form, description: e.target.value })} />
+                  onChange={e => handleFieldChange("description", e.target.value)} />
               ) : (
                 <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>{form.description || "—"}</p>
               )}
@@ -196,7 +224,7 @@ export default function MyVenturePage() {
               <div>
                 <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Sector</label>
                 {editing ? (
-                  <select className="input" value={form.sector} onChange={e => setForm({ ...form, sector: e.target.value })}>
+                  <select className="input" value={form.sector} onChange={e => handleFieldChange("sector", e.target.value)}>
                     {SECTORS.map(s => <option key={s}>{s}</option>)}
                   </select>
                 ) : (
@@ -207,9 +235,12 @@ export default function MyVenturePage() {
                 <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Team Size</label>
                 {editing ? (
                   <input type="number" className="input" value={form.teamSize}
-                    onChange={e => setForm({ ...form, teamSize: e.target.value })} />
+                    onChange={e => handleFieldChange("teamSize", e.target.value)} />
                 ) : (
                   <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{form.teamSize} founders</p>
+                )}
+                {editing && getFieldError("teamSize") && (
+                  <p className="text-xs text-red-500 mt-1">{getFieldError("teamSize")}</p>
                 )}
               </div>
             </div>
@@ -228,22 +259,28 @@ export default function MyVenturePage() {
                 <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Equity Offered (%)</label>
                 {editing ? (
                   <input type="number" className="input" value={form.equity}
-                    onChange={e => setForm({ ...form, equity: e.target.value })} />
+                    onChange={e => handleFieldChange("equity", e.target.value)} />
                 ) : (
                   <p className="text-3xl font-extrabold" style={{ color: "var(--accent-indigo)", fontFamily: "'Playfair Display', serif" }}>
                     {form.equity}%
                   </p>
+                )}
+                {editing && getFieldError("equity") && (
+                  <p className="text-xs text-red-500 mt-1">{getFieldError("equity")}</p>
                 )}
               </div>
               <div>
                 <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Funding Goal (USD)</label>
                 {editing ? (
                   <input type="number" className="input" value={form.fundingGoal}
-                    onChange={e => setForm({ ...form, fundingGoal: e.target.value })} />
+                    onChange={e => handleFieldChange("fundingGoal", e.target.value)} />
                 ) : (
                   <p className="text-3xl font-extrabold" style={{ color: "#10B981", fontFamily: "'Playfair Display', serif" }}>
                     ${Number(form.fundingGoal).toLocaleString()}
                   </p>
+                )}
+                {editing && getFieldError("fundingGoal") && (
+                  <p className="text-xs text-red-500 mt-1">{getFieldError("fundingGoal")}</p>
                 )}
               </div>
             </div>
@@ -251,7 +288,7 @@ export default function MyVenturePage() {
               <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Traction / Milestones</label>
               {editing ? (
                 <textarea className="input" style={{ minHeight: 80 }} value={form.traction}
-                  onChange={e => setForm({ ...form, traction: e.target.value })} />
+                  onChange={e => handleFieldChange("traction", e.target.value)} />
               ) : (
                 <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>{form.traction || "—"}</p>
               )}
@@ -260,11 +297,14 @@ export default function MyVenturePage() {
               <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Pitch Deck URL (optional)</label>
               {editing ? (
                 <input type="url" className="input" placeholder="https://your-deck.com" value={form.pitchDeckUrl}
-                  onChange={e => setForm({ ...form, pitchDeckUrl: e.target.value })} />
+                  onChange={e => handleFieldChange("pitchDeckUrl", e.target.value)} />
               ) : (
                 <p className="text-sm" style={{ color: form.pitchDeckUrl ? "var(--accent-indigo)" : "var(--text-muted)" }}>
                   {form.pitchDeckUrl || "Not added yet"}
                 </p>
+              )}
+              {editing && getFieldError("pitchDeckUrl") && (
+                <p className="text-xs text-red-500 mt-1">{getFieldError("pitchDeckUrl")}</p>
               )}
             </div>
           </motion.div>

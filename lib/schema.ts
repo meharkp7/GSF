@@ -1,8 +1,14 @@
 // ===== DRIZZLE ORM SCHEMA =====
-// Tables: ventures, expert_profiles, sessions, credit_transactions
+// Tables: ventures, expert_profiles, sessions, credit_transactions, credit_balances
 // Identity (name, email, PFP) lives in Clerk.
 // Profile extras (bio, location, links) live in Clerk unsafeMetadata.
-// App data (ventures, sessions, credits log) lives here in Supabase.
+// App data (ventures, sessions, credits log, credit balances) lives here in Supabase.
+//
+// CREDIT SYSTEM NOTE:
+// credit_balances is the canonical source of truth for a user's credit balance.
+// Clerk publicMetadata.credits is a read-only cache for display purposes only.
+// All balance mutations go through lib/credits-server.ts which wraps the
+// balance update + transaction log insert in a single DB transaction.
 
 import {
   pgTable, text, integer, boolean,
@@ -48,6 +54,14 @@ export const ventures = pgTable("ventures", {
   teamMembers:     jsonb("team_members").$type<any[]>().default([]),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tractionMetrics: jsonb("traction_metrics").$type<any[]>().default([]),
+  
+  // Marketplace UI Enhancements
+  founderName:     text("founder_name").default(""),
+  fundingStage:    text("funding_stage").default("Pre-seed"),
+  tags:            jsonb("tags").$type<string[]>().default([]),
+  views:           integer("views").default(0),
+  campaignEndsAt:  timestamp("campaign_ends_at"),
+
   createdAt:       timestamp("created_at").defaultNow(),
   updatedAt:       timestamp("updated_at").defaultNow(),
 });
@@ -110,6 +124,27 @@ export const creditTransactions = pgTable("credit_transactions", {
 });
 
 // ===================================================
+// INVESTMENT INTERESTS
+// ===================================================
+export const investmentInterests = pgTable("investment_interests", {
+  id:             uuid("id").defaultRandom().primaryKey(),
+  ventureId:      uuid("venture_id").notNull(), // should reference ventures.id, keeping simple
+  expertClerkId:  text("expert_clerk_id").notNull(),
+  status:         text("status").default("pending"), // pending, accepted, rejected
+  message:        text("message"),
+  createdAt:      timestamp("created_at").defaultNow(),
+});
+
+// ===================================================
+// CREDIT BALANCES  (one row per user — source of truth)
+// ===================================================
+export const creditBalances = pgTable("credit_balances", {
+  clerkUserId: text("clerk_user_id").primaryKey(),
+  balance:     integer("balance").notNull().default(0),
+  updatedAt:   timestamp("updated_at").defaultNow(),
+});
+
+// ===================================================
 // TYPE EXPORTS
 // ===================================================
 export type User                 = typeof users.$inferSelect;
@@ -122,3 +157,6 @@ export type Session              = typeof sessions.$inferSelect;
 export type NewSession           = typeof sessions.$inferInsert;
 export type CreditTransaction    = typeof creditTransactions.$inferSelect;
 export type NewCreditTransaction = typeof creditTransactions.$inferInsert;
+export type InvestmentInterest   = typeof investmentInterests.$inferSelect;
+export type NewInvestmentInterest= typeof investmentInterests.$inferInsert;
+export type CreditBalance        = typeof creditBalances.$inferSelect;

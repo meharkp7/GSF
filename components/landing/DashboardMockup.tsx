@@ -14,7 +14,7 @@ export function DashboardMockup() {
       className="relative"
     >
       {/* Main card */}
-      <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-border shadow-soft-xl overflow-hidden">
+      <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-2xl border border-border dark:border-slate-700 shadow-soft-xl dark:shadow-lg overflow-hidden">
         {/* Top bar */}
         <div className="bg-canvas px-4 py-3 border-b border-border flex items-center gap-2">
           <div className="flex gap-1.5">

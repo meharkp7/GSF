@@ -34,7 +34,7 @@ export function CommunityPreviewSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0, duration: 0.5 }}
-            className="bg-white rounded-2xl border border-border shadow-card p-6 space-y-5"
+            className="bg-white dark:bg-slate-800 rounded-2xl border border-border dark:border-slate-700 shadow-card dark:shadow-lg p-6 space-y-5"
           >
             <div className="flex items-center gap-2">
               <Users className="size-5 text-primary-500" />

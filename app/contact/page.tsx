@@ -32,7 +32,7 @@ export default function ContactPage() {
                   { icon: MapPin, label: "Based in", value: "Bangalore, India", sub: "With a global community" },
                   { icon: Clock, label: "Office hours", value: "Mon–Fri, 10am–6pm IST", sub: "Or reach us on Slack" },
                 ].map(({ icon: Icon, label, value, sub }) => (
-                  <div key={label} className="card p-5 flex items-start gap-4 bg-white">
+                  <div key={label} className="card p-5 flex items-start gap-4 bg-white dark:bg-slate-800">
                     <div className="size-10 rounded-xl bg-[#EEF4F9] border border-[#AACDDC] flex items-center justify-center shrink-0">
                       <Icon className="size-5 text-[#81A6C6]" />
                     </div>
@@ -45,7 +45,7 @@ export default function ContactPage() {
                 ))}
               </div>
 
-              <div className="lg:col-span-2 card p-8 bg-white">
+              <div className="lg:col-span-2 card p-8 bg-white dark:bg-slate-800">
                 <h2 className="text-lg font-semibold text-[#1A2332] mb-6">Send us a message</h2>
                 <form className="space-y-5" id="contact-form">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
