@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -63,8 +63,29 @@ export default function VenturesPage() {
   const [ideaStageFilter, setIdeaStageFilter] = useState("All stages");
   const [sectorFilter, setSectorFilter] = useState("All sectors");
   const [fundingFilter, setFundingFilter] = useState("All");
+  const [allVentures, setAllVentures] = useState(VENTURES);
 
-  const filtered = VENTURES.filter((v) => {
+  // Merge user-created ventures from localStorage with the default list
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("gsf_user_ventures");
+      if (stored) {
+        const userVentures = JSON.parse(stored);
+        if (Array.isArray(userVentures) && userVentures.length > 0) {
+          // Merge, avoiding duplicates by id
+          const existingIds = new Set(VENTURES.map((v) => v.id));
+          const newVentures = userVentures.filter(
+            (v: { id: string }) => !existingIds.has(v.id)
+          );
+          setAllVentures([...VENTURES, ...newVentures]);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load user ventures from localStorage:", e);
+    }
+  }, []);
+
+  const filtered = allVentures.filter((v) => {
     const matchSearch = search === "" ||
       v.name.toLowerCase().includes(search.toLowerCase()) ||
       v.founder.toLowerCase().includes(search.toLowerCase()) ||
