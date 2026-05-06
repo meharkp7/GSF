@@ -53,7 +53,7 @@ export const ventures = pgTable("ventures", {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   teamMembers:     jsonb("team_members").$type<any[]>().default([]),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tractionMetrics: jsonb("traction_metrics").$type<any[]>().default([]),
+  tractionMetrics: jsonb("traction_metrics").$type<any>().default({}),
   
   // Marketplace UI Enhancements
   founderName:     text("founder_name").default(""),

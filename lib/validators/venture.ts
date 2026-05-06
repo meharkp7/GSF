@@ -25,6 +25,26 @@ const pitchDeckUrlSchema = z
   ])
   .transform((value) => (value === "" || value === undefined ? null : value));
 
+const nonNegativeNumber = (label: string) =>
+  z.coerce.number({ message: `${label} must be a number` }).min(0, `${label} cannot be negative`);
+
+export const tractionMetricsSchema = z.object({
+  users: nonNegativeNumber("Users").default(0),
+  usersPrevious: nonNegativeNumber("Previous users").default(0),
+  mrr: nonNegativeNumber("MRR").default(0),
+  mrrPrevious: nonNegativeNumber("Previous MRR").default(0),
+  pilots: z.coerce
+    .number({ message: "Pilots must be a number" })
+    .int("Pilots must be a whole number")
+    .min(0, "Pilots cannot be negative")
+    .default(0),
+  growthRate: z.coerce
+    .number({ message: "Growth rate must be a number" })
+    .min(-100, "Growth rate cannot be lower than -100%")
+    .max(10000, "Growth rate is too large")
+    .default(0),
+});
+
 export const venturePayloadSchema = z.object({
   name: z.string().trim().min(2, "Venture name must be at least 2 characters"),
   tagline: z.string().optional().default(""),
@@ -34,6 +54,7 @@ export const venturePayloadSchema = z.object({
   equity: equitySchema,
   fundingGoal: fundingGoalSchema,
   traction: z.string().optional().default(""),
+  tractionMetrics: tractionMetricsSchema.optional().default({}),
   teamSize: teamSizeSchema,
   pitchDeckUrl: pitchDeckUrlSchema,
 });
