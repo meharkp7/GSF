@@ -12,6 +12,14 @@ describe("venturePayloadSchema", () => {
       equity: "25",
       fundingGoal: "50000",
       traction: "Early pilots",
+      tractionMetrics: {
+        users: 1200,
+        usersPrevious: 900,
+        mrr: 4500,
+        mrrPrevious: 3000,
+        pilots: 5,
+        growthRate: 12.5,
+      },
       teamSize: 3,
       pitchDeckUrl: "https://example.com/deck",
     });
@@ -21,6 +29,7 @@ describe("venturePayloadSchema", () => {
       expect(parsed.data.equity).toBe("25");
       expect(parsed.data.fundingGoal).toBe("50000");
       expect(parsed.data.teamSize).toBe(3);
+      expect(parsed.data.tractionMetrics.users).toBe(1200);
     }
   });
 
@@ -65,5 +74,25 @@ describe("venturePayloadSchema", () => {
     expect(withNull.success).toBe(true);
     if (withEmpty.success) expect(withEmpty.data.pitchDeckUrl).toBeNull();
     if (withNull.success) expect(withNull.data.pitchDeckUrl).toBeNull();
+  });
+
+  it("rejects invalid traction metrics", () => {
+    const parsed = venturePayloadSchema.safeParse({
+      name: "Acme Ventures",
+      equity: 10,
+      fundingGoal: 10000,
+      teamSize: 1,
+      tractionMetrics: {
+        users: -2,
+        growthRate: -101,
+      },
+    });
+
+    expect(parsed.success).toBe(false);
+    if (!parsed.success) {
+      const issues = parsed.error.issues.map((issue) => issue.path.join("."));
+      expect(issues).toContain("tractionMetrics.users");
+      expect(issues).toContain("tractionMetrics.growthRate");
+    }
   });
 });

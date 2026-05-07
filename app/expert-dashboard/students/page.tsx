@@ -4,6 +4,9 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Search, Star, ChevronRight, TrendingUp, Lightbulb, MessageSquare } from "lucide-react";
+import SearchFilter from "@/components/ui/SearchFilter";
+import EmptyState from "@/components/ui/EmptyState";
+import { useFilteredData } from "@/hooks/useFilteredData";
 
 const STUDENTS = [
   { id: 1, name: "Arjun Sharma",  avatar: "AS", venture: "EduLoop",      sector: "EdTech",    stage: "Research", stageColor: "#06B6D4", sessions: 3, rating: 5.0, lastSeen: "Apr 8", status: "active" },
@@ -19,12 +22,17 @@ const fadeUp = (d = 0) => ({
 });
 
 export default function ExpertStudentsPage() {
-  const [search, setSearch] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filtered = STUDENTS.filter(s => {
-    const q = search.toLowerCase();
-    return !q || s.name.toLowerCase().includes(q) || s.venture.toLowerCase().includes(q) || s.sector.toLowerCase().includes(q);
-  });
+  const filteredStudents = useFilteredData(
+    STUDENTS,
+    searchQuery,
+    [
+      (student, query) => student.name.toLowerCase().includes(query),
+      (student, query) => student.venture.toLowerCase().includes(query),
+      (student, query) => student.sector.toLowerCase().includes(query),
+    ]
+  );
 
   return (
     <DashboardShell role="expert">
@@ -53,15 +61,17 @@ export default function ExpertStudentsPage() {
         </motion.div>
 
         {/* Search */}
-        <motion.div {...fadeUp(0.08)} className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4" style={{ color: "var(--text-muted)" }} />
-          <input className="input pl-9" placeholder="Search founders or ventures…"
-            value={search} onChange={e => setSearch(e.target.value)} />
+        <motion.div {...fadeUp(0.08)}>
+          <SearchFilter
+            placeholder="Search founders or ventures..."
+            onSearchChange={setSearchQuery}
+          />
         </motion.div>
 
         {/* Student cards */}
         <div className="space-y-4">
-          {filtered.map((s, i) => (
+          {filteredStudents.length > 0 ? (
+            filteredStudents.map((s, i) => (
             <motion.div key={s.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.06 }} className="card p-5 hover-scale">
 
@@ -102,7 +112,14 @@ export default function ExpertStudentsPage() {
                 </div>
               </div>
             </motion.div>
-          ))}
+          ))
+          ) : (
+            <EmptyState
+              icon="👥"
+              title="No students found"
+              description="Try adjusting your search to find students."
+            />
+          )}
         </div>
       </div>
     </DashboardShell>

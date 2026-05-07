@@ -4,6 +4,9 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Search, Filter, ChevronDown, TrendingUp, Users, Coins, ArrowRight, Lightbulb, Bookmark, BookmarkCheck, CheckCircle2 } from "lucide-react";
+import SearchFilter from "@/components/ui/SearchFilter";
+import EmptyState from "@/components/ui/EmptyState";
+import { useFilteredDataWithFilters } from "@/hooks/useFilteredData";
 
 const STAGES = ["All", "Ideation", "Screening", "Research", "MVP", "Funding", "Launch"];
 const SECTORS = ["All", "EdTech", "FinTech", "HealthTech", "AgriTech", "SaaS", "Consumer", "ClimaTech", "DeepTech"];
@@ -54,21 +57,27 @@ const fadeUp = (d = 0) => ({
 });
 
 export default function ExpertVentureSearchPage() {
-  const [search,   setSearch]   = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [stage,    setStage]    = useState("All");
   const [sector,   setSector]   = useState("All");
   const [saved,    setSaved]    = useState<number[]>([]);
   const [interest, setInterest] = useState<number | null>(null);
   const [expressed,setExpressed]= useState<number[]>([]);
 
-  const filtered = VENTURES.filter(v => {
-    const q = search.toLowerCase();
-    const matchQ = !q || v.name.toLowerCase().includes(q) || v.founder.toLowerCase().includes(q)
-      || v.sector.toLowerCase().includes(q) || v.pitch.toLowerCase().includes(q);
-    const matchStage  = stage  === "All" || v.stage  === stage;
-    const matchSector = sector === "All" || v.sector === sector;
-    return matchQ && matchStage && matchSector;
-  });
+  const filteredVentures = useFilteredDataWithFilters(
+    VENTURES,
+    searchQuery,
+    {
+      stage: (venture) => stage === "All" || venture.stage === stage,
+      sector: (venture) => sector === "All" || venture.sector === sector,
+    },
+    [
+      (venture, query) => venture.name.toLowerCase().includes(query),
+      (venture, query) => venture.founder.toLowerCase().includes(query),
+      (venture, query) => venture.sector.toLowerCase().includes(query),
+      (venture, query) => venture.pitch.toLowerCase().includes(query),
+    ]
+  );
 
   function toggleSave(id: number) {
     setSaved(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -96,37 +105,30 @@ export default function ExpertVentureSearchPage() {
         </motion.div>
 
         {/* Search + filters */}
-        <motion.div {...fadeUp(0.05)} className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4" style={{ color: "var(--text-muted)" }} />
-            <input
-              className="input pl-9"
-              placeholder="Search ventures, founders, sectors..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <div className="relative">
-              <select className="input pr-8 pl-3 py-2 text-sm appearance-none cursor-pointer"
-                value={stage} onChange={e => setStage(e.target.value)}>
-                {STAGES.map(s => <option key={s}>{s}</option>)}
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 pointer-events-none" style={{ color: "var(--text-muted)" }} />
-            </div>
-            <div className="relative">
-              <select className="input pr-8 pl-3 py-2 text-sm appearance-none cursor-pointer"
-                value={sector} onChange={e => setSector(e.target.value)}>
-                {SECTORS.map(s => <option key={s}>{s}</option>)}
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 pointer-events-none" style={{ color: "var(--text-muted)" }} />
-            </div>
-          </div>
+        <motion.div {...fadeUp(0.05)}>
+          <SearchFilter
+            placeholder="Search ventures, founders, sectors..."
+            onSearchChange={setSearchQuery}
+            filters={{
+              stage: {
+                options: STAGES.map(s => ({ value: s, label: s })),
+                value: stage,
+                onChange: setStage,
+                label: "Stage",
+              },
+              sector: {
+                options: SECTORS.map(s => ({ value: s, label: s })),
+                value: sector,
+                onChange: setSector,
+                label: "Sector",
+              },
+            }}
+          />
         </motion.div>
 
         <div className="flex items-center justify-between">
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            <strong style={{ color: "var(--text-primary)" }}>{filtered.length}</strong> ventures found
+            <strong style={{ color: "var(--text-primary)" }}>{filteredVentures.length}</strong> ventures found
           </p>
           <div className="flex items-center gap-1">
             <Filter className="size-3.5" style={{ color: "var(--text-muted)" }} />
@@ -136,7 +138,8 @@ export default function ExpertVentureSearchPage() {
 
         {/* Venture cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {filtered.map((v, i) => {
+          {filteredVentures.length > 0 ? (
+            filteredVentures.map((v, i) => {
             const stageColor  = STAGE_COLORS[v.stage] ?? "#5B6CFF";
             const isSaved     = saved.includes(v.id);
             const isExpressed = expressed.includes(v.id);
@@ -228,16 +231,17 @@ export default function ExpertVentureSearchPage() {
                 </div>
               </motion.div>
             );
-          })}
+          })
+          ) : (
+            <div className="col-span-full">
+              <EmptyState
+                icon="🚀"
+                title="No ventures found"
+                description="Try adjusting your search or filters to find ventures."
+              />
+            </div>
+          )}
         </div>
-
-        {filtered.length === 0 && (
-          <div className="text-center py-20">
-            <Search className="size-10 text-[var(--text-muted)] mx-auto mb-3" />
-            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>No ventures match your filters</p>
-            <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Try adjusting the stage or sector filter</p>
-          </div>
-        )}
       </div>
     </DashboardShell>
   );

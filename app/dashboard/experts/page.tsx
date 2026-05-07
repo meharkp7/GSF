@@ -4,6 +4,9 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Search, Star, Video, ChevronDown, Clock, Award } from "lucide-react";
+import SearchFilter from "@/components/ui/SearchFilter";
+import EmptyState from "@/components/ui/EmptyState";
+import { useFilteredDataWithFilters } from "@/hooks/useFilteredData";
 
 const EXPERTS = [
   { id: 1, name: "Meera Patel",     avatar: "MP", domain: "HealthTech", role: "ex-YC Founder, S21",       exp: "5+ yrs",  rate: 100, rating: 4.9, reviews: 38, tags: ["MVP", "Fundraising", "GTM"],          available: true,  bg: "#EF4444" },
@@ -24,19 +27,25 @@ const fadeUp = (delay = 0) => ({
 });
 
 export default function ExpertsPage() {
-  const [search,  setSearch]  = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [domain,  setDomain]  = useState("All");
   const [expTier, setExpTier] = useState("All");
   const [booking, setBooking] = useState<number | null>(null);
   const [booked,  setBooked]  = useState<number[]>([]);
 
-  const filtered = EXPERTS.filter(e => {
-    const q           = search.toLowerCase();
-    const matchSearch = !q || e.name.toLowerCase().includes(q) || e.domain.toLowerCase().includes(q) || e.tags.some(t => t.toLowerCase().includes(q));
-    const matchDomain = domain  === "All" || e.domain === domain;
-    const matchExp    = expTier === "All" || e.exp    === expTier;
-    return matchSearch && matchDomain && matchExp;
-  });
+  const filteredExperts = useFilteredDataWithFilters(
+    EXPERTS,
+    searchQuery,
+    {
+      domain: (expert) => domain === "All" || expert.domain === domain,
+      expTier: (expert) => expTier === "All" || expert.exp === expTier,
+    },
+    [
+      (expert, query) => expert.name.toLowerCase().includes(query),
+      (expert, query) => expert.domain.toLowerCase().includes(query),
+      (expert, query) => expert.tags.some(tag => tag.toLowerCase().includes(query)),
+    ]
+  );
 
   function handleBook(id: number) {
     setBooking(id);
@@ -58,42 +67,36 @@ export default function ExpertsPage() {
         </motion.div>
 
         {/* Search + filters */}
-        <motion.div {...fadeUp(0.05)} className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4" style={{ color: "var(--text-muted)" }} />
-            <input
-              className="input pl-9 w-full"
-              placeholder="Search by name, domain, or topic..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <div className="relative">
-              <select className="input pr-8 pl-3 py-2 text-sm appearance-none cursor-pointer"
-                value={domain} onChange={e => setDomain(e.target.value)}>
-                {DOMAINS.map(d => <option key={d}>{d}</option>)}
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 pointer-events-none" style={{ color: "var(--text-muted)" }} />
-            </div>
-            <div className="relative">
-              <select className="input pr-8 pl-3 py-2 text-sm appearance-none cursor-pointer"
-                value={expTier} onChange={e => setExpTier(e.target.value)}>
-                {EXP_TIERS.map(t => <option key={t}>{t}</option>)}
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 pointer-events-none" style={{ color: "var(--text-muted)" }} />
-            </div>
-          </div>
+        <motion.div {...fadeUp(0.05)}>
+          <SearchFilter
+            placeholder="Search by name, domain, or topic..."
+            onSearchChange={setSearchQuery}
+            filters={{
+              domain: {
+                options: DOMAINS.map(d => ({ value: d, label: d })),
+                value: domain,
+                onChange: setDomain,
+                label: "Domain",
+              },
+              expTier: {
+                options: EXP_TIERS.map(t => ({ value: t, label: t })),
+                value: expTier,
+                onChange: setExpTier,
+                label: "Experience",
+              },
+            }}
+          />
         </motion.div>
 
         {/* Results count */}
         <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-          Showing <strong style={{ color: "var(--text-primary)" }}>{filtered.length}</strong> experts
+          Showing <strong style={{ color: "var(--text-primary)" }}>{filteredExperts.length}</strong> experts
         </p>
 
         {/* Expert grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          {filtered.map((expert, i) => {
+          {filteredExperts.length > 0 ? (
+            filteredExperts.map((expert, i) => {
             const isBooked  = booked.includes(expert.id);
             const isBooking = booking === expert.id;
 
@@ -173,17 +176,18 @@ export default function ExpertsPage() {
                 </div>
               </motion.div>
             );
-          })}
+          })
+          ) : (
+            <div className="col-span-full">
+              <EmptyState
+                icon="🔍"
+                title="No experts found"
+                description="Try adjusting your search or filters to find experts."
+              />
+            </div>
+          )}
         </div>
 
-        {/* Empty state */}
-        {filtered.length === 0 && (
-          <div className="text-center py-20">
-            <Search className="size-10 mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
-            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>No experts found</p>
-            <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Try adjusting your filters</p>
-          </div>
-        )}
       </div>
     </DashboardShell>
   );
