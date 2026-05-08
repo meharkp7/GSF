@@ -29,6 +29,24 @@ export const users = pgTable("users", {
 });
 
 // ===================================================
+// AVAILABILITY SLOTS  (expert calendars)
+// ===================================================
+export const availabilitySlots = pgTable("availability_slots", {
+  id:              uuid("id").defaultRandom().primaryKey(),
+  expertClerkId:    text("expert_clerk_id").notNull(),
+  expertName:       text("expert_name").notNull(),
+  startAt:          timestamp("start_at").notNull(),
+  endAt:            timestamp("end_at").notNull(),
+  timezone:         text("timezone").default("Asia/Kolkata"),
+  notes:            text("notes").default(""),
+  isBooked:         boolean("is_booked").default(false),
+  bookedByClerkId:  text("booked_by_clerk_id"),
+  bookedSessionId:  uuid("booked_session_id"),
+  createdAt:        timestamp("created_at").defaultNow(),
+  updatedAt:        timestamp("updated_at").defaultNow(),
+});
+
+// ===================================================
 // VENTURES  (one per founder)
 // ===================================================
 export const ventures = pgTable("ventures", {
@@ -114,6 +132,8 @@ export const creditTransactions = pgTable("credit_transactions", {
 // ===================================================
 export type User                 = typeof users.$inferSelect;
 export type NewUser              = typeof users.$inferInsert;
+export type AvailabilitySlot     = typeof availabilitySlots.$inferSelect;
+export type NewAvailabilitySlot  = typeof availabilitySlots.$inferInsert;
 export type Venture              = typeof ventures.$inferSelect;
 export type NewVenture           = typeof ventures.$inferInsert;
 export type ExpertProfile        = typeof expertProfiles.$inferSelect;

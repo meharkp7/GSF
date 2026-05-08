@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { Calendar, Clock, CheckCircle2, Video, Search, ChevronDown, Plus, Inbox } from "lucide-react";
+import { Calendar, Clock, CheckCircle2, Video, Search, ChevronDown, Plus, Inbox, Trash2 } from "lucide-react";
 
 const ALL_SESSIONS = [
   { id: 1, founder: "Arjun Sharma",  venture: "EduLoop",      date: "Apr 8, 2026",  time: "3:00 PM", duration: 45, status: "completed", earned: 80,  avatar: "AS", topic: "ICP refinement & customer interview analysis" },
@@ -31,6 +31,24 @@ const fadeUp = (d = 0) => ({
 export default function ExpertSessionsPage() {
   const [statusFilter, setStatus] = useState("All");
   const [search, setSearch] = useState("");
+  const [showAvailabilityForm, setShowAvailabilityForm] = useState(false);
+  const [availabilitySlots, setAvailabilitySlots] = useState<Array<{
+    id: string;
+    expertName: string;
+    startAt: string;
+    endAt: string;
+    timezone?: string;
+    notes?: string;
+    isBooked?: boolean;
+  }>>([]);
+  const [loadingAvailability, setLoadingAvailability] = useState(true);
+  const [savingAvailability, setSavingAvailability] = useState(false);
+  const [slotForm, setSlotForm] = useState({
+    date: new Date().toISOString().slice(0, 10),
+    time: "09:00",
+    duration: "60",
+    notes: "",
+  });
 
   const filtered = ALL_SESSIONS.filter(s => {
     const q = search.toLowerCase();
@@ -41,6 +59,65 @@ export default function ExpertSessionsPage() {
 
   const totalEarned = ALL_SESSIONS.filter(s => s.status === "completed").reduce((a, s) => a + s.earned, 0);
   const upcoming = ALL_SESSIONS.filter(s => s.status === "upcoming" || s.status === "pending");
+
+  useEffect(() => {
+    async function loadAvailability() {
+      try {
+        setLoadingAvailability(true);
+        const res = await fetch("/api/expert-availability?mine=1");
+        if (!res.ok) throw new Error("Failed to load availability");
+        const data = await res.json();
+        setAvailabilitySlots(data);
+      } catch {
+        setAvailabilitySlots([]);
+      } finally {
+        setLoadingAvailability(false);
+      }
+    }
+
+    loadAvailability();
+  }, []);
+
+  async function handleSaveAvailability() {
+    setSavingAvailability(true);
+    try {
+      const start = new Date(`${slotForm.date}T${slotForm.time}:00`);
+      const end = new Date(start.getTime() + Math.max(30, Number(slotForm.duration) || 60) * 60000);
+
+      const res = await fetch("/api/expert-availability", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          startAt: start.toISOString(),
+          endAt: end.toISOString(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          notes: slotForm.notes,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to save availability");
+      const created = await res.json();
+      setAvailabilitySlots(prev => [created, ...prev]);
+      setShowAvailabilityForm(false);
+      setSlotForm(prev => ({ ...prev, notes: "" }));
+    } catch (error) {
+      console.error("Save availability failed:", error);
+      alert("Could not save availability slot.");
+    } finally {
+      setSavingAvailability(false);
+    }
+  }
+
+  async function handleDeleteAvailability(slotId: string) {
+    try {
+      const res = await fetch(`/api/expert-availability?slotId=${slotId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete slot");
+      setAvailabilitySlots(prev => prev.filter(slot => slot.id !== slotId));
+    } catch (error) {
+      console.error("Delete availability failed:", error);
+      alert("Could not delete slot.");
+    }
+  }
 
   return (
     <DashboardShell role="expert">
@@ -56,10 +133,78 @@ export default function ExpertSessionsPage() {
           </div>
           <div className="flex items-center gap-3">
             <span className="badge badge-teal text-xs">{totalEarned} credits earned</span>
-            <button className="btn-primary text-sm py-2 px-4 flex items-center gap-1.5">
+            <button onClick={() => setShowAvailabilityForm(v => !v)} className="btn-primary text-sm py-2 px-4 flex items-center gap-1.5">
               <Plus className="size-3.5" /> Set Availability
             </button>
           </div>
+        </motion.div>
+
+        <motion.div {...fadeUp(0.03)} className="card p-5">
+          <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
+            <div>
+              <h2 className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>Availability slots</h2>
+              <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+                Publish live slots so founders can book them from Connect.
+              </p>
+            </div>
+            <span className="badge badge-blue text-xs">{availabilitySlots.length} slots</span>
+          </div>
+
+          {showAvailabilityForm && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+              <div>
+                <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Date</label>
+                <input type="date" className="input text-sm" value={slotForm.date} onChange={e => setSlotForm(prev => ({ ...prev, date: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Time</label>
+                <input type="time" className="input text-sm" value={slotForm.time} onChange={e => setSlotForm(prev => ({ ...prev, time: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Duration</label>
+                <input type="number" min="30" step="15" className="input text-sm" value={slotForm.duration} onChange={e => setSlotForm(prev => ({ ...prev, duration: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Note</label>
+                <input type="text" className="input text-sm" placeholder="Office hours, fundraising..." value={slotForm.notes} onChange={e => setSlotForm(prev => ({ ...prev, notes: e.target.value }))} />
+              </div>
+            </div>
+          )}
+
+          {showAvailabilityForm && (
+            <div className="flex items-center gap-2 mb-4">
+              <button onClick={handleSaveAvailability} disabled={savingAvailability} className="btn-primary text-sm py-2 px-4">
+                {savingAvailability ? "Saving…" : "Save slot"}
+              </button>
+              <button onClick={() => setShowAvailabilityForm(false)} className="btn-outline text-sm py-2 px-4">Cancel</button>
+            </div>
+          )}
+
+          {loadingAvailability ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 animate-pulse">
+              <div className="h-20 rounded-2xl" style={{ backgroundColor: "var(--bg-surface-2)" }} />
+              <div className="h-20 rounded-2xl" style={{ backgroundColor: "var(--bg-surface-2)" }} />
+            </div>
+          ) : availabilitySlots.length > 0 ? (
+            <div className="space-y-3">
+              {availabilitySlots.map(slot => (
+                <div key={slot.id} className="flex items-center justify-between gap-3 rounded-2xl border p-4" style={{ borderColor: "var(--border-default)" }}>
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{slot.expertName}</p>
+                    <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+                      {new Date(slot.startAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                      {slot.notes ? ` · ${slot.notes}` : ""}
+                    </p>
+                  </div>
+                  <button onClick={() => handleDeleteAvailability(slot.id)} className="btn-outline text-xs py-2 px-3 flex items-center gap-1.5">
+                    <Trash2 className="size-3.5" /> Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>No availability slots published yet.</p>
+          )}
         </motion.div>
 
         {/* Upcoming callout */}
