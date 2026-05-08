@@ -63,6 +63,13 @@ export default function ConnectPage() {
   }>>([]);
   const [loadingSlots, setLoadingSlots] = useState(true);
   const [bookingSlotId, setBookingSlotId] = useState<string | null>(null);
+  const [recentSession, setRecentSession] = useState<null | {
+    id: string;
+    meetingUrl?: string;
+    recordingUrl?: string;
+    expertName?: string;
+    scheduledAt?: string;
+  }>(null);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -134,6 +141,7 @@ export default function ConnectPage() {
       if (!slotRes.ok) throw new Error("Failed to reserve slot");
 
       setLiveSlots(prev => prev.map(item => item.id === slot.id ? { ...item, isBooked: true } : item));
+      setRecentSession(session);
       alert("Session booked successfully.");
     } catch (error) {
       console.error("Booking failed:", error);
@@ -230,6 +238,33 @@ export default function ConnectPage() {
             </div>
           )}
         </section>
+
+        {recentSession && (
+          <section className="section-container pb-6">
+            <div className="card p-5 flex flex-col sm:flex-row sm:items-center gap-4 border-[#81A6C6]">
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-[#1A2332] mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  Session booked successfully
+                </h3>
+                <p className="text-sm text-[#4A5668]">
+                  Your live room and recording links are ready for {recentSession.expertName || "this session"}.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {recentSession.meetingUrl && (
+                  <Link href={recentSession.meetingUrl} className="btn-primary text-sm py-2 px-4">
+                    <Video className="size-3.5" /> Join meeting
+                  </Link>
+                )}
+                {recentSession.recordingUrl && (
+                  <Link href={recentSession.recordingUrl} className="btn-outline text-sm py-2 px-4">
+                    <Clock className="size-3.5" /> Recording
+                  </Link>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* How it works */}
         <section className="section-container pb-20">

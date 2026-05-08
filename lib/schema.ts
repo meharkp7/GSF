@@ -122,6 +122,9 @@ export const sessions = pgTable("sessions", {
   creditsCost:    integer("credits_cost").default(100),
   creditsEarned:  integer("credits_earned").default(80),
   notes:          text("notes"),
+  meetingUrl:     text("meeting_url"),
+  recordingUrl:   text("recording_url"),
+  recordingReadyAt: timestamp("recording_ready_at"),
   createdAt:      timestamp("created_at").defaultNow(),
   updatedAt:      timestamp("updated_at").defaultNow(),
 });

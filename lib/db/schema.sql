@@ -134,6 +134,8 @@ CREATE TABLE sessions (
   status         session_status NOT NULL DEFAULT 'scheduled',
   notes          TEXT,
   meeting_url    TEXT,
+  recording_url  TEXT,
+  recording_ready_at TIMESTAMPTZ,
   created_at     TIMESTAMPTZ DEFAULT NOW(),
   updated_at     TIMESTAMPTZ DEFAULT NOW()
 );

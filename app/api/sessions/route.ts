@@ -77,6 +77,20 @@ export async function POST(req: Request) {
         status:         "pending",
       })
       .returning();
+
+    const meetingUrl = `/session-room/${created.id}`;
+    const recordingUrl = `/session-room/${created.id}/recording`;
+
+    [created] = await db
+      .update(sessions)
+      .set({
+        meetingUrl,
+        recordingUrl,
+        recordingReadyAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(sessions.id, created.id))
+      .returning();
   } catch {
     return NextResponse.json(
       { error: "Failed to create session" },

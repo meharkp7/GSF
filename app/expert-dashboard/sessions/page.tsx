@@ -2,16 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Calendar, Clock, CheckCircle2, Video, Search, ChevronDown, Plus, Inbox, Trash2 } from "lucide-react";
 
 const ALL_SESSIONS = [
-  { id: 1, founder: "Arjun Sharma",  venture: "EduLoop",      date: "Apr 8, 2026",  time: "3:00 PM", duration: 45, status: "completed", earned: 80,  avatar: "AS", topic: "ICP refinement & customer interview analysis" },
-  { id: 2, founder: "Priya Mehta",   venture: "Supplify",     date: "Apr 6, 2026",  time: "11:00 AM",duration: 60, status: "completed", earned: 100, avatar: "PM", topic: "MVP scope review and feature prioritisation" },
-  { id: 3, founder: "Rahul Kumar",   venture: "HealthBridge", date: "Apr 12, 2026", time: "4:00 PM", duration: 30, status: "upcoming",  earned: 0,   avatar: "RK", topic: "Investor pitch prep & term sheet review" },
-  { id: 4, founder: "Sneha Rao",     venture: "FitMind",      date: "Apr 15, 2026", time: "2:00 PM", duration: 45, status: "pending",   earned: 0,   avatar: "SR", topic: "GTM strategy for consumer wellness app" },
-  { id: 5, founder: "Dev Singh",     venture: "AgriChain",    date: "Mar 30, 2026", time: "10:00 AM",duration: 60, status: "completed", earned: 100, avatar: "DS", topic: "Blockchain implementation for supply chain" },
-  { id: 6, founder: "Anika Roy",     venture: "FoodSense",    date: "Mar 25, 2026", time: "5:00 PM", duration: 30, status: "completed", earned: 80,  avatar: "AR", topic: "User research synthesis & insight mapping" },
+  { id: 1, founder: "Arjun Sharma",  venture: "EduLoop",      date: "Apr 8, 2026",  time: "3:00 PM", duration: 45, status: "completed", earned: 80,  avatar: "AS", topic: "ICP refinement & customer interview analysis", recordingUrl: "/session-room/demo-1/recording" },
+  { id: 2, founder: "Priya Mehta",   venture: "Supplify",     date: "Apr 6, 2026",  time: "11:00 AM",duration: 60, status: "completed", earned: 100, avatar: "PM", topic: "MVP scope review and feature prioritisation", recordingUrl: "/session-room/demo-2/recording" },
+  { id: 3, founder: "Rahul Kumar",   venture: "HealthBridge", date: "Apr 12, 2026", time: "4:00 PM", duration: 30, status: "upcoming",  earned: 0,   avatar: "RK", topic: "Investor pitch prep & term sheet review", meetingUrl: "/session-room/demo-3" },
+  { id: 4, founder: "Sneha Rao",     venture: "FitMind",      date: "Apr 15, 2026", time: "2:00 PM", duration: 45, status: "pending",   earned: 0,   avatar: "SR", topic: "GTM strategy for consumer wellness app", meetingUrl: "/session-room/demo-4" },
+  { id: 5, founder: "Dev Singh",     venture: "AgriChain",    date: "Mar 30, 2026", time: "10:00 AM",duration: 60, status: "completed", earned: 100, avatar: "DS", topic: "Blockchain implementation for supply chain", recordingUrl: "/session-room/demo-5/recording" },
+  { id: 6, founder: "Anika Roy",     venture: "FoodSense",    date: "Mar 25, 2026", time: "5:00 PM", duration: 30, status: "completed", earned: 80,  avatar: "AR", topic: "User research synthesis & insight mapping", recordingUrl: "/session-room/demo-6/recording" },
 ];
 
 const STATUS_FILTERS = ["All", "upcoming", "pending", "completed"];
@@ -273,15 +274,24 @@ export default function ExpertSessionsPage() {
 
                 <div className="flex-shrink-0 text-right">
                   {s.status === "completed" && (
-                    <p className="text-sm font-bold text-emerald-500 mb-1">+{s.earned} cr</p>
+                    <div className="space-y-2">
+                      <p className="text-sm font-bold text-emerald-500 mb-1">+{s.earned} cr</p>
+                      {s.recordingUrl && (
+                        <Link href={s.recordingUrl} className="btn-outline text-xs py-1 px-3 inline-flex items-center gap-1">
+                          <Video className="size-3" /> Recording
+                        </Link>
+                      )}
+                    </div>
                   )}
                   {s.status === "upcoming" && (
-                    <button className="btn-primary text-xs py-1 px-3 flex items-center gap-1">
+                    <Link href={s.meetingUrl || "/session-room/demo-upcoming"} className="btn-primary text-xs py-1 px-3 flex items-center gap-1">
                       <Video className="size-3" /> Join
-                    </button>
+                    </Link>
                   )}
                   {s.status === "pending" && (
-                    <button className="btn-outline text-xs py-1 px-3">Confirm</button>
+                    <Link href={s.meetingUrl || "/session-room/demo-pending"} className="btn-outline text-xs py-1 px-3 inline-flex items-center gap-1">
+                      <Clock className="size-3" /> Hold link
+                    </Link>
                   )}
                 </div>
               </motion.div>
