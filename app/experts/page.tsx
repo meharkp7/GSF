@@ -3,9 +3,10 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Star, MessageSquare, Video, Search, Briefcase, Mail, Filter, X } from "lucide-react";
 import EmptyState from "@/components/ui/EmptyState";
+import SkeletonCard from "@/components/ui/SkeletonCard";
 
 const ALL_EXPERTS = [
   { name: "Dr. Anika Patel",    initials: "AP", role: "Partner",               company: "Sequoia Capital India",  domain: "Venture Capital",         tags: ["Fundraising", "SaaS", "EdTech"],          bio: "10+ years investing in early-stage startups. Led investments in 40+ companies including 3 unicorns.", sessions: 48,  rating: 4.9, available: true,  avatarBg: "#EF4444", experience: "10+ years", linkedin: "linkedin.com/in/anika-patel",    website: "anika.vc",           email: "anika@gsf.com" },
@@ -33,9 +34,16 @@ const ALL_EXPERTS = [
 const DOMAINS = ["All", ...Array.from(new Set(ALL_EXPERTS.map(e => e.domain)))].sort();
 
 export default function ExpertsPage() {
-  const [search, setSearch]   = useState("");
-  const [domain, setDomain]   = useState("All");
+  const [search, setSearch] = useState("");
+  const [domain, setDomain] = useState("All");
   const [availOnly, setAvailOnly] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading delay (replace with actual data fetch)
+    const timer = setTimeout(() => setLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -134,9 +142,15 @@ export default function ExpertsPage() {
           <div className="flex items-center gap-1.5 text-xs text-[#8A95A3] dark:text-slate-400"><Filter className="size-3.5" /> {filtered.length} results</div>
         </div>
 
-        {/* Expert grid */}
+        {/* Expert grid with Loading Skeleton */}
         <section className="section-container pb-24 pt-2">
-          {filtered.length > 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          ) : filtered.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((expert) => (
                 <div key={expert.name} className="card p-6 card-hover flex flex-col gap-4 bg-white dark:bg-slate-800">
