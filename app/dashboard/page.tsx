@@ -384,22 +384,80 @@ export default function FounderDashboardPage() {
 
                   {/* Financial terms */}
                   <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { label: "Equity Offered", value: venture.equity   ? `${venture.equity}%`  : "—", icon: TrendingUp },
-                      { label: "Funding Goal",   value: venture.fundingGoal ? `$${Number(venture.fundingGoal).toLocaleString()}` : "—", icon: Coins },
-                      { label: "Traction",       value: venture.traction || "—", icon: Zap },
-                      { label: "Team Size",      value: venture.teamSize  ? `${venture.teamSize} founder${venture.teamSize !== 1 ? "s" : ""}` : "—", icon: Users },
-                    ].map(({ label, value, icon: Icon }) => (
-                      <div
-                        key={label}
-                        className="p-3 rounded-xl text-center"
-                        style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-soft)" }}
-                      >
-                        <Icon className="size-4 mx-auto mb-1" style={{ color: "var(--accent-indigo)" }} />
-                        <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{value}</p>
-                        <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{label}</p>
-                      </div>
-                    ))}
+                    {(() => {
+                      const tm = (venture as any)?.tractionMetrics;
+                      const hasStructured = tm && typeof tm === "object" && !Array.isArray(tm);
+
+                      if (hasStructured) {
+                        const usersNow = Number((tm as any).users) || 0;
+                        const usersPrev = Number((tm as any).usersPrevious) || 0;
+                        const mrrNow = Number((tm as any).mrr) || 0;
+                        const mrrPrev = Number((tm as any).mrrPrevious) || 0;
+                        const pilots = Number((tm as any).pilots) || 0;
+                        const growthRate = Number((tm as any).growthRate) || 0;
+
+                        const usersDelta = usersNow - usersPrev;
+                        const mrrDelta = mrrNow - mrrPrev;
+
+                        return [
+                          {
+                            label: "Users",
+                            value: usersNow.toLocaleString(),
+                            icon: Users,
+                            sub: usersDelta === 0 ? "" : `${usersDelta >= 0 ? "+" : ""}${usersDelta.toLocaleString()} vs previous`,
+                            subColor: usersDelta >= 0 ? "#10B981" : "#EF4444",
+                          },
+                          {
+                            label: "MRR (USD)",
+                            value: `$${mrrNow.toLocaleString()}`,
+                            icon: Coins,
+                            sub: mrrDelta === 0 ? "" : `${mrrDelta >= 0 ? "+" : ""}${mrrDelta.toLocaleString()} vs previous`,
+                            subColor: mrrDelta >= 0 ? "#10B981" : "#EF4444",
+                          },
+                          {
+                            label: "Active Pilots",
+                            value: pilots.toLocaleString(),
+                            icon: Zap,
+                            sub: "Pilot partnerships running",
+                            subColor: "var(--text-muted)",
+                          },
+                          {
+                            label: "Growth Rate",
+                            value: `${growthRate.toFixed(1)}%`,
+                            icon: TrendingUp,
+                            sub: "Month-over-month",
+                            subColor: "var(--text-muted)",
+                          },
+                        ].map(({ label, value, icon: Icon, sub, subColor }) => (
+                          <div
+                            key={label}
+                            className="p-3 rounded-xl text-center"
+                            style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-soft)" }}
+                          >
+                            <Icon className="size-4 mx-auto mb-1" style={{ color: "var(--accent-indigo)" }} />
+                            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{value}</p>
+                            <p className="text-[10px]" style={{ color: subColor }}>{sub || "—"}</p>
+                          </div>
+                        ));
+                      }
+
+                      return [
+                        { label: "Equity Offered", value: venture.equity   ? `${venture.equity}%`  : "—", icon: TrendingUp },
+                        { label: "Funding Goal",   value: venture.fundingGoal ? `$${Number(venture.fundingGoal).toLocaleString()}` : "—", icon: Coins },
+                        { label: "Traction",       value: venture.traction || "—", icon: Zap },
+                        { label: "Team Size",      value: venture.teamSize  ? `${venture.teamSize} founder${venture.teamSize !== 1 ? "s" : ""}` : "—", icon: Users },
+                      ].map(({ label, value, icon: Icon }) => (
+                        <div
+                          key={label}
+                          className="p-3 rounded-xl text-center"
+                          style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-soft)" }}
+                        >
+                          <Icon className="size-4 mx-auto mb-1" style={{ color: "var(--accent-indigo)" }} />
+                          <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{value}</p>
+                          <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{label}</p>
+                        </div>
+                      ));
+                    })()}
                   </div>
                 </div>
               )}

@@ -1,9 +1,12 @@
+"use client";
+
 import { HeroSection } from "@/components/landing/HeroSection";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { IntroAnimationWrapper } from "@/components/landing/IntroAnimation";
 import Link from "next/link";
 import { Video, Lightbulb, Users, ArrowRight, Shield, Star, Crown } from "lucide-react";
+import { showSuccess } from "@/utils/toast";
 
 export default function HomePage() {
   return (
@@ -71,6 +74,16 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* Test Toast Button */}
+        <div className="text-center py-4">
+          <button
+            onClick={() => showSuccess("Toast notification working! 🎉")}
+            className="btn-primary px-6 py-3"
+          >
+            Test Toast
+          </button>
+        </div>
 
         {/* Subscription plans */}
         <section className="section-container section-padding">

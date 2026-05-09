@@ -6,6 +6,9 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useUser } from "@clerk/nextjs";
 import { clerkUserToAuthUser } from "@/lib/auth";
 import { Send, Search, Paperclip, MoreVertical, Video, Phone, Smile, Image as ImageIcon } from "lucide-react";
+import SearchFilter from "@/components/ui/SearchFilter";
+import EmptyState from "@/components/ui/EmptyState";
+import { useFilteredData } from "@/hooks/useFilteredData";
 
 interface Message {
   id: number;
@@ -70,14 +73,19 @@ export default function ChatPage() {
   const [activeId, setActiveId] = useState(1);
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState("");
-  const [search, setSearch] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const activeContact = CONTACTS.find(c => c.id === activeId)!;
   const activeMessages = messages[activeId] ?? [];
-  const filtered = CONTACTS.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()));
+
+  const filteredContacts = useFilteredData(
+    CONTACTS,
+    searchQuery,
+    [(contact, query) => contact.name.toLowerCase().includes(query)]
+  );
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -124,15 +132,16 @@ export default function ChatPage() {
           {/* Header */}
           <div className="p-4 border-b" style={{ borderBottomColor: "var(--border-soft)" }}>
             <h2 className="text-sm font-bold mb-3" style={{ color: "var(--text-primary)" }}>Messages</h2>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5" style={{ color: "var(--text-muted)" }} />
-              <input className="input pl-8 text-sm py-2" placeholder="Search…" value={search} onChange={e => setSearch(e.target.value)} />
-            </div>
+            <SearchFilter
+              placeholder="Search contacts..."
+              onSearchChange={setSearchQuery}
+            />
           </div>
 
           {/* Contacts */}
           <div className="flex-1 overflow-y-auto scrollbar-hide">
-            {filtered.map(contact => (
+            {filteredContacts.length > 0 ? (
+              filteredContacts.map(contact => (
               <button
                 key={contact.id}
                 onClick={() => setActiveId(contact.id)}
@@ -168,7 +177,14 @@ export default function ChatPage() {
                   </div>
                 )}
               </button>
-            ))}
+            ))
+            ) : (
+              <EmptyState
+                icon="💬"
+                title="No contacts found"
+                description="Try adjusting your search to find contacts."
+              />
+            )}
           </div>
         </div>
 

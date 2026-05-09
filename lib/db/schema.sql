@@ -37,6 +37,59 @@ CREATE TABLE users (
 );
 
 -- ============================================================
+-- AVAILABILITY SLOTS TABLE
+-- ============================================================
+
+CREATE TABLE availability_slots (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  expert_clerk_id   VARCHAR(255) NOT NULL,
+  expert_name       VARCHAR(255) NOT NULL,
+  start_at          TIMESTAMPTZ NOT NULL,
+  end_at            TIMESTAMPTZ NOT NULL,
+  timezone          VARCHAR(100) DEFAULT 'Asia/Kolkata',
+  notes             TEXT DEFAULT '',
+  is_booked         BOOLEAN DEFAULT FALSE,
+  booked_by_clerk_id VARCHAR(255),
+  booked_session_id UUID,
+  created_at        TIMESTAMPTZ DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- NOTIFICATIONS TABLE (email log)
+-- ============================================================
+
+CREATE TABLE notifications (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id    UUID,
+  to_email      VARCHAR(255) NOT NULL,
+  type          VARCHAR(100) NOT NULL, -- booking_confirmation | reminder | recording_ready
+  status        VARCHAR(50) NOT NULL DEFAULT 'pending',
+  payload       JSONB DEFAULT '{}',
+  sent_at       TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_notifications_session ON notifications(session_id);
+
+-- ============================================================
+-- SESSION FEEDBACK TABLE (ratings & reviews)
+-- ============================================================
+
+CREATE TABLE session_feedback (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id        UUID NOT NULL,
+  founder_clerk_id  VARCHAR(255) NOT NULL,
+  expert_clerk_id   VARCHAR(255) NOT NULL,
+  rating            INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  feedback          TEXT,
+  created_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_session_feedback_session ON session_feedback(session_id);
+CREATE INDEX idx_session_feedback_expert ON session_feedback(expert_clerk_id);
+
+-- ============================================================
 -- COHORTS TABLE
 -- ============================================================
 
@@ -115,6 +168,8 @@ CREATE TABLE sessions (
   status         session_status NOT NULL DEFAULT 'scheduled',
   notes          TEXT,
   meeting_url    TEXT,
+  recording_url  TEXT,
+  recording_ready_at TIMESTAMPTZ,
   created_at     TIMESTAMPTZ DEFAULT NOW(),
   updated_at     TIMESTAMPTZ DEFAULT NOW()
 );
@@ -171,6 +226,8 @@ CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_clerk_id ON users(clerk_id);
 CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_users_cohort ON users(cohort_id);
+CREATE INDEX idx_availability_expert ON availability_slots(expert_clerk_id, start_at);
+CREATE INDEX idx_availability_future ON availability_slots(is_booked, start_at);
 CREATE INDEX idx_ideas_user ON ideas(user_id);
 CREATE INDEX idx_ideas_status ON ideas(status);
 CREATE INDEX idx_sessions_expert ON sessions(expert_id);
@@ -192,6 +249,9 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER users_updated_at BEFORE UPDATE ON users
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER availability_slots_updated_at BEFORE UPDATE ON availability_slots
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 CREATE TRIGGER cohorts_updated_at BEFORE UPDATE ON cohorts

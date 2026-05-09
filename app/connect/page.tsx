@@ -4,6 +4,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import { Video, MessageSquare, Calendar, Search, Star, Clock, ArrowRight, Shield, Zap, Filter } from "lucide-react";
 import EmptyState from "@/components/ui/EmptyState";
 import SkeletonCard from "@/components/ui/SkeletonCard";
@@ -49,6 +51,9 @@ export default function ConnectPage() {
   const [domain, setDomain]       = useState("All domains");
   const [availOnly, setAvailOnly] = useState(false);
   const [loading, setLoading] = useState(true);
+  
+  const router = useRouter();
+  const { isSignedIn } = useUser();
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1500);
@@ -66,6 +71,14 @@ export default function ConnectPage() {
       return matchSearch && matchDomain && matchAvail;
     });
   }, [search, domain, availOnly]);
+
+  const handleBookCall = (expert: typeof EXPERTS[0]) => {
+    if (!isSignedIn) {
+      router.push(`/sign-up?redirect=/connect?expert=${encodeURIComponent(expert.name)}`);
+      return;
+    }
+    router.push(`/booking?expert=${encodeURIComponent(expert.name)}`);
+  };
 
   return (
     <>
@@ -207,9 +220,9 @@ export default function ConnectPage() {
                     </div>
 
                     <div className="flex items-center gap-2 pt-3 border-t border-slate-800">
-                      <Link href="/sign-up" className="flex-1 btn-primary py-2 text-sm justify-center">
+                      <button onClick={() => handleBookCall(expert)} className="flex-1 btn-primary py-2 text-sm justify-center">
                         <Video className="size-3.5" /> Book Call
-                      </Link>
+                      </button>
                       <Link href="/sign-up" className="btn-outline py-2 px-3" title="Chat">
                         <MessageSquare className="size-4" />
                       </Link>
@@ -269,7 +282,7 @@ export default function ConnectPage() {
                 <ul className="space-y-2 flex-1 mb-6 text-left">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-xs text-[#4A5668]">
-                      <span className="size-1.5 rounded-full bg-[#81A6C6] shrink-0" />{f}</span>
+                      <span className="size-1.5 rounded-full bg-[#81A6C6] shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
