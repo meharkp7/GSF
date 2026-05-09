@@ -11,6 +11,7 @@ import {
   Rocket, DollarSign, Building2, Pin, Briefcase, Star, Users,
   X, Send, CheckCircle2, Link2
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const AVATAR_COLORS = [
   { bg: "#DBEAFE", text: "#1E40AF" },
@@ -265,15 +266,15 @@ export default function CommunityPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-24 min-h-screen bg-[#F7F2EC] dark:bg-slate-950">
+      <main className="pt-24 min-h-screen bg-canvas">
 
         {/* Header */}
-        <section className="bg-white dark:bg-slate-900 border-b border-[#D2C4B4] dark:border-slate-700">
+        <section className="bg-surface border-b border-border transition-colors">
           <div className="section-container py-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl text-[#1A2332] dark:text-slate-100 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>GSF Community</h1>
-                <p className="text-[#4A5668] dark:text-slate-300 text-sm">Where founders share their journey and experts share their playbooks.</p>
+                <h1 className="text-3xl text-text-primary mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>GSF Community</h1>
+                <p className="text-text-secondary text-sm">Where founders share their journey and experts share their playbooks.</p>
               </div>
               <button onClick={() => setShowCreate(true)} className="btn-primary shrink-0">
                 <PenSquare className="size-4" /> Create a post
@@ -288,15 +289,15 @@ export default function CommunityPage() {
           <div className="flex-1 min-w-0 space-y-4">
 
             {/* Search + sort */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-[#D2C4B4] dark:border-slate-700 p-4 flex flex-col sm:flex-row gap-3">
+            <div className="bg-surface rounded-2xl border border-border p-4 flex flex-col sm:flex-row gap-3 shadow-sm transition-colors">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#8A95A3] dark:text-slate-400" />
-                <input type="text" placeholder="Search posts, authors, topics..." className="input pl-10 h-9 text-sm bg-white dark:bg-slate-900 border-[#D2C4B4] dark:border-slate-700" value={search} onChange={e => setSearch(e.target.value)} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-text-muted" />
+                <input type="text" placeholder="Search posts, authors, topics..." className="input pl-10 h-9 text-sm bg-surface border-border" value={search} onChange={e => setSearch(e.target.value)} />
               </div>
               <div className="flex gap-1.5">
                 {SORT_OPTIONS.map(({ id, label, icon: Icon }) => (
                   <button key={id} onClick={() => setSort(id)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${sort === id ? "bg-[#81A6C6] text-white border-[#81A6C6]" : "bg-white dark:bg-slate-900 text-[#4A5668] dark:text-slate-300 border-[#D2C4B4] dark:border-slate-700 hover:border-[#81A6C6]"}`}>
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${sort === id ? "bg-primary-500 text-white border-primary-500" : "bg-surface text-text-secondary border-border hover:border-primary-400"}`}>
                     <Icon className="size-3.5" />{label}
                   </button>
                 ))}
@@ -307,7 +308,7 @@ export default function CommunityPage() {
             <div className="flex gap-2 flex-wrap">
               {TAGS.map(tag => (
                 <button key={tag} onClick={() => setActiveTag(tag)}
-                  className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-all ${activeTag === tag ? "bg-[#1A2332] text-white border-[#1A2332] dark:bg-slate-100 dark:text-slate-950 dark:border-slate-100" : "bg-white dark:bg-slate-900 text-[#4A5668] dark:text-slate-300 border-[#D2C4B4] dark:border-slate-700 hover:border-[#81A6C6]"}`}>
+                  className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-all ${activeTag === tag ? "bg-text-primary text-text-inverse border-text-primary" : "bg-surface text-text-secondary border-border hover:border-primary-400"}`}>
                   {tag}
                 </button>
               ))}
@@ -318,22 +319,22 @@ export default function CommunityPage() {
               const stageStyle = post.stage ? STAGE_STYLES[post.stage] : null;
               const isExpanded = expanded === post.id;
               return (
-                <div key={post.id} id={post.id} className={`bg-white dark:bg-slate-900 rounded-2xl border ${post.pinned ? "border-[#AACDDC] dark:border-blue-400/30" : "border-[#D2C4B4] dark:border-slate-700"} overflow-hidden hover:border-[#81A6C6] dark:hover:border-blue-400 transition-colors group`}>
+                <div key={post.id} id={post.id} className={cn("bg-surface rounded-2xl border overflow-hidden transition-all group", post.pinned ? "border-primary-200/50 dark:border-primary-500/30 shadow-sm" : "border-border hover:border-primary-400 hover:shadow-soft")}>
                   {post.pinned && (
-                    <div className="bg-[#EEF4F9] dark:bg-slate-800 border-b border-[#AACDDC] dark:border-slate-700 px-4 py-2 text-xs font-semibold text-[#3D74A0] dark:text-blue-300 flex items-center gap-1.5">
+                    <div className="bg-surface-2 border-b border-border px-4 py-2 text-xs font-semibold text-primary-600 dark:text-primary-400 flex items-center gap-1.5">
                       <Pin className="size-3" /> Pinned post
                     </div>
                   )}
                   <div className="flex">
                     {/* Vote column */}
-                    <div className="flex flex-col items-center gap-1 px-3 pt-4 pb-4 bg-[#FDFAF7] dark:bg-slate-950 border-r border-[#D2C4B4] dark:border-slate-700 min-w-[52px]">
+                    <div className="flex flex-col items-center gap-1 px-3 pt-4 pb-4 bg-background border-r border-border min-w-[52px] transition-colors">
                       <button onClick={() => handleVote(post.id, 1)}
-                        className={`size-7 rounded-md flex items-center justify-center transition-colors hover:bg-[#EEF4F9] dark:hover:bg-slate-800 ${post.userVote === 1 ? "text-[#81A6C6] dark:text-blue-300" : "text-[#8A95A3] dark:text-slate-400"}`}>
+                        className={cn("size-7 rounded-md flex items-center justify-center transition-colors hover:bg-surface-2", post.userVote === 1 ? "text-primary-500" : "text-text-muted")}>
                         <ArrowUp className="size-4" />
                       </button>
-                      <span className={`text-xs font-bold ${post.userVote === 1 ? "text-[#81A6C6] dark:text-blue-300" : post.userVote === -1 ? "text-red-400" : "text-[#1A2332] dark:text-slate-100"}`}>{post.upvotes}</span>
+                      <span className={cn("text-xs font-bold transition-colors", post.userVote === 1 ? "text-primary-500" : post.userVote === -1 ? "text-red-500" : "text-text-primary")}>{post.upvotes}</span>
                       <button onClick={() => handleVote(post.id, -1)}
-                        className={`size-7 rounded-md flex items-center justify-center transition-colors hover:bg-red-50 dark:hover:bg-red-500/10 ${post.userVote === -1 ? "text-red-400" : "text-[#8A95A3] dark:text-slate-400"}`}>
+                        className={cn("size-7 rounded-md flex items-center justify-center transition-colors hover:bg-red-500/10", post.userVote === -1 ? "text-red-500" : "text-text-muted")}>
                         <ArrowDown className="size-4" />
                       </button>
                     </div>
@@ -342,16 +343,16 @@ export default function CommunityPage() {
                     <div className="flex-1 p-5">
                       {/* Author row */}
                       <div className="flex items-center gap-2.5 mb-3">
-                        <div className="size-8 rounded-full border border-[#D2C4B4] dark:border-slate-700 flex items-center justify-center text-xs font-bold shrink-0"
+                        <div className="size-8 rounded-full border border-border flex items-center justify-center text-xs font-bold shrink-0 shadow-sm"
                           style={{ background: post.avatarColor.bg, color: post.avatarColor.text }}>{post.initials}</div>
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-sm font-semibold text-[#1A2332] dark:text-slate-100">{post.author}</span>
-                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border flex items-center gap-1 ${ROLE_STYLES[post.roleType]}`}>
+                            <span className="text-sm font-semibold text-text-primary">{post.author}</span>
+                            <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full border flex items-center gap-1", ROLE_STYLES[post.roleType])}>
                               {post.roleType === "founder" ? <Briefcase className="size-2.5" /> : post.roleType === "expert" ? <Star className="size-2.5" /> : <Users className="size-2.5" />} {post.role}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 text-[10px] text-[#8A95A3] dark:text-slate-400 mt-0.5">
+                          <div className="flex items-center gap-2 text-[10px] text-text-muted mt-0.5">
                             <span>{post.time}</span>
                             {stageStyle && (
                               <>
@@ -367,20 +368,20 @@ export default function CommunityPage() {
                         <span className="badge badge-warm text-[10px] shrink-0">{post.tag}</span>
                       </div>
 
-                      <h2 className="text-base font-bold text-[#1A2332] dark:text-slate-100 leading-snug mb-3 group-hover:text-[#3D74A0] dark:group-hover:text-blue-300 transition-colors"
+                      <h2 className="text-base font-bold text-text-primary leading-snug mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors"
                         style={{ fontFamily: "'Playfair Display', serif" }}>{post.title}</h2>
-                      <p className="text-sm text-[#4A5668] dark:text-slate-300 leading-relaxed line-clamp-3 whitespace-pre-line">{post.body.split("\n")[0]}</p>
+                      <p className="text-sm text-text-secondary leading-relaxed line-clamp-3 whitespace-pre-line">{post.body.split("\n")[0]}</p>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-3 mt-4 pt-3 border-t border-[#F3E3D0] dark:border-slate-700">
+                      <div className="flex items-center gap-3 mt-4 pt-3 border-t border-border">
                         <button onClick={() => setExpanded(isExpanded ? null : post.id)}
-                          className={`flex items-center gap-1.5 text-xs transition-colors ${isExpanded ? "text-[#81A6C6] dark:text-blue-300" : "text-[#8A95A3] dark:text-slate-400 hover:text-[#81A6C6]"}`}>
+                          className={cn("flex items-center gap-1.5 text-xs transition-colors", isExpanded ? "text-primary-500" : "text-text-muted hover:text-primary-500")}>
                           <MessageSquare className="size-3.5" /> {post.comments.length} comment{post.comments.length !== 1 ? "s" : ""}
                         </button>
-                        <button onClick={() => handleShare(post)} className="flex items-center gap-1.5 text-xs text-[#8A95A3] dark:text-slate-400 hover:text-[#81A6C6] transition-colors">
+                        <button onClick={() => handleShare(post)} className="flex items-center gap-1.5 text-xs text-text-muted hover:text-primary-500 transition-colors">
                           <Share2 className="size-3.5" /> Share
                         </button>
-                        <button onClick={() => handleSave(post.id)} className={`flex items-center gap-1.5 text-xs transition-colors ${post.saved ? "text-amber-500" : "text-[#8A95A3] dark:text-slate-400 hover:text-[#81A6C6]"}`}>
+                        <button onClick={() => handleSave(post.id)} className={cn("flex items-center gap-1.5 text-xs transition-colors", post.saved ? "text-amber-500" : "text-text-muted hover:text-primary-500")}>
                           {post.saved ? <BookmarkCheck className="size-3.5" /> : <Bookmark className="size-3.5" />}
                           {post.saved ? "Saved" : "Save"}
                         </button>
@@ -388,33 +389,33 @@ export default function CommunityPage() {
 
                       {/* Expandable comment section */}
                       {isExpanded && (
-                        <div className="mt-4 pt-4 border-t border-[#F3E3D0] dark:border-slate-700 space-y-3">
+                        <div className="mt-4 pt-4 border-t border-border space-y-3">
                           {post.comments.length > 0 ? (
                             post.comments.map(c => (
                               <div key={c.id} className="flex gap-2.5">
-                                <div className="size-7 rounded-full border border-[#D2C4B4] dark:border-slate-700 flex items-center justify-center text-[10px] font-bold shrink-0"
+                                <div className="size-7 rounded-full border border-border flex items-center justify-center text-[10px] font-bold shrink-0"
                                   style={{ background: c.avatarColor.bg, color: c.avatarColor.text }}>{c.initials}</div>
-                                <div className="flex-1 bg-[#F7F2EC] dark:bg-slate-800 rounded-xl px-3 py-2">
+                                <div className="flex-1 bg-surface-2 rounded-xl px-3 py-2 transition-colors">
                                   <div className="flex items-center gap-2 mb-0.5">
-                                    <span className="text-xs font-semibold text-[#1A2332] dark:text-slate-100">{c.author}</span>
-                                    <span className="text-[10px] text-[#8A95A3] dark:text-slate-400">{c.time}</span>
+                                    <span className="text-xs font-semibold text-text-primary">{c.author}</span>
+                                    <span className="text-[10px] text-text-muted">{c.time}</span>
                                   </div>
-                                  <p className="text-xs text-[#4A5668] dark:text-slate-300 leading-relaxed">{c.text}</p>
+                                  <p className="text-xs text-text-secondary leading-relaxed">{c.text}</p>
                                 </div>
                               </div>
                             ))
                           ) : (
-                            <p className="text-xs text-[#8A95A3] dark:text-slate-400 italic">No comments yet. Be the first to reply.</p>
+                            <p className="text-xs text-text-muted italic">No comments yet. Be the first to reply.</p>
                           )}
 
                           {/* Add comment */}
                           <div className="flex gap-2 pt-1">
-                            <div className="size-7 rounded-full bg-[#EEF4F9] dark:bg-slate-700 border border-[#AACDDC] dark:border-slate-600 flex items-center justify-center text-[10px] font-bold text-[#3D74A0] dark:text-blue-300 shrink-0">YO</div>
+                            <div className="size-7 rounded-full bg-surface-2 border border-border flex items-center justify-center text-[10px] font-bold text-primary-600 dark:text-primary-400 shrink-0 shadow-sm">YO</div>
                             <div className="flex-1 flex gap-2">
                               <input
                                 type="text"
                                 placeholder="Write a comment..."
-                                className="input text-xs py-1.5 flex-1 bg-white dark:bg-slate-900 border-[#D2C4B4] dark:border-slate-700"
+                                className="input text-xs py-1.5 flex-1 bg-surface border-border focus:ring-1 focus:ring-primary-500/30"
                                 value={commentMap[post.id] || ""}
                                 onChange={e => setCommentMap(m => ({ ...m, [post.id]: e.target.value }))}
                                 onKeyDown={e => e.key === "Enter" && submitComment(post.id)}
@@ -434,10 +435,10 @@ export default function CommunityPage() {
             })}
 
             {filtered.length === 0 && (
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-[#D2C4B4] dark:border-slate-700 p-16 text-center">
-                <MessageSquare className="size-10 text-[#8A95A3] mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-[#1A2332] dark:text-slate-100 mb-2">No posts found</h3>
-                <p className="text-sm text-[#8A95A3] dark:text-slate-400">Try a different tag or search term.</p>
+              <div className="bg-surface rounded-2xl border border-border p-16 text-center transition-colors">
+                <MessageSquare className="size-10 text-text-muted mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-text-primary mb-2">No posts found</h3>
+                <p className="text-sm text-text-muted">Try a different tag or search term.</p>
               </div>
             )}
           </div>
@@ -446,14 +447,14 @@ export default function CommunityPage() {
           <div className="w-full lg:w-72 space-y-5 shrink-0">
 
             {/* Welcome to GSF Community */}
-            <div className="rounded-2xl border border-[#D2C4B4] dark:border-slate-700 overflow-hidden">
+            <div className="rounded-2xl border border-border overflow-hidden transition-all shadow-sm">
               {/* Blue banner */}
-              <div className="px-5 py-4 text-center" style={{ background: "linear-gradient(135deg, #3D74A0, #5B6CFF)" }}>
+              <div className="px-5 py-4 text-center" style={{ background: "linear-gradient(135deg, var(--color-primary-600), var(--color-accent-400))" }}>
                 <p className="text-white font-bold text-sm tracking-wide">Welcome to GSF Community</p>
                 <p className="text-white/80 text-[11px] mt-0.5">Join 2,400+ founders & experts</p>
               </div>
-              <div className="bg-white dark:bg-slate-900 p-5">
-                <p className="text-xs text-[#4A5668] dark:text-slate-300 leading-relaxed mb-4">
+              <div className="bg-surface p-5 transition-colors">
+                <p className="text-xs text-text-secondary leading-relaxed mb-4">
                   The space where student founders share their journey — from first idea to funded company — and where experts share honest playbooks.
                 </p>
                 <button onClick={() => setShowCreate(true)} className="btn-primary w-full justify-center text-sm py-2.5">
@@ -463,9 +464,9 @@ export default function CommunityPage() {
             </div>
 
             {/* Community rules */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-[#D2C4B4] dark:border-slate-700 p-5">
-              <h3 className="font-semibold text-[#1A2332] dark:text-slate-100 mb-3 text-sm">Community Guidelines</h3>
-              <ol className="space-y-2.5 text-xs text-[#4A5668] dark:text-slate-300">
+            <div className="bg-surface rounded-2xl border border-border p-5 transition-colors">
+              <h3 className="font-semibold text-text-primary mb-3 text-sm">Community Guidelines</h3>
+              <ol className="space-y-2.5 text-xs text-text-secondary">
                 {[
                   "Be specific — vague posts get ignored",
                   "Share what actually happened, not the highlight reel",
@@ -475,7 +476,7 @@ export default function CommunityPage() {
                   "Constructive feedback > cheerleading",
                 ].map((rule, i) => (
                   <li key={i} className="flex gap-2">
-                    <span className="size-4 rounded-full bg-[#EEF4F9] dark:bg-slate-700 text-[#81A6C6] dark:text-blue-300 text-[10px] font-bold flex items-center justify-center shrink-0">{i + 1}</span>
+                    <span className="size-4 rounded-full bg-surface-2 text-primary-500 text-[10px] font-bold flex items-center justify-center shrink-0">{i + 1}</span>
                     {rule}
                   </li>
                 ))}
@@ -483,26 +484,26 @@ export default function CommunityPage() {
             </div>
 
             {/* Saved count */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-[#D2C4B4] dark:border-slate-700 p-5">
+            <div className="bg-surface rounded-2xl border border-border p-5 transition-colors">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold text-[#1A2332] dark:text-slate-100 text-sm">Saved Posts</h3>
-                  <p className="text-xs text-[#8A95A3] dark:text-slate-400">{posts.filter(p => p.saved).length} post{posts.filter(p => p.saved).length !== 1 ? "s" : ""} saved</p>
+                  <h3 className="font-semibold text-text-primary text-sm">Saved Posts</h3>
+                  <p className="text-xs text-text-muted">{posts.filter(p => p.saved).length} post{posts.filter(p => p.saved).length !== 1 ? "s" : ""} saved</p>
                 </div>
                 <BookmarkCheck className="size-5 text-amber-500" />
               </div>
               {posts.filter(p => p.saved).length > 0 && (
                 <div className="mt-3 space-y-2">
                   {posts.filter(p => p.saved).slice(0, 3).map(p => (
-                    <div key={p.id} className="text-xs text-[#4A5668] dark:text-slate-300 bg-[#F7F2EC] dark:bg-slate-800 rounded-lg px-3 py-2 line-clamp-1">{p.title}</div>
+                    <div key={p.id} className="text-xs text-text-secondary bg-background rounded-lg px-3 py-2 line-clamp-1">{p.title}</div>
                   ))}
                 </div>
               )}
             </div>
 
             {/* Top contributors */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-[#D2C4B4] dark:border-slate-700 p-5">
-              <h3 className="font-semibold text-[#1A2332] dark:text-slate-100 mb-4 text-sm">Top Contributors</h3>
+            <div className="bg-surface rounded-2xl border border-border p-5 transition-colors">
+              <h3 className="font-semibold text-text-primary mb-4 text-sm">Top Contributors</h3>
               <div className="space-y-3">
                 {[
                   { name: "Dr. Anika Patel",  role: "VC Partner",        initials: "AP", av: AVATAR_COLORS[1], posts: 24 },
@@ -512,13 +513,13 @@ export default function CommunityPage() {
                   { name: "Yuki Tanaka",       role: "Ex-Notion PM",      initials: "YT", av: AVATAR_COLORS[5], posts: 11 },
                 ].map(c => (
                   <div key={c.name} className="flex items-center gap-2.5">
-                    <div className="size-8 rounded-full border border-[#D2C4B4] flex items-center justify-center text-xs font-bold shrink-0"
+                    <div className="size-8 rounded-full border border-border flex items-center justify-center text-xs font-bold shrink-0 shadow-sm"
                       style={{ background: c.av.bg, color: c.av.text }}>{c.initials}</div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-semibold text-[#1A2332] dark:text-slate-100 truncate">{c.name}</div>
-                      <div className="text-[10px] text-[#8A95A3] dark:text-slate-400">{c.role}</div>
+                      <div className="text-xs font-semibold text-text-primary truncate">{c.name}</div>
+                      <div className="text-[10px] text-text-muted">{c.role}</div>
                     </div>
-                    <span className="text-[10px] text-[#8A95A3] dark:text-slate-400">{c.posts} posts</span>
+                    <span className="text-[10px] text-text-muted">{c.posts} posts</span>
                   </div>
                 ))}
               </div>
@@ -532,27 +533,27 @@ export default function CommunityPage() {
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
           onClick={e => e.target === e.currentTarget && setShowCreate(false)}>
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-[#D2C4B4] dark:border-slate-700 shadow-xl w-full max-w-lg p-6">
+          <div className="bg-surface rounded-2xl border border-border shadow-xl w-full max-w-lg p-6 transition-colors">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="font-bold text-[#1A2332] dark:text-slate-100 text-lg" style={{ fontFamily: "'Playfair Display', serif" }}>Create a Post</h2>
-              <button onClick={() => setShowCreate(false)} className="size-8 rounded-lg flex items-center justify-center text-[#8A95A3] dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800">
+              <h2 className="font-bold text-text-primary text-lg" style={{ fontFamily: "'Playfair Display', serif" }}>Create a Post</h2>
+              <button onClick={() => setShowCreate(false)} className="size-8 rounded-lg flex items-center justify-center text-text-muted hover:bg-surface-2 transition-colors">
                 <X className="size-4" />
               </button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#8A95A3] dark:text-slate-400 block mb-1.5">Category</label>
-                <select className="input text-sm bg-white dark:bg-slate-900 border-[#D2C4B4] dark:border-slate-700" value={newPost.tag} onChange={e => setNewPost(p => ({ ...p, tag: e.target.value }))}>
+                <label className="text-xs font-semibold uppercase tracking-wider text-text-muted block mb-1.5">Category</label>
+                <select className="input text-sm bg-surface border-border" value={newPost.tag} onChange={e => setNewPost(p => ({ ...p, tag: e.target.value }))}>
                   {TAGS.slice(1).map(t => <option key={t}>{t}</option>)}
                 </select>
               </div>
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#8A95A3] dark:text-slate-400 block mb-1.5">Title *</label>
-                <input className="input bg-white dark:bg-slate-900 border-[#D2C4B4] dark:border-slate-700" placeholder="What did you build, learn, or want to ask?" value={newPost.title} onChange={e => setNewPost(p => ({ ...p, title: e.target.value }))} />
+                <label className="text-xs font-semibold uppercase tracking-wider text-text-muted block mb-1.5">Title *</label>
+                <input className="input bg-surface border-border" placeholder="What did you build, learn, or want to ask?" value={newPost.title} onChange={e => setNewPost(p => ({ ...p, title: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#8A95A3] dark:text-slate-400 block mb-1.5">Your story *</label>
-                <textarea className="input min-h-[140px] resize-none text-sm bg-white dark:bg-slate-900 border-[#D2C4B4] dark:border-slate-700" placeholder="Share the full context — what happened, what you learned, and what advice you have or need." value={newPost.body} onChange={e => setNewPost(p => ({ ...p, body: e.target.value }))} />
+                <label className="text-xs font-semibold uppercase tracking-wider text-text-muted block mb-1.5">Your story *</label>
+                <textarea className="input min-h-[140px] resize-none text-sm bg-surface border-border" placeholder="Share the full context — what happened, what you learned, and what advice you have or need." value={newPost.body} onChange={e => setNewPost(p => ({ ...p, body: e.target.value }))} />
               </div>
               <button onClick={submitPost} disabled={!newPost.title.trim() || !newPost.body.trim()}
                 className="btn-primary w-full justify-center py-3"

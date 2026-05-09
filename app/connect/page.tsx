@@ -83,7 +83,7 @@ export default function ConnectPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-24 min-h-screen bg-[#FDFAF7]">
+      <main className="pt-24 min-h-screen bg-background">
 
         {/* Hero */}
         <section className="relative section-padding overflow-hidden bg-soft-pattern">
@@ -94,17 +94,17 @@ export default function ConnectPage() {
               <Video className="size-3.5" />
               Live Video + Chat — Built for founders
             </span>
-            <h1 className="text-5xl sm:text-6xl text-[#1A2332] tracking-tight mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h1 className="text-5xl sm:text-6xl text-text-primary tracking-tight mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
               Talk to experts who&apos;ve{" "}
               <em className="not-italic text-gradient-primary">actually built it</em>
             </h1>
-            <p className="text-xl text-[#4A5668] dark:text-slate-300 max-w-2xl mx-auto mb-8">
+            <p className="text-xl text-text-secondary max-w-2xl mx-auto mb-8">
               Book 1-on-1 video calls with domain-expert advisors. Continue via direct chat. No middlemen, no gatekeeping.
             </p>
-            <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-white dark:bg-slate-800 border border-[#D2C4B4] dark:border-slate-700 shadow-soft-sm mb-12">
-              <Shield className="size-5 text-[#81A6C6]" />
-              <span className="text-sm text-[#4A5668] dark:text-slate-300">
-                <span className="text-[#1A2332] dark:text-slate-100 font-semibold">Basic plan free for 30 days</span> — full access. Then from ₹499/month.
+            <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-surface border border-border shadow-soft-sm mb-12 transition-colors">
+              <Shield className="size-5 text-primary-300" />
+              <span className="text-sm text-text-secondary">
+                <span className="text-text-primary font-semibold">Basic plan free for 30 days</span> — full access. Then from ₹499/month.
               </span>
             </div>
           </div>
@@ -112,16 +112,16 @@ export default function ConnectPage() {
 
         {/* How it works */}
         <section className="section-container pb-20">
-          <h2 className="text-2xl font-semibold text-[#1A2332] dark:text-slate-100 mb-8 text-center">How it works</h2>
+          <h2 className="text-2xl font-semibold text-text-primary mb-8 text-center">How it works</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {HOW_IT_WORKS.map(({ step, icon: Icon, title, desc }) => (
-              <div key={step} className="card p-6 relative bg-white dark:bg-slate-800">
-                <div className="text-4xl font-bold text-[#D2C4B4] dark:text-slate-700 absolute top-4 right-4 select-none" style={{ fontFamily: "'Playfair Display', serif" }}>{step}</div>
-                <div className="size-10 rounded-xl bg-[#EEF4F9] dark:bg-slate-700 border border-[#AACDDC] dark:border-slate-600 flex items-center justify-center mb-4">
-                  <Icon className="size-5 text-[#81A6C6] dark:text-blue-300" />
+              <div key={step} className="card p-6 relative bg-surface border-border">
+                <div className="text-4xl font-bold text-border absolute top-4 right-4 select-none opacity-50" style={{ fontFamily: "'Playfair Display', serif" }}>{step}</div>
+                <div className="size-10 rounded-xl bg-surface-2 border border-border-accent flex items-center justify-center mb-4">
+                  <Icon className="size-5 text-primary-400" />
                 </div>
-                <h3 className="font-semibold text-[#1A2332] dark:text-slate-100 mb-2">{title}</h3>
-                <p className="text-sm text-[#4A5668] dark:text-slate-300 leading-relaxed">{desc}</p>
+                <h3 className="font-semibold text-text-primary mb-2">{title}</h3>
+                <p className="text-sm text-text-secondary leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -236,10 +236,10 @@ export default function ConnectPage() {
 
         {/* Pricing */}
         <section className="section-container py-20 text-center">
-          <h2 className="text-3xl text-[#1A2332] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-3xl text-text-primary mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
             Simple, transparent pricing
           </h2>
-          <p className="text-[#4A5668] mb-12 max-w-lg mx-auto">
+          <p className="text-text-secondary mb-12 max-w-lg mx-auto">
             Basic plan free for 30 days. Upgrade to unlock senior experts.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-4xl mx-auto">
@@ -266,23 +266,23 @@ export default function ConnectPage() {
                 highlight: false, freeBadge: false,
               },
             ].map((plan) => (
-              <div key={plan.name} className={`card p-6 flex flex-col ${plan.highlight ? "border-[#81A6C6] shadow-[0_4px_24px_rgba(129,166,198,0.18)]" : ""}`}>
+              <div key={plan.name} className={cn("card p-6 flex flex-col transition-all duration-300", plan.highlight ? "border-primary-400 shadow-blue-lg ring-1 ring-primary-400/20" : "border-border")}>
                 {plan.freeBadge && <span className="badge badge-warm text-xs mb-3 w-fit">Free first 30 days</span>}
                 {plan.highlight && <span className="badge badge-blue text-xs mb-3 w-fit">Most Popular</span>}
-                <div className="font-bold text-lg text-[#1A2332] mb-1">{plan.name}</div>
+                <div className="font-bold text-lg text-text-primary mb-1">{plan.name}</div>
                 <div className="mb-1">
-                  <span className="text-2xl font-bold text-[#1A2332]" style={{ fontFamily: "'Playfair Display', serif" }}>{plan.price}</span>
-                  <span className="text-xs text-[#8A95A3] ml-1">{plan.period}</span>
+                  <span className="text-2xl font-bold text-text-primary" style={{ fontFamily: "'Playfair Display', serif" }}>{plan.price}</span>
+                  <span className="text-xs text-text-muted ml-1">{plan.period}</span>
                 </div>
-                {plan.credits && <div className="text-xs font-medium text-[#81A6C6] mb-1">{plan.credits}</div>}
-                {plan.autoPayNote && <div className="text-[10px] text-[#8A95A3] mb-3">{plan.autoPayNote}</div>}
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4A5668] bg-[#F3E3D0] border border-[#D2C4B4] rounded-lg px-2 py-1 mb-4 w-fit">
+                {plan.credits && <div className="text-xs font-medium text-primary-400 mb-1">{plan.credits}</div>}
+                {plan.autoPayNote && <div className="text-[10px] text-text-muted mb-3">{plan.autoPayNote}</div>}
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary bg-surface-2 border border-border rounded-lg px-2 py-1 mb-4 w-fit">
                   {plan.experienceRange}
                 </div>
                 <ul className="space-y-2 flex-1 mb-6 text-left">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-xs text-[#4A5668]">
-                      <span className="size-1.5 rounded-full bg-[#81A6C6] shrink-0" />{f}
+                    <li key={f} className="flex items-center gap-2 text-xs text-text-secondary">
+                      <span className="size-1.5 rounded-full bg-primary-400 shrink-0" />{f}
                     </li>
                   ))}
                 </ul>

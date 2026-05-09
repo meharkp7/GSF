@@ -157,30 +157,30 @@
 
 /* ===== DARK MODE OVERRIDES ===== */
 html.dark {
-  --bg-base:        #111F36;
-  --bg-canvas:      #15273D;
-  --bg-surface:     #1A2E48;
-  --bg-surface-2:   #233649;
-  --bg-card:        #1A2E48;
-  --bg-sidebar:     #15273D;
-  --bg-nav:         rgba(17,31,54,0.95);
+  --bg-base:        #05070A;
+  --bg-canvas:      #0A0D14;
+  --bg-surface:     #0F172A;
+  --bg-surface-2:   #1E293B;
+  --bg-card:        #0F172A;
+  --bg-sidebar:     #0A0D14;
+  --bg-nav:         rgba(5, 7, 10, 0.8);
 
-  --border-default: #2D4563;
-  --border-soft:    #1F3548;
-  --border-accent:  #5B6CFF;
+  --border-default: #1E293B;
+  --border-soft:    #0F172A;
+  --border-accent:  #334155; /* Dark grey for secondary accents */
 
-  --text-primary:   #F0F4F8;
-  --text-secondary: #B0BCC9;
-  --text-muted:     #7A8896;
-  --text-inverse:   #111F36;
+  --text-primary:   #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted:     #64748B;
+  --text-inverse:   #05070A;
 
-  --accent-primary: #6C7EFF;
-  --accent-dark:    #8499FF;
-  --accent-indigo:  #6C7EFF;
-  --accent-teal:    #4FD1C5;
+  --accent-primary: #5B6CFF;
+  --accent-dark:    #475569; /* Dark grey accent */
+  --accent-indigo:  #6366F1;
+  --accent-teal:    #2DD4BF;
 
-  --shadow-nav:     0 2px 24px rgba(0,0,0,0.5);
-  --shadow-card-el: 0 1px 3px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.25);
+  --shadow-nav:     0 4px 24px rgba(0,0,0,0.6);
+  --shadow-card-el: 0 4px 20px rgba(0,0,0,0.4);
 }
 
 /* ===== BASE ===== */

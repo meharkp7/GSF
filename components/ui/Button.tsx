@@ -15,15 +15,15 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles = {
   primary:
-    "bg-[#81A6C6] dark:bg-[#6C7EFF] text-white hover:bg-[#5B8FB8] dark:hover:bg-[#7B87FF] shadow-[0_2px_12px_rgba(129,166,198,0.35)] dark:shadow-[0_2px_12px_rgba(107,126,255,0.35)] hover:shadow-[0_4px_20px_rgba(129,166,198,0.45)] dark:hover:shadow-[0_4px_20px_rgba(107,126,255,0.45)] focus-ring",
+    "bg-[var(--accent-indigo)] text-white hover:opacity-90 shadow-[0_2px_12px_rgba(91,108,255,0.35)] hover:shadow-[0_4px_20px_rgba(91,108,255,0.45)] focus-ring",
   secondary:
-    "bg-[#D2C4B4] dark:bg-slate-700 text-[#1A2332] dark:text-slate-100 hover:bg-[#AACDDC] dark:hover:bg-slate-600 shadow-soft-sm focus-ring",
+    "bg-[var(--bg-surface-2)] text-[var(--text-primary)] border border-[var(--border-default)] hover:bg-[var(--bg-canvas)] shadow-soft-sm focus-ring",
   outline:
-    "bg-transparent border-[1.5px] border-[#D2C4B4] dark:border-slate-600 text-[#4A5668] dark:text-slate-300 hover:border-[#81A6C6] dark:hover:border-blue-400 hover:text-[#1A2332] dark:hover:text-slate-100 hover:bg-[#EEF4F9] dark:hover:bg-slate-800 focus-ring",
+    "bg-transparent border-[1.5px] border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--accent-indigo)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] focus-ring",
   ghost:
-    "bg-transparent text-[#4A5668] dark:text-slate-300 hover:bg-[#F3E3D0] dark:hover:bg-slate-800 hover:text-[#1A2332] dark:hover:text-slate-100 focus-ring",
+    "bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-surface-2)] hover:text-[var(--text-primary)] focus-ring",
   danger:
-    "bg-red-500 dark:bg-red-600 text-white hover:bg-red-600 dark:hover:bg-red-700 shadow-soft-sm focus-ring",
+    "bg-red-500 text-white hover:bg-red-600 shadow-soft-sm focus-ring",
 };
 
 const sizeStyles = {

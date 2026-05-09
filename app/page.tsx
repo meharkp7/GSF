@@ -7,6 +7,7 @@ import { IntroAnimationWrapper } from "@/components/landing/IntroAnimation";
 import Link from "next/link";
 import { Video, Lightbulb, Users, ArrowRight, Shield, Star, Crown } from "lucide-react";
 import { showSuccess } from "@/utils/toast";
+import { cn } from "@/lib/utils";
 
 export default function HomePage() {
   return (
@@ -16,14 +17,14 @@ export default function HomePage() {
         <HeroSection />
 
         {/* Two core platforms */}
-        <section className="bg-white dark:bg-slate-900 border-y border-[#D2C4B4] dark:border-slate-700 py-20">
+        <section className="bg-surface border-y border-border py-20">
           <div className="section-container">
             <div className="text-center mb-14">
-              <h2 className="text-4xl sm:text-5xl text-[#1A2332] dark:text-slate-100 mb-4"
+              <h2 className="text-4xl sm:text-5xl text-text-primary mb-4"
                 style={{ fontFamily: "'Playfair Display', serif" }}>
                 Two platforms. One mission.
               </h2>
-              <p className="text-[#4A5668] dark:text-slate-300 text-lg max-w-xl mx-auto">
+              <p className="text-text-secondary text-lg max-w-xl mx-auto">
                 Connect with experts who&apos;ve done it. Fund the ideas that will shape tomorrow.
               </p>
             </div>
@@ -31,13 +32,13 @@ export default function HomePage() {
 
               {/* Connect */}
               <div className="card p-8 card-hover group">
-                <div className="size-14 rounded-2xl bg-[#EEF4F9] flex items-center justify-center mb-6 border border-[#AACDDC]">
-                  <Video className="size-7 text-[#81A6C6]" />
+                <div className="size-14 rounded-2xl bg-surface-2 flex items-center justify-center mb-6 border border-border">
+                  <Video className="size-7 text-[var(--accent-indigo)]" />
                 </div>
-                <h3 className="text-2xl text-[#1A2332] mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <h3 className="text-2xl text-text-primary mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
                   GSF Connect
                 </h3>
-                <p className="text-[#4A5668] leading-relaxed mb-6">
+                <p className="text-text-secondary leading-relaxed mb-6">
                   Book 1-on-1 video calls with world-class startup experts. Continue the conversation via direct chat. Like Zoom — built exclusively for ambitious student founders.
                 </p>
                 <div className="flex flex-wrap gap-2 mb-8">
@@ -52,13 +53,13 @@ export default function HomePage() {
 
               {/* Ventures */}
               <div className="card p-8 card-hover" style={{ borderColor: '#D2C4B4' }}>
-                <div className="size-14 rounded-2xl bg-[#F3E3D0] flex items-center justify-center mb-6 border border-[#D2C4B4]">
-                  <Lightbulb className="size-7 text-[#5B4A3A]" />
+                <div className="size-14 rounded-2xl bg-surface-2 flex items-center justify-center mb-6 border border-border">
+                  <Lightbulb className="size-7 text-text-primary" />
                 </div>
-                <h3 className="text-2xl text-[#1A2332] mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <h3 className="text-2xl text-text-primary mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
                   GSF Ventures
                 </h3>
-                <p className="text-[#4A5668] leading-relaxed mb-6">
+                <p className="text-text-secondary leading-relaxed mb-6">
                   Students list startup ideas with equity terms. Venture creators and investors fund them directly. GSF earns a transparent 1–2% fee on successful deals — nothing more.
                 </p>
                 <div className="flex flex-wrap gap-2 mb-8">
@@ -91,11 +92,11 @@ export default function HomePage() {
             <span className="badge badge-blue mb-4">
               Transparent pricing
             </span>
-            <h2 className="text-4xl font-bold text-[#1A2332] mb-4"
+            <h2 className="text-4xl font-bold text-text-primary mb-4"
               style={{ fontFamily: "'Playfair Display', serif" }}>
               Choose your plan
             </h2>
-            <p className="text-[#4A5668] max-w-xl mx-auto">
+            <p className="text-text-secondary max-w-xl mx-auto">
               Start with Basic free for your first 30 days. Upgrade anytime to unlock senior experts and exclusive GSF access.
             </p>
           </div>
@@ -111,8 +112,8 @@ export default function HomePage() {
                 credits: "600 credits / month",
                 experienceRange: "0–10 yrs experience experts",
                 icon: Shield,
-                iconColor: "text-[#81A6C6]",
-                iconBg: "bg-[#EEF4F9] border-[#AACDDC]",
+                iconColor: "text-[#81A6C6] dark:text-blue-300",
+                iconBg: "bg-[#EEF4F9] dark:bg-slate-800 border-[#AACDDC] dark:border-slate-700",
                 features: [
                   "600 credits / month",
                   "Connect with experts: 0–10 yrs experience",
@@ -131,8 +132,8 @@ export default function HomePage() {
                 credits: "1,500 credits / month",
                 experienceRange: "10–15 yrs experience experts",
                 icon: Star,
-                iconColor: "text-[#3D74A0]",
-                iconBg: "bg-[#DCEEF8] border-[#81A6C6]",
+                iconColor: "text-[#3D74A0] dark:text-blue-400",
+                iconBg: "bg-[#DCEEF8] dark:bg-slate-800 border-[#81A6C6] dark:border-slate-700",
                 features: [
                   "1,500 credits / month",
                   "Connect with experts: 10–15 yrs experience",
@@ -151,8 +152,8 @@ export default function HomePage() {
                 credits: "2,000 credits / month",
                 experienceRange: "15+ yrs · GSF exclusive experts",
                 icon: Crown,
-                iconColor: "text-[#5B4A3A]",
-                iconBg: "bg-[#F3E3D0] border-[#D2C4B4]",
+                iconColor: "text-[#5B4A3A] dark:text-amber-200",
+                iconBg: "bg-[#F3E3D0] dark:bg-slate-800 border-[#D2C4B4] dark:border-slate-700",
                 features: [
                   "2,000 credits / month",
                   "Exclusive GSF experts: 15+ yrs experience",
@@ -186,7 +187,7 @@ export default function HomePage() {
                     <PlanIcon className={`size-6 ${plan.iconColor}`} />
                   </div>
 
-                  <div className="font-bold text-lg text-[#1A2332] mb-1">{plan.name}</div>
+                  <div className="font-bold text-lg text-text-primary mb-1">{plan.name}</div>
                   <div className="mb-1">
                     <span
                       className="text-3xl font-bold"
@@ -200,19 +201,19 @@ export default function HomePage() {
                     >
                       {plan.price}
                     </span>
-                    <span className="text-xs text-[#8A95A3] ml-1">{plan.period}</span>
+                    <span className="text-xs text-text-muted ml-1">{plan.period}</span>
                   </div>
-                  <div className="text-xs font-medium text-[#81A6C6] mb-1">{plan.credits}</div>
+                  <div className="text-xs font-medium text-accent-primary mb-1">{plan.credits}</div>
 
                   {/* Experience range badge */}
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4A5668] bg-[#F3E3D0] border border-[#D2C4B4] rounded-lg px-2 py-1 mb-5 w-fit">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary bg-surface-2 border border-border rounded-lg px-2 py-1 mb-5 w-fit">
                     {plan.experienceRange}
                   </div>
 
                   <ul className="space-y-2.5 flex-1 mb-6">
                     {plan.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-xs text-[#4A5668]">
-                        <span className="size-1.5 rounded-full bg-[#81A6C6] shrink-0 mt-1" />
+                      <li key={f} className="flex items-start gap-2 text-xs text-text-secondary">
+                        <span className="size-1.5 rounded-full bg-accent-primary shrink-0 mt-1" />
                         {f}
                       </li>
                     ))}
@@ -229,22 +230,22 @@ export default function HomePage() {
             })}
           </div>
 
-          <p className="text-center text-xs text-[#8A95A3] mt-8">
+          <p className="text-center text-xs text-text-muted mt-8">
             All plans include auto-pay. Cancel anytime. No hidden fees.
           </p>
         </section>
 
         {/* Expert teaser */}
-        <section className="bg-[#F7F2EC] border-t border-[#D2C4B4] section-padding">
+        <section className="bg-canvas border-t border-border section-padding">
           <div className="section-container">
             <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
               <div className="max-w-lg">
-                <h2 className="text-4xl text-[#1A2332] mb-4"
+                <h2 className="text-4xl text-text-primary mb-4"
                   style={{ fontFamily: "'Playfair Display', serif" }}>
                   40+ experts.<br />
                   <span className="text-gradient-primary">Zero gatekeepers.</span>
                 </h2>
-                <p className="text-[#4A5668] leading-relaxed mb-6">
+                <p className="text-text-secondary leading-relaxed mb-6">
                   VCs, exited founders, product leaders, legal advisors — every GSF expert is vetted, accessible, and ready to give you the real talk that books never will.
                 </p>
                 <Link href="/experts" className="btn-primary px-7 py-3">
@@ -254,20 +255,19 @@ export default function HomePage() {
               </div>
               <div className="grid grid-cols-3 gap-3 w-full max-w-xs">
                 {[
-                  { initials: "AP", name: "Anika P.", role: "VC Partner", bg: "#EEF4F9", text: "#3D74A0" },
-                  { initials: "JW", name: "James W.", role: "Founder", bg: "#F3E3D0", text: "#5B4A3A" },
-                  { initials: "SM", name: "Sara M.", role: "Product", bg: "#EEF4F9", text: "#3D74A0" },
-                  { initials: "YT", name: "Yuki T.", role: "Growth", bg: "#F3E3D0", text: "#5B4A3A" },
-                  { initials: "RD", name: "Raj D.", role: "Legal", bg: "#EEF4F9", text: "#3D74A0" },
-                  { initials: "FA", name: "Fatima A.", role: "Impact", bg: "#F3E3D0", text: "#5B4A3A" },
+                  { initials: "AP", name: "Anika P.", role: "VC Partner", bg: "bg-[#EEF4F9] dark:bg-slate-800", text: "text-[#3D74A0] dark:text-blue-300" },
+                  { initials: "JW", name: "James W.", role: "Founder", bg: "bg-[#F3E3D0] dark:bg-slate-800", text: "text-[#5B4A3A] dark:text-amber-200" },
+                  { initials: "SM", name: "Sara M.", role: "Product", bg: "bg-[#EEF4F9] dark:bg-slate-800", text: "text-[#3D74A0] dark:text-blue-300" },
+                  { initials: "YT", name: "Yuki T.", role: "Growth", bg: "bg-[#F3E3D0] dark:bg-slate-800", text: "text-[#5B4A3A] dark:text-amber-200" },
+                  { initials: "RD", name: "Raj D.", role: "Legal", bg: "bg-[#EEF4F9] dark:bg-slate-800", text: "text-[#3D74A0] dark:text-blue-300" },
+                  { initials: "FA", name: "Fatima A.", role: "Impact", bg: "bg-[#F3E3D0] dark:bg-slate-800", text: "text-[#5B4A3A] dark:text-amber-200" },
                 ].map((e) => (
-                  <div key={e.initials} className="card p-3 text-center card-hover">
-                    <div className="size-10 rounded-full mx-auto mb-2 flex items-center justify-center text-sm font-bold border border-[#D2C4B4]"
-                      style={{ background: e.bg, color: e.text }}>
+                  <div key={e.initials} className="card p-3 text-center card-hover bg-card dark:bg-slate-800">
+                    <div className={cn("size-10 rounded-full mx-auto mb-2 flex items-center justify-center text-sm font-bold border border-border", e.bg, e.text)}>
                       {e.initials}
                     </div>
-                    <div className="text-xs font-semibold text-[#1A2332] truncate">{e.name}</div>
-                    <div className="text-[10px] text-[#8A95A3]">{e.role}</div>
+                    <div className="text-xs font-semibold text-text-primary truncate">{e.name}</div>
+                    <div className="text-[10px] text-text-muted">{e.role}</div>
                   </div>
                 ))}
               </div>
@@ -278,15 +278,15 @@ export default function HomePage() {
         {/* Final CTA */}
         <section className="section-container py-24 text-center">
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-5xl text-[#1A2332] mb-4"
+            <h2 className="text-5xl text-text-primary mb-4"
               style={{ fontFamily: "'Playfair Display', serif" }}>
               A Society for Founders.
             </h2>
-            <p className="text-xl text-[#81A6C6] font-medium italic mb-8"
+            <p className="text-xl text-[var(--accent-indigo)] font-medium italic mb-8"
               style={{ fontFamily: "'Playfair Display', serif" }}>
               Not Talkers.
             </p>
-            <p className="text-[#4A5668] mb-10">
+            <p className="text-text-secondary mb-10">
               Basic plan free for 30 days. No credit card. Start building today.
             </p>
             <Link href="/sign-up" className="btn-primary text-base px-10 py-4 mx-auto">
