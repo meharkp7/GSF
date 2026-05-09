@@ -237,6 +237,27 @@ CREATE INDEX idx_modules_cohort ON modules(cohort_id, order_index);
 CREATE INDEX idx_progress_user ON student_progress(user_id);
 
 -- ============================================================
+-- ARTICLES TABLE (insights publishing)
+-- ============================================================
+
+CREATE TABLE articles (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  author_clerk_id VARCHAR(255) NOT NULL,
+  author_name     VARCHAR(255) NOT NULL,
+  title           VARCHAR(500) NOT NULL,
+  category        VARCHAR(100) NOT NULL,
+  body            TEXT NOT NULL,
+  status          VARCHAR(50) NOT NULL DEFAULT 'draft', -- draft | published
+  published_at    TIMESTAMPTZ,
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_articles_status ON articles(status);
+CREATE INDEX idx_articles_author ON articles(author_clerk_id);
+CREATE INDEX idx_articles_published ON articles(published_at DESC);
+
+-- ============================================================
 -- UPDATED_AT TRIGGER
 -- ============================================================
 
@@ -264,4 +285,7 @@ CREATE TRIGGER experts_updated_at BEFORE UPDATE ON experts
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 CREATE TRIGGER sessions_updated_at BEFORE UPDATE ON sessions
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER articles_updated_at BEFORE UPDATE ON articles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();

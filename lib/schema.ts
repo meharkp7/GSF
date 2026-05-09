@@ -193,6 +193,22 @@ export const sessionFeedback = pgTable("session_feedback", {
 });
 
 // ===================================================
+// ARTICLES (insights publishing)
+// ===================================================
+export const articles = pgTable("articles", {
+  id:          uuid("id").defaultRandom().primaryKey(),
+  authorClerkId: text("author_clerk_id").notNull(),
+  authorName:   text("author_name").notNull(),
+  title:        text("title").notNull(),
+  category:     text("category").notNull(), // "Fundraising", "Product", "Growth", etc.
+  body:         text("body").notNull(),
+  status:       text("status").notNull().default("draft"), // draft | published
+  publishedAt:  timestamp("published_at"),
+  createdAt:    timestamp("created_at").defaultNow(),
+  updatedAt:    timestamp("updated_at").defaultNow(),
+});
+
+// ===================================================
 // TYPE EXPORTS
 // ===================================================
 export type User                 = typeof users.$inferSelect;
@@ -212,3 +228,5 @@ export type NewInvestmentInterest= typeof investmentInterests.$inferInsert;
 export type CreditBalance        = typeof creditBalances.$inferSelect;
 export type Notification         = typeof notifications.$inferSelect;
 export type SessionFeedback      = typeof sessionFeedback.$inferSelect;
+export type Article              = typeof articles.$inferSelect;
+export type NewArticle           = typeof articles.$inferInsert;
