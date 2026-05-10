@@ -35,6 +35,24 @@ export const users = pgTable("users", {
 });
 
 // ===================================================
+// AVAILABILITY SLOTS  (expert calendars)
+// ===================================================
+export const availabilitySlots = pgTable("availability_slots", {
+  id:              uuid("id").defaultRandom().primaryKey(),
+  expertClerkId:    text("expert_clerk_id").notNull(),
+  expertName:       text("expert_name").notNull(),
+  startAt:          timestamp("start_at").notNull(),
+  endAt:            timestamp("end_at").notNull(),
+  timezone:         text("timezone").default("Asia/Kolkata"),
+  notes:            text("notes").default(""),
+  isBooked:         boolean("is_booked").default(false),
+  bookedByClerkId:  text("booked_by_clerk_id"),
+  bookedSessionId:  uuid("booked_session_id"),
+  createdAt:        timestamp("created_at").defaultNow(),
+  updatedAt:        timestamp("updated_at").defaultNow(),
+});
+
+// ===================================================
 // VENTURES  (one per founder)
 // ===================================================
 export const ventures = pgTable("ventures", {
@@ -104,8 +122,25 @@ export const sessions = pgTable("sessions", {
   creditsCost:    integer("credits_cost").default(100),
   creditsEarned:  integer("credits_earned").default(80),
   notes:          text("notes"),
+  meetingUrl:     text("meeting_url"),
+  recordingUrl:   text("recording_url"),
+  recordingReadyAt: timestamp("recording_ready_at"),
   createdAt:      timestamp("created_at").defaultNow(),
   updatedAt:      timestamp("updated_at").defaultNow(),
+});
+
+// ===================================================
+// NOTIFICATIONS (email log)
+// ===================================================
+export const notifications = pgTable("notifications", {
+  id:          uuid("id").defaultRandom().primaryKey(),
+  sessionId:   uuid("session_id"),
+  toEmail:     text("to_email").notNull(),
+  type:        text("type").notNull(), // booking_confirmation | reminder | recording_ready
+  status:      text("status").notNull().default("pending"),
+  payload:     jsonb("payload").$type<any>().default({}),
+  sentAt:      timestamp("sent_at"),
+  createdAt:   timestamp("created_at").defaultNow(),
 });
 
 // ===================================================
@@ -145,10 +180,41 @@ export const creditBalances = pgTable("credit_balances", {
 });
 
 // ===================================================
+// SESSION FEEDBACK (ratings & reviews)
+// ===================================================
+export const sessionFeedback = pgTable("session_feedback", {
+  id:            uuid("id").defaultRandom().primaryKey(),
+  sessionId:     uuid("session_id").notNull(),
+  founderClerkId: text("founder_clerk_id").notNull(),
+  expertClerkId:  text("expert_clerk_id").notNull(),
+  rating:        integer("rating").notNull(), // 1-5
+  feedback:      text("feedback").default(""),
+  createdAt:     timestamp("created_at").defaultNow(),
+});
+
+// ===================================================
+// ARTICLES (insights publishing)
+// ===================================================
+export const articles = pgTable("articles", {
+  id:          uuid("id").defaultRandom().primaryKey(),
+  authorClerkId: text("author_clerk_id").notNull(),
+  authorName:   text("author_name").notNull(),
+  title:        text("title").notNull(),
+  category:     text("category").notNull(), // "Fundraising", "Product", "Growth", etc.
+  body:         text("body").notNull(),
+  status:       text("status").notNull().default("draft"), // draft | published
+  publishedAt:  timestamp("published_at"),
+  createdAt:    timestamp("created_at").defaultNow(),
+  updatedAt:    timestamp("updated_at").defaultNow(),
+});
+
+// ===================================================
 // TYPE EXPORTS
 // ===================================================
 export type User                 = typeof users.$inferSelect;
 export type NewUser              = typeof users.$inferInsert;
+export type AvailabilitySlot     = typeof availabilitySlots.$inferSelect;
+export type NewAvailabilitySlot  = typeof availabilitySlots.$inferInsert;
 export type Venture              = typeof ventures.$inferSelect;
 export type NewVenture           = typeof ventures.$inferInsert;
 export type ExpertProfile        = typeof expertProfiles.$inferSelect;
@@ -160,3 +226,7 @@ export type NewCreditTransaction = typeof creditTransactions.$inferInsert;
 export type InvestmentInterest   = typeof investmentInterests.$inferSelect;
 export type NewInvestmentInterest= typeof investmentInterests.$inferInsert;
 export type CreditBalance        = typeof creditBalances.$inferSelect;
+export type Notification         = typeof notifications.$inferSelect;
+export type SessionFeedback      = typeof sessionFeedback.$inferSelect;
+export type Article              = typeof articles.$inferSelect;
+export type NewArticle           = typeof articles.$inferInsert;

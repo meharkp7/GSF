@@ -1,41 +1,19 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { initTheme, toggleTheme, getStoredTheme, type Theme } from "@/lib/theme";
+import * as React from "react";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { type ThemeProviderProps } from "next-themes";
 
-interface ThemeContextValue {
-  theme: Theme;
-  toggle: () => void;
-  isDark: boolean;
-}
-
-const ThemeContext = createContext<ThemeContextValue>({
-  theme: "light",
-  toggle: () => {},
-  isDark: false,
-});
-
-export function useTheme() {
-  return useContext(ThemeContext);
-}
-
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
-
-  useEffect(() => {
-    // Initialize theme from localStorage on mount
-    const stored = initTheme();
-    setTheme(stored);
-  }, []);
-
-  function handleToggle() {
-    const next = toggleTheme();
-    setTheme(next);
-  }
-
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return (
-    <ThemeContext.Provider value={{ theme, toggle: handleToggle, isDark: theme === "dark" }}>
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="light"
+      enableSystem
+      disableTransitionOnChange
+      {...props}
+    >
       {children}
-    </ThemeContext.Provider>
+    </NextThemesProvider>
   );
 }

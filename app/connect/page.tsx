@@ -3,9 +3,12 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import { Video, MessageSquare, Calendar, Search, Star, Clock, ArrowRight, Shield, Zap, Filter } from "lucide-react";
 import EmptyState from "@/components/ui/EmptyState";
+import SkeletonCard from "@/components/ui/SkeletonCard";
 
 const EXPERTS = [
   { name: "Dr. Anika Patel",      initials: "AP", role: "Partner",               company: "Sequoia Capital India",  domain: "Fundraising & VC",     rating: 4.9, sessions: 48,  available: true,  tags: ["Fundraising", "SaaS", "EdTech"],        bg: "#EF4444" },
@@ -47,6 +50,15 @@ export default function ConnectPage() {
   const [search, setSearch]       = useState("");
   const [domain, setDomain]       = useState("All domains");
   const [availOnly, setAvailOnly] = useState(false);
+  const [loading, setLoading] = useState(true);
+  
+  const router = useRouter();
+  const { isSignedIn } = useUser();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -60,10 +72,18 @@ export default function ConnectPage() {
     });
   }, [search, domain, availOnly]);
 
+  const handleBookCall = (expert: typeof EXPERTS[0]) => {
+    if (!isSignedIn) {
+      router.push(`/sign-up?redirect=/connect?expert=${encodeURIComponent(expert.name)}`);
+      return;
+    }
+    router.push(`/booking?expert=${encodeURIComponent(expert.name)}`);
+  };
+
   return (
     <>
       <Navbar />
-      <main className="pt-24 min-h-screen bg-[#FDFAF7]">
+      <main className="pt-24 min-h-screen bg-background">
 
         {/* Hero */}
         <section className="relative section-padding overflow-hidden bg-soft-pattern">
@@ -74,17 +94,17 @@ export default function ConnectPage() {
               <Video className="size-3.5" />
               Live Video + Chat — Built for founders
             </span>
-            <h1 className="text-5xl sm:text-6xl text-[#1A2332] tracking-tight mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h1 className="text-5xl sm:text-6xl text-text-primary tracking-tight mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
               Talk to experts who&apos;ve{" "}
               <em className="not-italic text-gradient-primary">actually built it</em>
             </h1>
-            <p className="text-xl text-[#4A5668] dark:text-slate-300 max-w-2xl mx-auto mb-8">
+            <p className="text-xl text-text-secondary max-w-2xl mx-auto mb-8">
               Book 1-on-1 video calls with domain-expert advisors. Continue via direct chat. No middlemen, no gatekeeping.
             </p>
-            <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-white dark:bg-slate-800 border border-[#D2C4B4] dark:border-slate-700 shadow-soft-sm mb-12">
-              <Shield className="size-5 text-[#81A6C6]" />
-              <span className="text-sm text-[#4A5668] dark:text-slate-300">
-                <span className="text-[#1A2332] dark:text-slate-100 font-semibold">Basic plan free for 30 days</span> — full access. Then from ₹499/month.
+            <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-surface border border-border shadow-soft-sm mb-12 transition-colors">
+              <Shield className="size-5 text-primary-300" />
+              <span className="text-sm text-text-secondary">
+                <span className="text-text-primary font-semibold">Basic plan free for 30 days</span> — full access. Then from ₹499/month.
               </span>
             </div>
           </div>
@@ -92,16 +112,16 @@ export default function ConnectPage() {
 
         {/* How it works */}
         <section className="section-container pb-20">
-          <h2 className="text-2xl font-semibold text-[#1A2332] dark:text-slate-100 mb-8 text-center">How it works</h2>
+          <h2 className="text-2xl font-semibold text-text-primary mb-8 text-center">How it works</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {HOW_IT_WORKS.map(({ step, icon: Icon, title, desc }) => (
-              <div key={step} className="card p-6 relative bg-white dark:bg-slate-800">
-                <div className="text-4xl font-bold text-[#D2C4B4] dark:text-slate-700 absolute top-4 right-4 select-none" style={{ fontFamily: "'Playfair Display', serif" }}>{step}</div>
-                <div className="size-10 rounded-xl bg-[#EEF4F9] dark:bg-slate-700 border border-[#AACDDC] dark:border-slate-600 flex items-center justify-center mb-4">
-                  <Icon className="size-5 text-[#81A6C6] dark:text-blue-300" />
+              <div key={step} className="card p-6 relative bg-surface border-border">
+                <div className="text-4xl font-bold text-border absolute top-4 right-4 select-none opacity-50" style={{ fontFamily: "'Playfair Display', serif" }}>{step}</div>
+                <div className="size-10 rounded-xl bg-surface-2 border border-border-accent flex items-center justify-center mb-4">
+                  <Icon className="size-5 text-primary-400" />
                 </div>
-                <h3 className="font-semibold text-[#1A2332] dark:text-slate-100 mb-2">{title}</h3>
-                <p className="text-sm text-[#4A5668] dark:text-slate-300 leading-relaxed">{desc}</p>
+                <h3 className="font-semibold text-text-primary mb-2">{title}</h3>
+                <p className="text-sm text-text-secondary leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -151,52 +171,14 @@ export default function ConnectPage() {
               </div>
             </div>
 
-            {/* Expert grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filtered.map((expert) => (
-                <div key={expert.name} className="card p-6 card-hover flex flex-col gap-4 bg-slate-900 border-slate-800">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="size-12 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
-                        style={{ background: `linear-gradient(135deg, ${expert.bg}, ${expert.bg}bb)` }}>
-                        {expert.initials}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-slate-100 text-sm">{expert.name}</h3>
-                        <p className="text-xs text-slate-300">{expert.role}</p>
-                        <p className="text-xs font-semibold text-blue-300 mt-0.5">{expert.company}</p>
-                        <span className="badge badge-blue mt-1 text-[10px]">{expert.domain}</span>
-                      </div>
-                    </div>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${expert.available ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : "bg-slate-800 text-slate-400 border border-slate-700"}`}>
-                      {expert.available ? "● Available" : "Busy"}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-xs text-slate-400">
-                    <span className="flex items-center gap-1"><Star className="size-3 text-amber-400 fill-amber-400" />{expert.rating}</span>
-                    <span className="flex items-center gap-1"><Clock className="size-3" />{expert.sessions} sessions</span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {expert.tags.map((tag) => (
-                      <span key={tag} className="text-xs text-slate-300 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">{tag}</span>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-3 border-t border-slate-800">
-                    <Link href="/sign-up" className="flex-1 btn-primary py-2 text-sm justify-center">
-                      <Video className="size-3.5" /> Book Call
-                    </Link>
-                    <Link href="/sign-up" className="btn-outline py-2 px-3" title="Chat">
-                      <MessageSquare className="size-4" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {filtered.length === 0 && (
+            {/* Expert grid with Loading Skeleton */}
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
               <EmptyState
                 icon="📅"
                 title="No experts found"
@@ -204,16 +186,60 @@ export default function ConnectPage() {
                 primaryAction={{ label: "Browse All Experts", href: "/experts" }}
                 secondaryAction={{ label: "Join GSF", href: "/sign-up" }}
               />
-)}
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filtered.map((expert) => (
+                  <div key={expert.name} className="card p-6 card-hover flex flex-col gap-4 bg-slate-900 border-slate-800">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="size-12 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
+                          style={{ background: `linear-gradient(135deg, ${expert.bg}, ${expert.bg}bb)` }}>
+                          {expert.initials}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-slate-100 text-sm">{expert.name}</h3>
+                          <p className="text-xs text-slate-300">{expert.role}</p>
+                          <p className="text-xs font-semibold text-blue-300 mt-0.5">{expert.company}</p>
+                          <span className="badge badge-blue mt-1 text-[10px]">{expert.domain}</span>
+                        </div>
+                      </div>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${expert.available ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : "bg-slate-800 text-slate-400 border border-slate-700"}`}>
+                        {expert.available ? "● Available" : "Busy"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs text-slate-400">
+                      <span className="flex items-center gap-1"><Star className="size-3 text-amber-400 fill-amber-400" />{expert.rating}</span>
+                      <span className="flex items-center gap-1"><Clock className="size-3" />{expert.sessions} sessions</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      {expert.tags.map((tag) => (
+                        <span key={tag} className="text-xs text-slate-300 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">{tag}</span>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-3 border-t border-slate-800">
+                      <button onClick={() => handleBookCall(expert)} className="flex-1 btn-primary py-2 text-sm justify-center">
+                        <Video className="size-3.5" /> Book Call
+                      </button>
+                      <Link href="/sign-up" className="btn-outline py-2 px-3" title="Chat">
+                        <MessageSquare className="size-4" />
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
         {/* Pricing */}
         <section className="section-container py-20 text-center">
-          <h2 className="text-3xl text-[#1A2332] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-3xl text-text-primary mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
             Simple, transparent pricing
           </h2>
-          <p className="text-[#4A5668] mb-12 max-w-lg mx-auto">
+          <p className="text-text-secondary mb-12 max-w-lg mx-auto">
             Basic plan free for 30 days. Upgrade to unlock senior experts.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-4xl mx-auto">
@@ -240,23 +266,23 @@ export default function ConnectPage() {
                 highlight: false, freeBadge: false,
               },
             ].map((plan) => (
-              <div key={plan.name} className={`card p-6 flex flex-col ${plan.highlight ? "border-[#81A6C6] shadow-[0_4px_24px_rgba(129,166,198,0.18)]" : ""}`}>
+              <div key={plan.name} className={cn("card p-6 flex flex-col transition-all duration-300", plan.highlight ? "border-primary-400 shadow-blue-lg ring-1 ring-primary-400/20" : "border-border")}>
                 {plan.freeBadge && <span className="badge badge-warm text-xs mb-3 w-fit">Free first 30 days</span>}
                 {plan.highlight && <span className="badge badge-blue text-xs mb-3 w-fit">Most Popular</span>}
-                <div className="font-bold text-lg text-[#1A2332] mb-1">{plan.name}</div>
+                <div className="font-bold text-lg text-text-primary mb-1">{plan.name}</div>
                 <div className="mb-1">
-                  <span className="text-2xl font-bold text-[#1A2332]" style={{ fontFamily: "'Playfair Display', serif" }}>{plan.price}</span>
-                  <span className="text-xs text-[#8A95A3] ml-1">{plan.period}</span>
+                  <span className="text-2xl font-bold text-text-primary" style={{ fontFamily: "'Playfair Display', serif" }}>{plan.price}</span>
+                  <span className="text-xs text-text-muted ml-1">{plan.period}</span>
                 </div>
-                {plan.credits && <div className="text-xs font-medium text-[#81A6C6] mb-1">{plan.credits}</div>}
-                {plan.autoPayNote && <div className="text-[10px] text-[#8A95A3] mb-3">{plan.autoPayNote}</div>}
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4A5668] bg-[#F3E3D0] border border-[#D2C4B4] rounded-lg px-2 py-1 mb-4 w-fit">
+                {plan.credits && <div className="text-xs font-medium text-primary-400 mb-1">{plan.credits}</div>}
+                {plan.autoPayNote && <div className="text-[10px] text-text-muted mb-3">{plan.autoPayNote}</div>}
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary bg-surface-2 border border-border rounded-lg px-2 py-1 mb-4 w-fit">
                   {plan.experienceRange}
                 </div>
                 <ul className="space-y-2 flex-1 mb-6 text-left">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-xs text-[#4A5668]">
-                      <span className="size-1.5 rounded-full bg-[#81A6C6] shrink-0" />{f}
+                    <li key={f} className="flex items-center gap-2 text-xs text-text-secondary">
+                      <span className="size-1.5 rounded-full bg-primary-400 shrink-0" />{f}
                     </li>
                   ))}
                 </ul>

@@ -158,8 +158,8 @@ function CreditWallet({ credits }: { credits: number }) {
   }, [credits]);
 
   return (
-    <div className="p-5 rounded-2xl relative overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(91,108,255,0.08), rgba(79,209,197,0.06))", border: "1px solid rgba(91,108,255,0.2)" }}>
-      <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] pointer-events-none" style={{ background: "rgba(91,108,255,0.15)" }} />
+    <div className="p-5 rounded-2xl relative overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(91,108,255,0.08), rgba(79,209,197,0.06))", border: "1px solid var(--border-default)" }}>
+      <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] pointer-events-none" style={{ background: "rgba(91,108,255,0.1)" }} />
 
       <div className="flex items-center gap-4">
         {/* Spinning credit orb */}
@@ -243,7 +243,7 @@ function CommunityFeedWidget() {
       {posts.map(p => (
         <Link key={p.id} href={`/community#${p.id}`}
           className="block p-3 rounded-xl transition-all hover:scale-[1.01]"
-          style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-soft)" }}>
+          style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-default)" }}>
           <p className="text-xs font-semibold line-clamp-2 mb-1.5" style={{ color: "var(--text-primary)" }}>{p.title}</p>
           <div className="flex items-center justify-between">
             <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>{p.author}</span>
@@ -301,10 +301,10 @@ export default function FounderDashboardPage() {
         {/* Top stat cards */}
         <motion.div {...fadeUp(0.05)} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: "Stage",         value: venture?.stage ?? "Ideation", icon: Target,   color: "#06B6D4", bg: "rgba(6,182,212,0.1)" },
-            { label: "Credits Left",  value: `${credits}`,                  icon: Coins,   color: "#5B6CFF", bg: "rgba(91,108,255,0.1)" },
-            { label: "Sessions Done", value: `${sessionStats.completed}`,   icon: Calendar,color: "#10B981", bg: "rgba(16,185,129,0.1)" },
-            { label: "Upcoming",      value: `${sessionStats.pending}`,     icon: BarChart2,color:"#F59E0B", bg: "rgba(245,158,11,0.1)" },
+            { label: "Stage",         value: venture?.stage ?? "Ideation", icon: Target,   color: "#06B6D4", bg: "rgba(6,182,212,0.15)" },
+            { label: "Credits Left",  value: `${credits}`,                  icon: Coins,   color: "#5B6CFF", bg: "rgba(91,108,255,0.15)" },
+            { label: "Sessions Done", value: `${sessionStats.completed}`,   icon: Calendar,color: "#10B981", bg: "rgba(16,185,129,0.15)" },
+            { label: "Upcoming",      value: `${sessionStats.pending}`,     icon: BarChart2,color:"#F59E0B", bg: "rgba(245,158,11,0.15)" },
           ].map(({ label, value, icon: Icon, color, bg }) => (
             <div key={label} className="stat-card hover-scale">
               <div className="flex items-center gap-3">
@@ -432,7 +432,7 @@ export default function FounderDashboardPage() {
                           <div
                             key={label}
                             className="p-3 rounded-xl text-center"
-                            style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-soft)" }}
+                            style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-default)" }}
                           >
                             <Icon className="size-4 mx-auto mb-1" style={{ color: "var(--accent-indigo)" }} />
                             <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{value}</p>
@@ -450,7 +450,7 @@ export default function FounderDashboardPage() {
                         <div
                           key={label}
                           className="p-3 rounded-xl text-center"
-                          style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-soft)" }}
+                          style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-default)" }}
                         >
                           <Icon className="size-4 mx-auto mb-1" style={{ color: "var(--accent-indigo)" }} />
                           <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{value}</p>
@@ -499,7 +499,7 @@ export default function FounderDashboardPage() {
                     <div
                       key={s.id}
                       className="flex items-center gap-3 p-3 rounded-xl hover-scale cursor-pointer"
-                      style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-soft)" }}
+                      style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-default)" }}
                     >
                       <div
                         className="size-9 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
@@ -558,7 +558,7 @@ export default function FounderDashboardPage() {
             </motion.div>
 
             {/* Upcoming session */}
-            <motion.div {...fadeUp(0.2)} className="p-5 rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(91,108,255,0.1), rgba(79,209,197,0.08))", border: "1px solid rgba(91,108,255,0.2)" }}>
+            <motion.div {...fadeUp(0.2)} className="p-5 rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(91,108,255,0.08), rgba(79,209,197,0.05))", border: "1px solid var(--border-default)" }}>
               <div className="flex items-center gap-2 mb-3">
                 <Calendar className="size-4" style={{ color: "var(--accent-indigo)" }} />
                 <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Next Session</p>

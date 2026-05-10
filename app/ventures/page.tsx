@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { Lightbulb, TrendingUp, MessageSquare, Shield, Percent, Eye, Heart, Search, ArrowRight, SlidersHorizontal, BarChart2, Rocket, DollarSign, Building2, BookOpen, Loader2 } from "lucide-react";
 import EmptyState from "@/components/ui/EmptyState";
+import SkeletonCard from "@/components/ui/SkeletonCard";
 
 const AVATAR_COLORS = [
   { bg: "#DBEAFE", text: "#1E40AF" },
@@ -50,7 +51,6 @@ export default function VenturesPage() {
   const [sectorFilter, setSectorFilter] = useState("All sectors");
   const [fundingFilter, setFundingFilter] = useState("All");
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [ventures, setVentures] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [fundingActionStatus, setFundingActionStatus] = useState<Record<string, 'idle' | 'loading' | 'success' | 'error'>>({});
@@ -84,7 +84,6 @@ export default function VenturesPage() {
       });
       if (res.ok) {
         setFundingActionStatus(prev => ({ ...prev, [ventureId]: 'success' }));
-        // optimistic update
         setVentures(prev => prev.map(v => v.id === ventureId ? { ...v, interested: (v.interested || 0) + 1 } : v));
         alert("Success! Your interest has been sent to the founder.");
       } else {
@@ -103,7 +102,7 @@ export default function VenturesPage() {
 
   const filtered = ventures.filter((v) => {
     const safeName = v.name || "";
-    const safeFounder = v.founderName || "";
+    const safeFounder = v.founderName || v.founder || "";
     const safeTagline = v.tagline || "";
     const safeTags = Array.isArray(v.tags) ? v.tags : [];
     
@@ -111,9 +110,8 @@ export default function VenturesPage() {
       safeName.toLowerCase().includes(search.toLowerCase()) ||
       safeFounder.toLowerCase().includes(search.toLowerCase()) ||
       safeTagline.toLowerCase().includes(search.toLowerCase()) ||
-      safeTags.some((t: string) => t.toLowerCase().includes(search.toLowerCase()));
+      safeTags.some(t => t.toLowerCase().includes(search.toLowerCase()));
       
-    // Note: Drizzle stage maps to ideaStage in UI
     const matchIdea = ideaStageFilter === "All stages" || v.stage === ideaStageFilter;
     const matchSector = sectorFilter === "All sectors" || v.sector === sectorFilter;
     const matchFunding = fundingFilter === "All" || v.fundingStage === fundingFilter;
@@ -124,39 +122,39 @@ export default function VenturesPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-24 min-h-screen bg-[#FDFAF7] dark:bg-slate-950">
+      <main className="pt-24 min-h-screen bg-background">
 
         {/* Hero */}
-        <section className="relative section-padding overflow-hidden bg-soft-pattern">
+        <section className="relative section-padding overflow-hidden bg-background">
           <div className="absolute inset-0 bg-dot-grid opacity-25" />
           <div className="section-container relative z-10">
             <div className="max-w-3xl">
               <span className="badge badge-warm mb-6">
                 <Lightbulb className="size-3.5" /> Student Venture Marketplace
               </span>
-              <h1 className="text-5xl sm:text-6xl text-[#1A2332] dark:text-slate-100 tracking-tight mb-6"
+              <h1 className="text-5xl sm:text-6xl text-text-primary tracking-tight mb-6"
                 style={{ fontFamily: "'Playfair Display', serif" }}>
                 Fund the next big idea.{" "}
                 <em className="not-italic text-gradient-primary">Before it's big.</em>
               </h1>
-              <p className="text-xl text-[#4A5668] leading-relaxed mb-8 max-w-2xl">
+              <p className="text-xl text-text-secondary leading-relaxed mb-8 max-w-2xl">
                 Students list startup ideas at any stage — from Ideation to Product-Market Fit.
                 Venture creators fund them directly. GSF earns a transparent{" "}
-                <strong className="text-[#1A2332] dark:text-slate-100">1–2% platform fee</strong> on closed deals.
+                <strong className="text-text-primary">1–2% platform fee</strong> on closed deals.
               </p>
               <div className="flex flex-wrap gap-4 items-center">
-                <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-white border border-[#D2C4B4] shadow-soft-sm">
-                  <Percent className="size-5 text-[#81A6C6]" />
+                <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-surface dark:bg-slate-900 border border-border shadow-soft-sm">
+                  <Percent className="size-5 text-accent-primary" />
                   <div>
-                    <div className="text-xs text-[#8A95A3] uppercase tracking-wider">Platform Fee</div>
-                    <div className="text-[#1A2332] dark:text-slate-100 font-semibold text-sm">1–2% on equity deals</div>
+                    <div className="text-xs text-text-muted uppercase tracking-wider">Platform Fee</div>
+                    <div className="text-text-primary font-semibold text-sm">1–2% on equity deals</div>
                   </div>
                 </div>
-                <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-white border border-[#D2C4B4] shadow-soft-sm">
-                  <Shield className="size-5 text-[#81A6C6]" />
+                <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-surface dark:bg-slate-900 border border-border shadow-soft-sm">
+                  <Shield className="size-5 text-accent-primary" />
                   <div>
-                    <div className="text-xs text-[#8A95A3] uppercase tracking-wider">Deal Protection</div>
-                    <div className="text-[#1A2332] dark:text-slate-100 font-semibold text-sm">Escrow on all trades</div>
+                    <div className="text-xs text-text-muted uppercase tracking-wider">Deal Protection</div>
+                    <div className="text-text-primary font-semibold text-sm">Escrow on all trades</div>
                   </div>
                 </div>
                 <Link href="/ventures/list" className="btn-primary">
@@ -168,10 +166,10 @@ export default function VenturesPage() {
         </section>
 
         {/* Stage legend */}
-        <section className="border-y border-[#D2C4B4] dark:border-slate-700 bg-white dark:bg-slate-900 py-4">
+        <section className="border-y border-border bg-surface dark:bg-slate-900 py-4">
           <div className="section-container">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-semibold text-[#8A95A3] dark:text-slate-400 uppercase tracking-wider mr-2">Idea Stages:</span>
+              <span className="text-xs font-semibold text-text-muted uppercase tracking-wider mr-2">Idea Stages:</span>
               {IDEA_STAGES.map((stage) => {
                 const s = STAGE_STYLES[stage];
                 return (
@@ -194,39 +192,45 @@ export default function VenturesPage() {
         </section>
 
         {/* Filters + Grid */}
-        <section className="bg-[#F7F2EC] dark:bg-slate-950 py-12">
+        <section className="bg-canvas py-12 transition-colors">
           <div className="section-container">
             <div className="flex flex-col sm:flex-row gap-3 mb-6">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#8A95A3] dark:text-slate-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-text-muted" />
                 <input
                   id="venture-search"
                   type="text"
                   placeholder="Search by name, founder, or sector..."
-                  className="input pl-10 bg-white dark:bg-slate-900 border-[#D2C4B4] dark:border-slate-700"
+                  className="input pl-10 bg-surface dark:bg-slate-900 border-border"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
-              <select id="funding-filter" className="input sm:w-36 bg-white dark:bg-slate-900 border-[#D2C4B4] dark:border-slate-700" value={fundingFilter} onChange={(e) => setFundingFilter(e.target.value)}>
+              <select id="funding-filter" className="input sm:w-36 bg-surface dark:bg-slate-900 border-border" value={fundingFilter} onChange={(e) => setFundingFilter(e.target.value)}>
                 {FUNDING_STAGES.map((s) => <option key={s}>{s}</option>)}
               </select>
-              <select id="sector-filter" className="input sm:w-44 bg-white dark:bg-slate-900 border-[#D2C4B4] dark:border-slate-700" value={sectorFilter} onChange={(e) => setSectorFilter(e.target.value)}>
+              <select id="sector-filter" className="input sm:w-44 bg-surface dark:bg-slate-900 border-border" value={sectorFilter} onChange={(e) => setSectorFilter(e.target.value)}>
                 {SECTORS.map((s) => <option key={s}>{s}</option>)}
               </select>
             </div>
 
             {/* Result count */}
-            <p className="text-xs text-[#8A95A3] mb-4 flex items-center gap-2">
+            <p className="text-xs text-text-muted mb-4 flex items-center gap-2">
               <SlidersHorizontal className="size-3.5" />
-              Showing <span className="font-semibold text-[#1A2332] dark:text-slate-100">{filtered.length}</span> ventures
+              Showing <span className="font-semibold text-text-primary">{filtered.length}</span> ventures
               {(ideaStageFilter !== "All stages" || sectorFilter !== "All sectors" || fundingFilter !== "All" || search) && (
                 <button onClick={() => { setSearch(""); setIdeaStageFilter("All stages"); setSectorFilter("All sectors"); setFundingFilter("All"); }}
-                  className="text-[#81A6C6] hover:underline">Clear filters</button>
+                  className="text-accent-primary hover:underline">Clear filters</button>
               )}
             </p>
 
-            {filtered.length === 0 ? (
+            {loading ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
               <EmptyState
                 icon="🚀"
                 title="No ventures found"
@@ -238,33 +242,33 @@ export default function VenturesPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 {filtered.map((v) => {
                   const stageStyle = STAGE_STYLES[v.stage] || STAGE_STYLES["Ideation"];
-                  const avatarColor = v.avatarColor || AVATAR_COLORS[0];
+                  const avatarColor = AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)];
                   return (
-                    <div key={v.id} className="card card-hover p-6 flex flex-col gap-4 bg-white dark:bg-slate-800">
+                    <div key={v.id} className="card card-hover p-6 flex flex-col gap-4 bg-card">
                       {/* Header */}
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-center gap-3">
-                          <div className="size-12 rounded-full border-2 border-[#D2C4B4] flex items-center justify-center text-sm font-bold shrink-0"
+                          <div className="size-12 rounded-full border border-border flex items-center justify-center text-sm font-bold shrink-0"
                             style={{ background: avatarColor.bg, color: avatarColor.text }}>
-                            {v.initials || "FN"}
+                            {v.initials || v.name?.charAt(0) || "V"}
                           </div>
                           <div>
-                            <h2 className="font-bold text-[#1A2332] dark:text-slate-100 text-base">{v.name}</h2>
-                            <p className="text-xs text-[#8A95A3] dark:text-slate-400">by {v.founderName || "Unknown Founder"}</p>
+                            <h2 className="font-bold text-text-primary text-base">{v.name}</h2>
+                            <p className="text-xs text-text-muted">by {v.founderName || "Unknown Founder"}</p>
                             <span className={`badge mt-1 text-[10px] ${v.fundingStage === "Seed" ? "badge-blue" : "badge-warm"}`}>{v.fundingStage || "Pre-seed"}</span>
                           </div>
                         </div>
                         <span className={`text-xs px-2 py-1 rounded-full shrink-0 font-medium ${v.daysLeft <= 7 ? 'text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-300 border border-red-100 dark:border-red-500/20' : 'text-[#8A95A3] dark:text-slate-400 bg-[#F3E3D0] dark:bg-slate-700 border border-[#D2C4B4] dark:border-slate-600'}`}>
-                          {v.daysLeft || 0}d left
+                          {v.daysLeft || 30}d left
                         </span>
                       </div>
 
                       <p className="text-sm font-semibold text-[#1A2332] dark:text-slate-100 leading-snug">{v.tagline}</p>
-                      <p className="text-sm text-[#4A5668] leading-relaxed">{v.description}</p>
+                      <p className="text-sm text-[#4A5668] dark:text-slate-300 leading-relaxed">{v.description}</p>
 
-                      {/* Idea Stage — above equity */}
+                      {/* Idea Stage */}
                       <div className="flex items-center gap-2.5">
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8A95A3]">Idea Stage</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Idea Stage</span>
                         <span
                           className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border"
                           style={{ background: stageStyle.bg, color: stageStyle.text, borderColor: stageStyle.border }}
@@ -276,21 +280,21 @@ export default function VenturesPage() {
                       {/* Equity metrics */}
                       <div className="grid grid-cols-3 gap-2.5">
                         {[{ label: "Seeking", value: v.fundingGoal || "N/A" }, { label: "Equity", value: v.equity || "N/A" }, { label: "Traction", value: v.traction || "N/A" }].map(({ label, value }) => (
-                          <div key={label} className="bg-[#F7F2EC] dark:bg-slate-900 border border-[#D2C4B4] dark:border-slate-700 rounded-xl p-3">
-                            <div className="text-[10px] text-[#8A95A3] dark:text-slate-400 uppercase tracking-wider mb-1">{label}</div>
-                            <div className="text-sm font-semibold text-[#1A2332] dark:text-slate-100 truncate" title={value}>{value}</div>
+                          <div key={label} className="bg-surface-2 border border-border rounded-xl p-3">
+                            <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">{label}</div>
+                            <div className="text-sm font-semibold text-text-primary truncate" title={value}>{value}</div>
                           </div>
                         ))}
                       </div>
 
                       <div className="flex flex-wrap gap-1.5">
                         {Array.isArray(v.tags) && v.tags.map((tag: string) => (
-                          <span key={tag} className="text-xs text-[#4A5668] dark:text-slate-300 bg-[#F3E3D0] dark:bg-slate-700 border border-[#D2C4B4] dark:border-slate-600 px-2 py-0.5 rounded-full">{tag}</span>
+                          <span key={tag} className="text-xs text-text-secondary bg-surface-2 border border-border px-2 py-0.5 rounded-full">{tag}</span>
                         ))}
                       </div>
 
-                      <div className="flex items-center justify-between pt-3 border-t border-[#D2C4B4] dark:border-slate-700">
-                        <div className="flex items-center gap-4 text-xs text-[#8A95A3] dark:text-slate-400">
+                      <div className="flex items-center justify-between pt-3 border-t border-border">
+                        <div className="flex items-center gap-4 text-xs text-text-muted">
                           <span className="flex items-center gap-1.5"><Eye className="size-3.5" />{v.views || 0}</span>
                           <span className="flex items-center gap-1.5"><Heart className="size-3.5 text-red-400" />{v.interested || 0} interested</span>
                         </div>
@@ -315,14 +319,14 @@ export default function VenturesPage() {
 
         {/* CTA */}
         <section className="section-container py-20 text-center">
-          <div className="max-w-2xl mx-auto card p-10 bg-[#F3E3D0] border-[#D2C4B4]">
-            <div className="size-14 rounded-2xl bg-white border border-[#D2C4B4] flex items-center justify-center mx-auto mb-6 shadow-soft-sm">
-              <Lightbulb className="size-7 text-[#81A6C6]" />
+          <div className="max-w-2xl mx-auto card p-10 bg-canvas border-border">
+            <div className="size-14 rounded-2xl bg-surface-2 dark:bg-slate-800 border border-border flex items-center justify-center mx-auto mb-6 shadow-soft-sm">
+              <Lightbulb className="size-7 text-accent-primary" />
             </div>
-            <h2 className="text-3xl text-[#1A2332] dark:text-slate-100 mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-3xl text-text-primary mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
               Have a startup idea?
             </h2>
-            <p className="text-[#4A5668] mb-8">
+            <p className="text-text-secondary mb-8">
               List your venture on GSF at any stage — from just an idea to a growing company. GSF only earns when you do.
             </p>
             <Link href="/sign-up" className="btn-primary mx-auto text-base px-8 py-3.5">

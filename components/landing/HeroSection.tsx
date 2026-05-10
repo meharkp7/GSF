@@ -25,27 +25,33 @@ const JOURNEY_STAGES = [
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-soft-pattern">
-      <div className="section-container relative z-10 pt-24 sm:pt-28 pb-12 sm:pb-16">
-        <motion.div variants={container} initial="hidden" animate="show" className="max-w-2xl lg:max-w-3xl">
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-background transition-colors duration-300">
+      {/* Dynamic background effect */}
+      <div className="absolute inset-0 opacity-20 dark:opacity-40">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[var(--accent-indigo)] blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-[var(--accent-teal)] blur-[120px]" />
+      </div>
+
+      <div className="section-container relative z-10 pt-28 pb-16">
+        <motion.div variants={container} initial="hidden" animate="show" className="max-w-2xl">
 
           <motion.div variants={item} className="mb-8">
             <span className="badge badge-blue text-xs">
-              <span className="size-1.5 rounded-full bg-[#81A6C6]" />
+              <span className="size-1.5 rounded-full bg-[var(--accent-indigo)]" />
               Basic plan free for first 30 days · No credit card required
             </span>
           </motion.div>
 
           <motion.h1
             variants={item}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-[var(--text-primary)] leading-tight sm:leading-[1.05] mb-5 sm:mb-6 text-balance"
+            className="text-5xl sm:text-6xl lg:text-7xl text-text-primary leading-[1.1] mb-6 text-balance"
             style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 700 }}
           >
             Where Students Meet{" "}
             <em className="not-italic text-gradient-primary">Venture Creators.</em>
           </motion.h1>
 
-          <motion.p variants={item} className="text-base sm:text-lg md:text-xl text-[var(--text-secondary)] leading-relaxed max-w-xl mb-8 sm:mb-10">
+          <motion.p variants={item} className="text-lg sm:text-xl text-text-secondary leading-relaxed max-w-xl mb-10">
             Video call world-class experts, pitch your startup to investors, and build
             with a community that takes action — not just talks about it.
           </motion.p>
@@ -61,7 +67,7 @@ export function HeroSection() {
 
           {/* Journey stage selector */}
           <motion.div variants={item}>
-            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-text-muted mb-4">
               Where are you in your founder journey?
             </p>
             <div className="flex flex-wrap gap-2 sm:gap-3">
@@ -70,17 +76,17 @@ export function HeroSection() {
                 return (
                   <button
                     key={stage.label}
-                    className="group flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] hover:border-[var(--accent-blue)] hover:bg-[var(--bg-surface)] transition-all duration-150 cursor-pointer shadow-soft-sm"
+                    className="group flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-surface hover:border-[var(--accent-indigo)] hover:bg-surface-2 transition-all duration-150 cursor-pointer shadow-soft-sm"
                   >
-                    <Icon className="size-3.5 text-[var(--accent-blue)] group-hover:text-[var(--accent-indigo)]" />
-                    <span className="text-xs font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent-indigo)]">
+                    <Icon className="size-3.5 text-[var(--accent-indigo)] group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-semibold text-text-primary group-hover:text-[var(--accent-indigo)] transition-colors">
                       {stage.shortLabel}
                     </span>
                   </button>
                 );
               })}
             </div>
-            <p className="text-xs text-[var(--text-muted)] mt-3">
+            <p className="text-xs text-text-muted mt-3">
               Select your stage — we personalise your GSF experience.
             </p>
           </motion.div>
@@ -88,18 +94,18 @@ export function HeroSection() {
           {/* Stats */}
           <motion.div
             variants={item}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 pt-8 sm:pt-10 border-t border-[var(--border-default)] mt-10 sm:mt-12"
+            className="flex items-center gap-8 pt-10 border-t border-border mt-12 flex-wrap"
           >
             {[
               { value: "500+", label: "Student founders" },
               { value: "40+", label: "Expert advisors" },
               { value: "₹0", label: "For first 30 days" },
             ].map(({ value, label }) => (
-              <div key={label} className="text-center sm:text-left">
-                <div className="text-2xl font-bold text-[var(--text-primary)]">
+              <div key={label}>
+                <div className="text-2xl font-bold text-text-primary" style={{ fontFamily: "'Playfair Display', serif" }}>
                   {value}
                 </div>
-                <div className="text-xs text-[var(--text-muted)] mt-0.5 uppercase tracking-wide font-medium">{label}</div>
+                <div className="text-xs text-text-muted mt-0.5 uppercase tracking-wide font-medium">{label}</div>
               </div>
             ))}
           </motion.div>

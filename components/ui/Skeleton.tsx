@@ -10,13 +10,9 @@ function SkeletonBlock({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "animate-pulse rounded-lg bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 bg-[length:400%_100%]",
+        "animate-pulse rounded-lg bg-surface-2",
         className
       )}
-      style={{
-        animation: "shimmer 1.6s ease-in-out infinite",
-        backgroundSize: "400% 100%",
-      }}
     />
   );
 }
