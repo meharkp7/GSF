@@ -56,11 +56,11 @@ export function HeroSection() {
             with a community that takes action — not just talks about it.
           </motion.p>
 
-          <motion.div variants={item} className="flex flex-wrap items-center gap-3 mb-14">
-            <Link href="/sign-up" className="btn-primary text-base px-7 py-3.5">
+          <motion.div variants={item} className="flex flex-col sm:flex-row sm:items-center gap-3 mb-12 sm:mb-14 w-full sm:w-auto">
+            <Link href="/sign-up" className="btn-primary text-base px-7 py-3.5 w-full sm:w-auto justify-center">
               Get Started Free <ArrowRight className="size-4" />
             </Link>
-            <Link href="/ventures" className="btn-outline text-base px-7 py-3.5">
+            <Link href="/ventures" className="btn-outline text-base px-7 py-3.5 w-full sm:w-auto justify-center">
               <Lightbulb className="size-4" /> Explore Ventures
             </Link>
           </motion.div>
@@ -70,7 +70,7 @@ export function HeroSection() {
             <p className="text-xs font-semibold uppercase tracking-widest text-text-muted mb-4">
               Where are you in your founder journey?
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               {JOURNEY_STAGES.map((stage) => {
                 const Icon = stage.icon;
                 return (

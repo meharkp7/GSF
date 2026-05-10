@@ -133,14 +133,14 @@
   --bg-surface-2:   #F3EDE6;
   --bg-card:        #FFFFFF;
   --bg-sidebar:     #FFFFFF;
-  --bg-nav:         rgba(253,250,247,0.95);
+  --bg-nav: rgba(253,250,247,0.88);
 
   --border-default: #D2C4B4;
   --border-soft:    #E8DACE;
   --border-accent:  #AACDDC;
 
   --text-primary:   #1A2332;
-  --text-secondary: #4A5668;
+  --text-secondary: #374151;
   --text-muted:     #8A95A3;
   --text-inverse:   #FFFFFF;
 
@@ -193,6 +193,11 @@ html {
 }
 
 body {
+  transition:
+  background-color 0.3s ease,
+  color 0.3s ease,
+  border-color 0.3s ease,
+  box-shadow 0.3s ease;
   font-family: "Inter", system-ui, sans-serif;
   font-size: 1rem;
   line-height: 1.65;
@@ -200,6 +205,13 @@ body {
   background-color: var(--bg-base);
   min-height: 100vh;
   transition: var(--transition-theme);
+}
+* {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 h1, h2, h3 {
@@ -258,6 +270,7 @@ input, textarea, select { font-family: "Inter", system-ui, sans-serif; }
 /* ===== CARDS ===== */
 .card {
   background: var(--bg-card);
+  backdrop-filter: blur(10px);
   border-radius: 1rem;
   border: 1px solid var(--border-default);
   box-shadow: var(--shadow-card-el);
@@ -400,7 +413,7 @@ html.dark .input::placeholder {
   justify-content: center;
   gap: 0.5rem;
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   font-family: "Inter", system-ui, sans-serif;
   font-weight: 500;
   font-size: 0.9rem;
@@ -505,7 +518,11 @@ html.dark .badge-warn { color: #FBBF24; }
 
 /* ===== TEXT UTILITIES ===== */
 .text-gradient-primary {
-  background: linear-gradient(135deg, #5B6CFF, #4FD1C5);
+  background: linear-gradient(
+    135deg,
+    var(--accent-indigo),
+    var(--accent-teal)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -527,7 +544,11 @@ html.dark .badge-warn { color: #FBBF24; }
 
 /* ===== BACKGROUNDS ===== */
 .bg-soft-pattern {
-  background: linear-gradient(to bottom, var(--bg-base), var(--bg-canvas));
+  background: linear-gradient(
+    to bottom,
+    var(--bg-base),
+    #F5EFE8
+  );
 }
 
 .bg-warm-section {
@@ -539,7 +560,19 @@ html.dark .badge-warn { color: #FBBF24; }
 }
 
 .bg-dark-section {
-  background: linear-gradient(135deg, #0F1420 0%, #111827 100%);
+  background: linear-gradient(
+    135deg,
+    var(--bg-base) 0%,
+    var(--bg-canvas) 100%
+  );
+}
+
+html.dark .bg-dark-section {
+  background: linear-gradient(
+    135deg,
+    #0F1420 0%,
+    #111827 100%
+  );
 }
 
 .bg-dot-grid {
@@ -838,3 +871,56 @@ select.input {
 /* scrollbar-hide */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+html.dark button {
+  color: var(--text-primary);
+}
+
+html.dark nav,
+html.dark header,
+html.dark footer,
+html.dark aside {
+  background: var(--bg-surface);
+  border-color: var(--border-default);
+}
+html.dark .card,
+html.dark .stat-card,
+html.dark .glass-light,
+html.dark .sidebar-link,
+html.dark .sidebar-link-active {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+html.dark .btn-outline {
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+html.dark .btn-outline:hover {
+  background: rgba(91,108,255,0.12);
+}
+html.dark {
+  background-color: var(--bg-base);
+}
+
+html:not(.dark) {
+  background-color: var(--bg-base);
+}
