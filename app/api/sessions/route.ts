@@ -5,7 +5,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { sessions } from "@/lib/schema";
+import { sessions, sessionFeedback } from "@/lib/schema";
 import { eq, or, desc } from "drizzle-orm";
 import { users, notifications } from "@/lib/schema";
 import { sendEmail } from "@/lib/email";
@@ -29,7 +29,26 @@ export async function GET() {
     )
     .orderBy(desc(sessions.scheduledAt));
 
-  return NextResponse.json(rows);
+  const feedbackRows = await db
+    .select()
+    .from(sessionFeedback)
+    .where(or(eq(sessionFeedback.founderClerkId, userId), eq(sessionFeedback.expertClerkId, userId)));
+
+  const feedbackBySession = new Map(
+    feedbackRows.map((feedback) => [feedback.sessionId, feedback])
+  );
+
+  return NextResponse.json(
+    rows.map((session) => {
+      const feedback = feedbackBySession.get(session.id);
+      return {
+        ...session,
+        feedbackRating: feedback?.rating ?? null,
+        feedbackNotes: feedback?.feedback ?? null,
+        feedbackCreatedAt: feedback?.createdAt ?? null,
+      };
+    })
+  );
 }
 
 export async function POST(req: Request) {

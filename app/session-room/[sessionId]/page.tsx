@@ -14,6 +14,10 @@ type SessionData = {
   scheduledAt: string;
   meetingUrl?: string;
   recordingUrl?: string;
+  status?: string;
+  feedbackRating?: number | null;
+  feedbackNotes?: string | null;
+  feedbackCreatedAt?: string | null;
 };
 
 export default function SessionRoomPage() {
@@ -24,6 +28,7 @@ export default function SessionRoomPage() {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
+  const [markingComplete, setMarkingComplete] = useState(false);
 
   useEffect(() => {
     async function loadSession() {
@@ -52,6 +57,12 @@ export default function SessionRoomPage() {
 
     setSubmittingFeedback(true);
     try {
+      await fetch(`/api/sessions/${params.sessionId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "completed" }),
+      }).catch(() => {});
+
       const res = await fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -68,12 +79,43 @@ export default function SessionRoomPage() {
       }
 
       toast.success("Feedback submitted! Thank you for reviewing.");
+      setSession((current) => current ? {
+        ...current,
+        status: "completed",
+        feedbackRating: rating,
+        feedbackNotes: feedback,
+        feedbackCreatedAt: new Date().toISOString(),
+      } : current);
       setRating(0);
       setFeedback("");
     } catch (err: any) {
       toast.error(err.message || "Failed to submit feedback");
     } finally {
       setSubmittingFeedback(false);
+    }
+  }
+
+  async function handleMarkComplete() {
+    setMarkingComplete(true);
+    try {
+      const res = await fetch(`/api/sessions/${params.sessionId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "completed" }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to update session status");
+      }
+
+      const updated = await res.json();
+      setSession((current) => current ? { ...current, status: updated.status, feedbackRating: current.feedbackRating, feedbackNotes: current.feedbackNotes } : current);
+      toast.success("Session marked as completed");
+    } catch (err: any) {
+      toast.error(err.message || "Could not update session status");
+    } finally {
+      setMarkingComplete(false);
     }
   }
 
@@ -118,6 +160,9 @@ export default function SessionRoomPage() {
               <button onClick={() => setRecording(true)} className="btn-primary text-sm py-2 px-4 flex items-center gap-1.5">
                 <CirclePlay className="size-3.5" /> Start recording
               </button>
+              <button onClick={handleMarkComplete} disabled={markingComplete} className="btn-outline text-sm py-2 px-4">
+                {markingComplete ? "Saving…" : "Mark complete"}
+              </button>
               {session.recordingUrl && (
                 <Link href={session.recordingUrl} className="btn-outline text-sm py-2 px-4 flex items-center gap-1.5">
                   <Camera className="size-3.5" /> View recording
@@ -131,6 +176,21 @@ export default function SessionRoomPage() {
             )}
           </div>
         </div>
+
+        {session.feedbackRating ? (
+          <div className="card p-6 space-y-3">
+            <h2 className="text-lg font-semibold text-[#1A2332]" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Session outcome
+            </h2>
+            <div className="flex items-center gap-2 text-sm text-[#4A5668]">
+              <span className="badge badge-live text-xs">{session.feedbackRating}/5 stars</span>
+              {session.feedbackCreatedAt && <span>Reviewed on {new Date(session.feedbackCreatedAt).toLocaleDateString()}</span>}
+            </div>
+            {session.feedbackNotes && (
+              <p className="text-sm text-[#1A2332] leading-relaxed whitespace-pre-wrap">{session.feedbackNotes}</p>
+            )}
+          </div>
+        ) : null}
 
         {/* Feedback form */}
         <div className="card p-6 space-y-4">

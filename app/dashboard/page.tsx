@@ -435,6 +435,11 @@ export default function FounderDashboardPage() {
                     <Link href="/dashboard/experts" style={{ color: "var(--accent-indigo)" }}>Book your first expert →</Link>
                   </p>
                 ) : [...doneSessions, ...upcomingSessions].slice(0, 4).map((s) => {
+                  const session = s as typeof s & {
+                    feedbackRating?: number | null;
+                    feedbackNotes?: string | null;
+                    feedbackCreatedAt?: string | null;
+                  };
                   const initials = (s.expertName ?? "??").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
                   const dateStr  = s.scheduledAt ? new Date(s.scheduledAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
                   return (
@@ -452,6 +457,11 @@ export default function FounderDashboardPage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{s.expertName || "Expert"}</p>
                         <p className="text-xs" style={{ color: "var(--text-muted)" }}>{s.ventureName} · {dateStr} · {s.duration}min</p>
+                        {session.feedbackRating ? (
+                          <p className="text-[10px] mt-1 line-clamp-2" style={{ color: "var(--text-secondary)" }}>
+                            {session.feedbackRating}/5 stars{session.feedbackNotes ? ` · ${session.feedbackNotes}` : ""}
+                          </p>
+                        ) : null}
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <span className="text-xs font-medium" style={{ color: "var(--accent-indigo)" }}>-{s.creditsCost} cr</span>

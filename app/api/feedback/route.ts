@@ -63,6 +63,15 @@ export async function POST(req: Request) {
       })
       .returning();
 
+    await db
+      .update(sessions)
+      .set({
+        status: "completed",
+        recordingReadyAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(sessions.id, sessionId));
+
     return NextResponse.json(created, { status: 201 });
   } catch (err) {
     console.error("Failed to submit feedback", err);
