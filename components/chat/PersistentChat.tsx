@@ -265,7 +265,9 @@ export function PersistentChat({ role }: Props) {
                         <p className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{conversation.counterpartName}</p>
                         <span className="text-[10px] flex-shrink-0" style={{ color: "var(--text-muted)" }}>{new Date(conversation.updatedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
                       </div>
-                      <p className="text-[10px] truncate mb-0.5" style={{ color: "var(--text-muted)" }}>{conversation.counterpartClerkId}</p>
+                      <p className="text-[10px] truncate mb-0.5" style={{ color: "var(--text-muted)" }}>
+                        {conversation.isFounder ? "Founder" : "Investor"}
+                      </p>
                       <p className="text-[10px] truncate" style={{ color: "var(--text-secondary)" }}>{conversation.lastMessage || "No messages yet. Say hello."}</p>
                     </div>
 
