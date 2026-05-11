@@ -1,14 +1,52 @@
 # GSF — Global Society of Founders
 
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue)
+![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC)
+![License](https://img.shields.io/badge/license-MIT-green)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)
+
 > **A Society for Founders. Not Talkers.**
 
 GSF is a professional platform connecting student founders with world-class expert mentors via video call and chat, and providing an equity-based venture marketplace where students can list startup ideas and attract investors.
 
 ---
 
+## 📚 Table of Contents
+
+- [Live Platform](#-live-platform)
+- [What GSF Does](#-what-gsf-does)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [Architecture](#-architecture-route-groups--role-areas)
+- [Route Inventory](#-route-inventory-current)
+- [Environment Variables](#-environment-variables)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
+- [Repository Standards](#-repository-standards)
+- [Issue Labels](#-issue-labels)
+- [Contact](#-contact)
+
+---
+
 ## 🌐 Live Platform
 
 **URL:** [http://localhost:3000](http://localhost:3000) (development)  
+
+---
+
+## ✨ Features
+
+- 1-on-1 mentorship calls with industry experts
+- Equity-based venture marketplace
+- Founder and expert role-based dashboards
+- Secure authentication with Clerk
+- Community-driven founder ecosystem
+- Responsive and modern UI
+- Venture listing and investor interaction
+- Real-time collaboration experience
 
 ---
 
@@ -84,24 +122,60 @@ components/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or yarn
 
-### Install & Run
+Before running the project locally, ensure you have:
+
+- Node.js 18+
+- npm or yarn
+- Git installed
+
+---
+
+### 1. Fork the Repository
+
+Click the **Fork** button on GitHub to create your own copy.
+
+---
+
+### 2. Clone the Repository
 
 ```bash
-# Clone the repository
-git clone https://github.com/Ayushh-Sharmaa/GSF.git
+git clone https://github.com/your-username/GSF.git
 cd GSF/GSF
+```
 
-# Install dependencies
+---
+
+### 3. Install Dependencies
+
+```bash
 npm install
+```
 
-# Start development server
+---
+
+### 4. Configure Environment Variables
+
+Create a `.env.local` file in the root directory:
+
+```env
+NEXT_PUBLIC_API_URL=your_api_url
+```
+
+---
+
+### 5. Start Development Server
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open:
+
+http://localhost:3000
+
+---
+
 
 ### Available Scripts
 
@@ -219,9 +293,6 @@ Authorization is enforced in `middleware.ts` using Clerk session claims (JWT met
 | `/api/venture` | GET, POST | Fetch/update the founder venture |
 | `/api/ventures` | (see `app/api/ventures/**`) | Ventures CRUD + interest |
 | `/api/ventures/interest` | POST | Express interest in a venture |
-| `/api/venture` | GET, POST | Fetch/update the founder venture |
-| `/api/ventures` | (see `app/api/ventures/**`) | Ventures CRUD + interest |
-| `/api/ventures/interest` | POST | Express interest in a venture |
 | `/api/ventures/public` | GET | Public venture data |
 | `/api/webhooks/clerk` | POST | Clerk webhook receiver for sync |
 
@@ -302,6 +373,39 @@ npm run build  # Optional but recommended before PR
 
 ---
 
+## 🛡️ Repository Standards
+
+### Branch Protection
+- Direct pushes to `main` are restricted
+- All contributions must go through Pull Requests
+
+### Code Quality
+- Run lint checks before opening PR
+- Ensure project builds successfully
+
+### Pull Request Expectations
+- Keep PRs focused and meaningful
+- Link related issues
+- Add screenshots for UI changes when applicable
+
+### Review Process
+- Maintainer approval is required before merge
+
+---
+
+## 🏷️ Issue Labels
+
+| Label | Description |
+|---|---|
+| `good first issue` | Beginner-friendly issues |
+| `bug` | Something is broken |
+| `enhancement` | Feature improvements |
+| `documentation` | Documentation-related tasks |
+| `help wanted` | Community contribution requested |
+
+---
+
+
 ## 📬 Contact
 
 **Email:** hello@gsf.community  
@@ -311,3 +415,11 @@ npm run build  # Optional but recommended before PR
 ---
 
 *© 2026 Global Society of Founders. A Society for Founders — Not Talkers.*
+
+---
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
