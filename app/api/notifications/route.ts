@@ -1,13 +1,13 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { notifications } from "@/lib/schema";
 
 async function getSignedInUser() {
   const { userId } = await auth();
   if (!userId) return null;
-  const user = await clerkClient().users.getUser(userId);
+  const user = await (await clerkClient()).users.getUser(userId);
   return { userId, user };
 }
 
@@ -22,12 +22,12 @@ export async function GET(req: Request) {
     const primary = signed.user.emailAddresses?.[0]?.emailAddress;
     if (!primary) return NextResponse.json([], { status: 200 });
 
-    const rows = await db.select().from(notifications).where(eq(notifications.toEmail, primary)).orderBy(notifications.createdAt.desc);
+    const rows = await db.select().from(notifications).where(eq(notifications.toEmail, primary)).orderBy(desc(notifications.createdAt));
     return NextResponse.json(rows);
   }
 
   // public listing (admin) — return latest 50
-  const rows = await db.select().from(notifications).orderBy(notifications.createdAt.desc).limit(50);
+  const rows = await db.select().from(notifications).orderBy(desc(notifications.createdAt)).limit(50);
   return NextResponse.json(rows);
 }
 

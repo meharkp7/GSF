@@ -54,7 +54,14 @@ export const venturePayloadSchema = z.object({
   equity: equitySchema,
   fundingGoal: fundingGoalSchema,
   traction: z.string().optional().default(""),
-  tractionMetrics: tractionMetricsSchema.optional().default({}),
+  tractionMetrics: tractionMetricsSchema.default({
+    users: 0,
+    usersPrevious: 0,
+    mrr: 0,
+    mrrPrevious: 0,
+    pilots: 0,
+    growthRate: 0,
+  }),
   teamSize: teamSizeSchema,
   pitchDeckUrl: pitchDeckUrlSchema,
 });
