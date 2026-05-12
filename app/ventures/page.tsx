@@ -258,13 +258,13 @@ export default function VenturesPage() {
                             <span className={`badge mt-1 text-[10px] ${v.fundingStage === "Seed" ? "badge-blue" : "badge-warm"}`}>{v.fundingStage || "Pre-seed"}</span>
                           </div>
                         </div>
-                        <span className={`text-xs px-2 py-1 rounded-full shrink-0 font-medium ${v.daysLeft <= 7 ? 'text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-300 border border-red-100 dark:border-red-500/20' : 'text-[#8A95A3] dark:text-slate-400 bg-[#F3E3D0] dark:bg-slate-700 border border-[#D2C4B4] dark:border-slate-600'}`}>
+                        <span className={`text-[10px] px-2 py-1 rounded-full shrink-0 font-medium ${v.daysLeft <= 7 ? 'text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-300 border border-red-100 dark:border-red-500/20' : 'bg-surface-2 border border-border'}`} style={{ color: "var(--text-muted)" }}>
                           {v.daysLeft || 30}d left
                         </span>
                       </div>
 
-                      <p className="text-sm font-semibold text-[#1A2332] dark:text-slate-100 leading-snug">{v.tagline}</p>
-                      <p className="text-sm text-[#4A5668] dark:text-slate-300 leading-relaxed">{v.description}</p>
+                      <p className="text-sm font-semibold leading-snug" style={{ color: "var(--text-primary)" }}>{v.tagline}</p>
+                      <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>{v.description}</p>
 
                       {/* Idea Stage */}
                       <div className="flex items-center gap-2.5">

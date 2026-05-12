@@ -284,18 +284,18 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
             </button>
 
             {notifOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white border rounded-lg shadow-lg z-50" style={{ borderColor: "var(--border-default)" }}>
+              <div className="absolute right-0 mt-2 w-80 border rounded-lg shadow-lg z-50" style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-default)" }}>
                 <div className="p-3 border-b flex items-center justify-between" style={{ borderBottomColor: "var(--border-default)" }}>
                   <strong className="text-sm">Notifications</strong>
                   <button className="text-xs text-blue-600" onClick={async () => { await markAllRead(); await fetchNotifications(); }}>Mark all read</button>
                 </div>
                 <div className="max-h-64 overflow-y-auto">
-                  {notificationsList.length === 0 && <div className="p-3 text-sm text-muted">No notifications</div>}
+                  {notificationsList.length === 0 && <div className="p-3 text-sm" style={{ color: "var(--text-muted)" }}>No notifications</div>}
                   {notificationsList.map((n) => (
-                    <div key={n.id} onClick={async () => { await markRead(n.id); if (n.payload?.url) window.location.href = n.payload.url; }} className={`p-3 border-b hover:bg-gray-50 cursor-pointer ${n.status !== 'read' ? 'bg-white' : 'bg-gray-50'}`} style={{ borderBottomColor: 'var(--border-default)' }}>
+                    <div key={n.id} onClick={async () => { await markRead(n.id); if (n.payload?.url) window.location.href = n.payload.url; }} className={`p-3 border-b cursor-pointer transition-colors ${n.status !== 'read' ? 'hover:brightness-95' : 'brightness-90'}`} style={{ backgroundColor: n.status !== 'read' ? 'var(--bg-surface)' : 'var(--bg-surface-2)', borderBottomColor: 'var(--border-default)' }}>
                       <div className="flex items-center justify-between">
                         <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{n.type}</div>
-                        <div className="text-[10px] text-muted">{new Date(n.createdAt).toLocaleString()}</div>
+                        <div className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{new Date(n.createdAt).toLocaleString()}</div>
                       </div>
                       <div className="text-xs text-[12px] mt-1" style={{ color: 'var(--text-muted)' }}>{n.payload?.message ?? JSON.stringify(n.payload ?? {})}</div>
                     </div>

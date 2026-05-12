@@ -139,9 +139,9 @@
   --border-soft:    #E8DACE;
   --border-accent:  #AACDDC;
 
-  --text-primary:   #1A2332;
+  --text-primary:   #111827;
   --text-secondary: #374151;
-  --text-muted:     #8A95A3;
+  --text-muted:     #64748B;
   --text-inverse:   #FFFFFF;
 
   --accent-primary: #81A6C6;
@@ -170,8 +170,8 @@ html.dark {
   --border-accent:  #334155; /* Dark grey for secondary accents */
 
   --text-primary:   #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted:     #64748B;
+  --text-secondary: #CBD5E1;
+  --text-muted:     #94A3B8;
   --text-inverse:   #05070A;
 
   --accent-primary: #5B6CFF;
