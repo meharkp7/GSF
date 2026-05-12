@@ -14,20 +14,20 @@ GSF is a professional platform connecting student founders with world-class expe
 
 ## 📚 Table of Contents
 
-- [Live Platform](#-live-platform)
-- [What GSF Does](#-what-gsf-does)
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
-- [Getting Started](#-getting-started)
-- [Architecture](#-architecture-route-groups--role-areas)
-- [Route Inventory](#-route-inventory-current)
-- [Environment Variables](#-environment-variables)
-- [Deployment](#-deployment)
-- [Contributing](#-contributing)
-- [Repository Standards](#-repository-standards)
-- [Issue Labels](#-issue-labels)
-- [Contact](#-contact)
+- [Live Platform](#live-platform)
+- [What GSF Does](#what-gsf-does)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Architecture](#architecture-route-groups--role-areas)
+- [Route Inventory](#route-inventory-current)
+- [Environment Variables](#environment-variables)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [Repository Standards](#repository-standards)
+- [Issue Labels](#issue-labels)
+- [Contact](#contact)
 
 ---
 
@@ -140,8 +140,8 @@ Click the **Fork** button on GitHub to create your own copy.
 ### 2. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/GSF.git
-cd GSF/GSF
+git clone https://github.com/KGFCH2/GSF.git
+cd GSF
 ```
 
 ---
@@ -410,7 +410,7 @@ npm run build  # Optional but recommended before PR
 
 **Email:** hello@gsf.community  
 **Website:** gsf.community  
-**GitHub:** [Ayushh-Sharmaa/GSF](https://github.com/Ayushh-Sharmaa/GSF)
+**GitHub:** [KGFCH2/GSF](https://github.com/KGFCH2/GSF)
 
 ---
 
