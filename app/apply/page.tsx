@@ -9,8 +9,10 @@ import Step2 from "@/components/apply/Step2";
 import Step3 from "@/components/apply/Step3";
 import Step4 from "@/components/apply/Step4";
 import { CheckCircle, Users, Lightbulb, Clock } from "lucide-react";
+import type { ApplicationFormData } from "@/types";
 
 const STEPS = ["Personal Info", "Education", "Startup Idea", "Review & Submit"];
+
 
 const PERKS = [
   { icon: CheckCircle, text: "Full platform access — Connect + Ventures" },
@@ -21,30 +23,61 @@ const PERKS = [
 
 export default function ApplyPage() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState<ApplicationFormData>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    university: "",
+    role: "",
+    idea: undefined,
+  });
+
 
   // Load saved progress from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("applyFormData");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setFormData(parsed);
+    if (!saved) return;
+
+    const parsed = JSON.parse(saved) as Partial<ApplicationFormData> & {
+      currentStep?: number;
+    };
+
+    // Defer state update to avoid react lint cascading-render warning.
+    queueMicrotask(() => {
+      setFormData({
+        firstName: parsed.firstName ?? "",
+        lastName: parsed.lastName ?? "",
+        email: parsed.email ?? "",
+        university: parsed.university ?? "",
+        role: parsed.role ?? "",
+        idea: parsed.idea,
+      });
+
       if (parsed.currentStep) setCurrentStep(parsed.currentStep);
-    }
+    });
   }, []);
 
+
   // Save progress to localStorage
-  const saveProgress = (data: any, step: number) => {
-    const newData = { ...formData, ...data, currentStep: step };
+  const saveProgress = (data: Partial<ApplicationFormData>, step: number) => {
+    const newData: ApplicationFormData = { ...formData, ...data };
     setFormData(newData);
-    localStorage.setItem("applyFormData", JSON.stringify(newData));
+
+    // Persist the full form plus currentStep for resume.
+    localStorage.setItem(
+      "applyFormData",
+      JSON.stringify({ ...newData, currentStep: step })
+    );
   };
 
-  const nextStep = (data: any) => {
-    saveProgress(data, currentStep + 1);
-    setCurrentStep(prev => prev + 1);
+  const nextStep = (data: Partial<ApplicationFormData>) => {
+    const next = currentStep + 1;
+    saveProgress(data, next);
+    setCurrentStep(next);
     window.scrollTo(0, 0);
   };
+
+
 
   const prevStep = () => {
     setCurrentStep(prev => prev - 1);
@@ -99,8 +132,9 @@ export default function ApplyPage() {
                 </div>
                 <div className="card card-warm p-5">
                   <p className="text-sm text-[#4A5668] italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    "I applied on a Tuesday and had my first expert call by Thursday. GSF moved faster than I expected."
+                    I applied on a Tuesday and had my first expert call by Thursday. GSF moved faster than I expected.
                   </p>
+
                   <div className="flex items-center gap-2 mt-3">
                     <div className="size-8 rounded-full bg-[#EEF4F9] border border-[#AACDDC] flex items-center justify-center text-xs font-bold text-[#3D74A0]">PS</div>
                     <div>

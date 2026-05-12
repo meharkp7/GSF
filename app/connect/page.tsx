@@ -9,6 +9,8 @@ import { useUser } from "@clerk/nextjs";
 import { Video, MessageSquare, Calendar, Search, Star, Clock, ArrowRight, Shield, Zap, Filter } from "lucide-react";
 import EmptyState from "@/components/ui/EmptyState";
 import SkeletonCard from "@/components/ui/SkeletonCard";
+import { cn } from "@/lib/utils";
+
 
 const EXPERTS = [
   { name: "Dr. Anika Patel",      initials: "AP", role: "Partner",               company: "Sequoia Capital India",  domain: "Fundraising & VC",     rating: 4.9, sessions: 48,  available: true,  tags: ["Fundraising", "SaaS", "EdTech"],        bg: "#EF4444" },

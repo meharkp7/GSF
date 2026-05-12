@@ -3,10 +3,13 @@
 import { ArrowLeft } from "lucide-react";
 import { showSuccess, showError } from "@/utils/toast";
 
+import type { ApplicationFormData } from "@/types";
+
 interface Step4Props {
-  formData: any;
+  formData: ApplicationFormData;
   onPrev: () => void;
 }
+
 
 export default function Step4({ formData, onPrev }: Step4Props) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

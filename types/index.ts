@@ -12,6 +12,17 @@ export interface User {
   createdAt: Date;
 }
 
+// Application form data (multi-step apply flow)
+export type ApplicationFormData = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  university: string;
+  role: string;
+  idea?: string;
+};
+
+
 // Idea status/stage
 export type IdeaStatus = "draft" | "validating" | "validated" | "archived";
 export type IdeaStage = "problem" | "persona" | "validation" | "pitch";

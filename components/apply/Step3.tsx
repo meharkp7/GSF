@@ -2,11 +2,14 @@
 
 import { ArrowRight, ArrowLeft } from "lucide-react";
 
+import type { ApplicationFormData } from "@/types";
+
 interface Step3Props {
-  formData: any;
-  onNext: (data: any) => void;
+  formData: ApplicationFormData;
+  onNext: (data: Partial<ApplicationFormData>) => void;
   onPrev: () => void;
 }
+
 
 export default function Step3({ formData, onNext, onPrev }: Step3Props) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
