@@ -133,14 +133,14 @@
   --bg-surface-2:   #F3EDE6;
   --bg-card:        #FFFFFF;
   --bg-sidebar:     #FFFFFF;
-  --bg-nav:         rgba(253,250,247,0.95);
+  --bg-nav: rgba(253,250,247,0.88);
 
   --border-default: #D2C4B4;
   --border-soft:    #E8DACE;
   --border-accent:  #AACDDC;
 
   --text-primary:   #1A2332;
-  --text-secondary: #4A5668;
+  --text-secondary: #374151;
   --text-muted:     #8A95A3;
   --text-inverse:   #FFFFFF;
 
@@ -157,30 +157,30 @@
 
 /* ===== DARK MODE OVERRIDES ===== */
 html.dark {
-  --bg-base:        #0B0F19;
-  --bg-canvas:      #0F1420;
-  --bg-surface:     #111827;
-  --bg-surface-2:   #1A2235;
-  --bg-card:        #111827;
-  --bg-sidebar:     #0F1420;
-  --bg-nav:         rgba(11,15,25,0.95);
+  --bg-base:        #05070A;
+  --bg-canvas:      #0A0D14;
+  --bg-surface:     #0F172A;
+  --bg-surface-2:   #1E293B;
+  --bg-card:        #0F172A;
+  --bg-sidebar:     #0A0D14;
+  --bg-nav:         rgba(5, 7, 10, 0.8);
 
-  --border-default: #1F2D45;
-  --border-soft:    #162030;
-  --border-accent:  #5B6CFF;
+  --border-default: #1E293B;
+  --border-soft:    #0F172A;
+  --border-accent:  #334155; /* Dark grey for secondary accents */
 
-  --text-primary:   #E5E7EB;
-  --text-secondary: #9CA3AF;
-  --text-muted:     #6B7280;
-  --text-inverse:   #0B0F19;
+  --text-primary:   #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted:     #64748B;
+  --text-inverse:   #05070A;
 
   --accent-primary: #5B6CFF;
-  --accent-dark:    #8499FF;
-  --accent-indigo:  #5B6CFF;
-  --accent-teal:    #4FD1C5;
+  --accent-dark:    #475569; /* Dark grey accent */
+  --accent-indigo:  #6366F1;
+  --accent-teal:    #2DD4BF;
 
-  --shadow-nav:     0 2px 24px rgba(0,0,0,0.4);
-  --shadow-card-el: 0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
+  --shadow-nav:     0 4px 24px rgba(0,0,0,0.6);
+  --shadow-card-el: 0 4px 20px rgba(0,0,0,0.4);
 }
 
 /* ===== BASE ===== */
@@ -193,6 +193,11 @@ html {
 }
 
 body {
+  transition:
+  background-color 0.3s ease,
+  color 0.3s ease,
+  border-color 0.3s ease,
+  box-shadow 0.3s ease;
   font-family: "Inter", system-ui, sans-serif;
   font-size: 1rem;
   line-height: 1.65;
@@ -200,6 +205,13 @@ body {
   background-color: var(--bg-base);
   min-height: 100vh;
   transition: var(--transition-theme);
+}
+* {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 h1, h2, h3 {
@@ -258,6 +270,7 @@ input, textarea, select { font-family: "Inter", system-ui, sans-serif; }
 /* ===== CARDS ===== */
 .card {
   background: var(--bg-card);
+  backdrop-filter: blur(10px);
   border-radius: 1rem;
   border: 1px solid var(--border-default);
   box-shadow: var(--shadow-card-el);
@@ -326,6 +339,12 @@ input, textarea, select { font-family: "Inter", system-ui, sans-serif; }
   font-family: "Inter", system-ui, sans-serif;
 }
 
+html.dark .input {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
 /* Allow Tailwind pl-* / pr-* on .input elements to override the defaults above.
    Generate explicit rules for every pl/pr value used in the codebase. */
 .input.pl-3  { padding-left: 0.75rem !important; }
@@ -345,6 +364,11 @@ input, textarea, select { font-family: "Inter", system-ui, sans-serif; }
   box-shadow: 0 0 0 3px rgba(91,108,255,0.15);
 }
 .input option { background: var(--bg-surface); color: var(--text-primary); }
+html.dark .input option { background: var(--bg-surface); color: var(--text-primary); }
+
+html.dark .input::placeholder {
+  color: var(--text-muted);
+}
 .textarea { min-height: 120px; resize: vertical; }
 
 /* ===== BUTTONS ===== */
@@ -389,7 +413,7 @@ input, textarea, select { font-family: "Inter", system-ui, sans-serif; }
   justify-content: center;
   gap: 0.5rem;
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   font-family: "Inter", system-ui, sans-serif;
   font-weight: 500;
   font-size: 0.9rem;
@@ -494,7 +518,11 @@ html.dark .badge-warn { color: #FBBF24; }
 
 /* ===== TEXT UTILITIES ===== */
 .text-gradient-primary {
-  background: linear-gradient(135deg, #5B6CFF, #4FD1C5);
+  background: linear-gradient(
+    135deg,
+    var(--accent-indigo),
+    var(--accent-teal)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -516,19 +544,11 @@ html.dark .badge-warn { color: #FBBF24; }
 
 /* ===== BACKGROUNDS ===== */
 .bg-soft-pattern {
-  background-color: var(--bg-base);
-  background-image:
-    radial-gradient(circle at 20% 50%, rgba(91,108,255,0.06) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(79,209,197,0.06) 0%, transparent 40%),
-    radial-gradient(circle at 60% 80%, rgba(129,166,198,0.08) 0%, transparent 40%);
-}
-
-html.dark .bg-soft-pattern {
-  background-color: var(--bg-base);
-  background-image:
-    radial-gradient(circle at 20% 50%, rgba(91,108,255,0.12) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(79,209,197,0.08) 0%, transparent 40%),
-    radial-gradient(circle at 60% 80%, rgba(91,108,255,0.06) 0%, transparent 40%);
+  background: linear-gradient(
+    to bottom,
+    var(--bg-base),
+    #F5EFE8
+  );
 }
 
 .bg-warm-section {
@@ -540,12 +560,23 @@ html.dark .bg-soft-pattern {
 }
 
 .bg-dark-section {
-  background: linear-gradient(135deg, #0F1420 0%, #111827 100%);
+  background: linear-gradient(
+    135deg,
+    var(--bg-base) 0%,
+    var(--bg-canvas) 100%
+  );
+}
+
+html.dark .bg-dark-section {
+  background: linear-gradient(
+    135deg,
+    #0F1420 0%,
+    #111827 100%
+  );
 }
 
 .bg-dot-grid {
-  background-image: radial-gradient(circle, var(--border-default) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background-color: var(--bg-base);
 }
 
 /* ===== GLASSMORPHISM ===== */
@@ -840,3 +871,56 @@ select.input {
 /* scrollbar-hide */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+html.dark button {
+  color: var(--text-primary);
+}
+
+html.dark nav,
+html.dark header,
+html.dark footer,
+html.dark aside {
+  background: var(--bg-surface);
+  border-color: var(--border-default);
+}
+html.dark .card,
+html.dark .stat-card,
+html.dark .glass-light,
+html.dark .sidebar-link,
+html.dark .sidebar-link-active {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+html.dark .btn-outline {
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+html.dark .btn-outline:hover {
+  background: rgba(91,108,255,0.12);
+}
+html.dark {
+  background-color: var(--bg-base);
+}
+
+html:not(.dark) {
+  background-color: var(--bg-base);
+}

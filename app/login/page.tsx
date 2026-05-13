@@ -102,17 +102,12 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center pt-6 pb-12 px-4"
-      style={{ backgroundColor: "var(--bg-base)" }}>
-      {/* Background blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full blur-[120px] opacity-30" style={{ background: "radial-gradient(circle, #5B6CFF, transparent)" }} />
-        <div className="absolute bottom-1/4 left-1/4 w-72 h-72 rounded-full blur-[90px] opacity-20" style={{ background: "radial-gradient(circle, #4FD1C5, transparent)" }} />
-      </div>
+      style={{ background: "linear-gradient(to bottom, var(--bg-base), var(--bg-canvas))" }}>
 
       <div className="relative z-10 w-full max-w-md">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="size-14 rounded-2xl overflow-hidden border-2 mb-4 shadow-[0_0_30px_rgba(91,108,255,0.3)]" style={{ borderColor: "rgba(91,108,255,0.4)" }}>
+          <div className="size-14 rounded-2xl overflow-hidden border-2 mb-4" style={{ borderColor: "rgba(91,108,255,0.4)" }}>
             <Image src="/gsf-logo.jpeg" alt="GSF" width={56} height={56} className="object-cover w-full h-full" />
           </div>
           <h1 className="text-2xl font-bold" style={{ fontFamily: "'Playfair Display', serif", color: "var(--text-primary)" }}>

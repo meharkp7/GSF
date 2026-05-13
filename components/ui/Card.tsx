@@ -17,9 +17,9 @@ const paddingStyles = {
 };
 
 const variantStyles = {
-  default: "bg-white border border-border shadow-card",
-  elevated: "bg-white border border-border shadow-soft-md",
-  bordered: "bg-white border-2 border-border",
+  default: "bg-surface border border-border shadow-card",
+  elevated: "bg-surface border border-border shadow-soft-md",
+  bordered: "bg-surface border-2 border-border",
   ghost: "bg-canvas border border-border",
 };
 

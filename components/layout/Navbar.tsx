@@ -5,11 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Video, Lightbulb, Users, BookOpen, Rocket, Zap, LogOut, LayoutDashboard, Sparkles } from "lucide-react";
+import { Menu, X, Video, Lightbulb, Users, BookOpen, Rocket, Zap, LogOut, LayoutDashboard, Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { clerkUserToAuthUser } from "@/lib/auth";
-import { NotificationBell } from "@/components/ui/NotificationBell";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 const NAV_LINKS = [
   { label: "Discover",  href: "/discover",  icon: Sparkles },
@@ -25,6 +25,7 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const router   = useRouter();
+
 
   // Clerk auth state
   const { user: clerkUser, isSignedIn, isLoaded } = useUser();
@@ -46,7 +47,7 @@ export function Navbar() {
 
   const navBg = scrolled
     ? "backdrop-blur-md border-b shadow-[var(--shadow-nav)]"
-    : "bg-transparent border-b border-transparent";
+    : "border-b";
 
   // Determine dashboard link based on role stored in Clerk metadata
   const dashboardHref = user?.role === "expert" ? "/expert-dashboard" : "/dashboard";
@@ -58,7 +59,7 @@ export function Navbar() {
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
           navBg
         )}
-        style={scrolled ? { backgroundColor: "var(--bg-nav)", borderBottomColor: "var(--border-default)" } : {}}
+        style={{ backgroundColor: "var(--bg-nav)", borderBottomColor: "var(--border-default)" }}
       >
         <div className="section-container">
           <div className="flex items-center justify-between h-16">
@@ -93,8 +94,8 @@ export function Navbar() {
                   className={cn(
                     "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
                     pathname === link.href
-                      ? "text-[var(--accent-indigo)] bg-[rgba(91,108,255,0.1)] border border-[rgba(91,108,255,0.2)]"
-                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
+                      ? "text-primary-500 dark:text-primary-400 bg-primary-500/10 dark:bg-primary-500/20 border border-primary-500/20 dark:border-primary-500/30 shadow-[0_0_12px_rgba(91,108,255,0.1)]"
+                      : "text-text-secondary hover:text-text-primary hover:bg-surface-2 transition-all duration-200"
                   )}
                 >
                   <link.icon className="size-3.5" />
@@ -158,6 +159,8 @@ export function Navbar() {
                   </Link>
                 </>
               )}
+              
+              <ThemeToggle />
             </div>
 
             {/* Mobile header additions */}
@@ -231,6 +234,10 @@ export function Navbar() {
                     </Link>
                   </>
                 )}
+                
+                <div className="flex justify-center pt-2">
+                  <ThemeToggle />
+                </div>
               </div>
             </div>
           </motion.div>

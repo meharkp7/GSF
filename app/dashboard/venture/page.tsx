@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useVenture } from "@/lib/hooks/useVenture";
-import { Lightbulb, Edit3, TrendingUp, Users, DollarSign, Save, Plus, Trash2 } from "lucide-react";
+import { Lightbulb, Edit3, TrendingUp, TrendingDown, Users, DollarSign, Save, Plus } from "lucide-react";
+import { venturePayloadSchema, type VentureFieldErrors } from "@/lib/validators/venture";
 
 const STAGES  = ["Ideation", "Screening", "Research", "MVP", "Funding", "Launch", "PMF"];
 const SECTORS = ["EdTech", "FinTech", "HealthTech", "AgriTech", "ClimaTech", "SaaS", "Consumer", "DeepTech", "Other"];
@@ -19,10 +20,39 @@ interface FormState {
   name: string; tagline: string; description: string; stage: string;
   sector: string; equity: string; fundingGoal: string; traction: string;
   teamSize: string; pitchDeckUrl: string;
+  tractionMetrics: {
+    users: string;
+    usersPrevious: string;
+    mrr: string;
+    mrrPrevious: string;
+    pilots: string;
+    growthRate: string;
+  };
+}
+
+function toMetricString(value: unknown): string {
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  if (typeof value === "string" && value.trim().length > 0) return value;
+  return "0";
+}
+
+function resolveTractionMetrics(raw: unknown): FormState["tractionMetrics"] {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return { users: "0", usersPrevious: "0", mrr: "0", mrrPrevious: "0", pilots: "0", growthRate: "0" };
+  }
+  const metrics = raw as Record<string, unknown>;
+  return {
+    users: toMetricString(metrics.users),
+    usersPrevious: toMetricString(metrics.usersPrevious),
+    mrr: toMetricString(metrics.mrr),
+    mrrPrevious: toMetricString(metrics.mrrPrevious),
+    pilots: toMetricString(metrics.pilots),
+    growthRate: toMetricString(metrics.growthRate),
+  };
 }
 
 export default function MyVenturePage() {
-  const { venture, loading, saving, updateVenture } = useVenture();
+  const { venture, loading, saving, updateVenture, fieldErrors, setFieldErrors } = useVenture();
   const [editing, setEditing] = useState(false);
   const [saved,   setSaved]   = useState(false);
 
@@ -30,6 +60,7 @@ export default function MyVenturePage() {
     name: "", tagline: "", description: "", stage: "Ideation",
     sector: "EdTech", equity: "0", fundingGoal: "0",
     traction: "", teamSize: "1", pitchDeckUrl: "",
+    tractionMetrics: { users: "0", usersPrevious: "0", mrr: "0", mrrPrevious: "0", pilots: "0", growthRate: "0" },
   });
 
   // Sync when venture data loads
@@ -46,12 +77,13 @@ export default function MyVenturePage() {
         traction:    venture.traction ?? "",
         teamSize:    String(venture.teamSize ?? 1),
         pitchDeckUrl: venture.pitchDeckUrl ?? "",
+        tractionMetrics: resolveTractionMetrics(venture.tractionMetrics),
       });
     }
   }, [venture]);
 
   async function handleSave() {
-    const ok = await updateVenture({
+    const payload = {
       name:        form.name,
       tagline:     form.tagline,
       description: form.description,
@@ -60,9 +92,26 @@ export default function MyVenturePage() {
       equity:      form.equity,
       fundingGoal: form.fundingGoal,
       traction:    form.traction,
+      tractionMetrics: {
+        users: Number(form.tractionMetrics.users) || 0,
+        usersPrevious: Number(form.tractionMetrics.usersPrevious) || 0,
+        mrr: Number(form.tractionMetrics.mrr) || 0,
+        mrrPrevious: Number(form.tractionMetrics.mrrPrevious) || 0,
+        pilots: Number(form.tractionMetrics.pilots) || 0,
+        growthRate: Number(form.tractionMetrics.growthRate) || 0,
+      },
       teamSize:    parseInt(form.teamSize) || 1,
       pitchDeckUrl: form.pitchDeckUrl || null,
-    });
+    };
+
+    const parsed = venturePayloadSchema.safeParse(payload);
+    if (!parsed.success) {
+      setFieldErrors(parsed.error.flatten().fieldErrors as VentureFieldErrors);
+      return;
+    }
+
+    setFieldErrors({});
+    const ok = await updateVenture(parsed.data);
     if (ok) {
       setSaved(true);
       setEditing(false);
@@ -70,8 +119,37 @@ export default function MyVenturePage() {
     }
   }
 
+  function getFieldError(name: keyof VentureFieldErrors) {
+    return fieldErrors[name]?.[0];
+  }
+
+  function handleFieldChange(key: keyof FormState, value: string) {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    if (fieldErrors[key as keyof VentureFieldErrors]) {
+      setFieldErrors((prev) => ({ ...prev, [key]: undefined }));
+    }
+  }
+
+  function handleMetricChange(key: keyof FormState["tractionMetrics"], value: string) {
+    setForm((prev) => ({
+      ...prev,
+      tractionMetrics: { ...prev.tractionMetrics, [key]: value },
+    }));
+    if (fieldErrors.tractionMetrics) {
+      setFieldErrors((prev) => ({ ...prev, tractionMetrics: undefined }));
+    }
+  }
+
   const stageIndex  = STAGES.indexOf(form.stage);
   const stageColors = ["#8B5CF6","#3B82F6","#06B6D4","#10B981","#F59E0B","#EF4444","#5B6CFF"];
+  const usersNow = Number(form.tractionMetrics.users) || 0;
+  const usersPrev = Number(form.tractionMetrics.usersPrevious) || 0;
+  const mrrNow = Number(form.tractionMetrics.mrr) || 0;
+  const mrrPrev = Number(form.tractionMetrics.mrrPrevious) || 0;
+  const pilots = Number(form.tractionMetrics.pilots) || 0;
+  const growthRate = Number(form.tractionMetrics.growthRate) || 0;
+  const usersDelta = usersNow - usersPrev;
+  const mrrDelta = mrrNow - mrrPrev;
 
   if (loading) {
     return (
@@ -174,8 +252,12 @@ export default function MyVenturePage() {
               <div key={key}>
                 <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>{label}</label>
                 {editing ? (
-                  <input type={type} className="input" value={(form as unknown as Record<string, string>)[key]}
-                    onChange={e => setForm({ ...form, [key]: e.target.value })} />
+                  <input
+                    type={type}
+                    className="input"
+                    value={(form as unknown as Record<string, string>)[key]}
+                    onChange={e => handleFieldChange(key as keyof FormState, e.target.value)}
+                  />
                 ) : (
                   <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
                     {(form as unknown as Record<string, string>)[key] || <span style={{ color: "var(--text-muted)" }}>Not set</span>}
@@ -183,11 +265,14 @@ export default function MyVenturePage() {
                 )}
               </div>
             ))}
+            {getFieldError("name") && (
+              <p className="text-xs text-red-500">{getFieldError("name")}</p>
+            )}
             <div>
               <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Description</label>
               {editing ? (
                 <textarea className="input textarea" value={form.description}
-                  onChange={e => setForm({ ...form, description: e.target.value })} />
+                  onChange={e => handleFieldChange("description", e.target.value)} />
               ) : (
                 <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>{form.description || "—"}</p>
               )}
@@ -196,7 +281,7 @@ export default function MyVenturePage() {
               <div>
                 <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Sector</label>
                 {editing ? (
-                  <select className="input" value={form.sector} onChange={e => setForm({ ...form, sector: e.target.value })}>
+                  <select className="input" value={form.sector} onChange={e => handleFieldChange("sector", e.target.value)}>
                     {SECTORS.map(s => <option key={s}>{s}</option>)}
                   </select>
                 ) : (
@@ -207,9 +292,12 @@ export default function MyVenturePage() {
                 <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Team Size</label>
                 {editing ? (
                   <input type="number" className="input" value={form.teamSize}
-                    onChange={e => setForm({ ...form, teamSize: e.target.value })} />
+                    onChange={e => handleFieldChange("teamSize", e.target.value)} />
                 ) : (
                   <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{form.teamSize} founders</p>
+                )}
+                {editing && getFieldError("teamSize") && (
+                  <p className="text-xs text-red-500 mt-1">{getFieldError("teamSize")}</p>
                 )}
               </div>
             </div>
@@ -228,22 +316,28 @@ export default function MyVenturePage() {
                 <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Equity Offered (%)</label>
                 {editing ? (
                   <input type="number" className="input" value={form.equity}
-                    onChange={e => setForm({ ...form, equity: e.target.value })} />
+                    onChange={e => handleFieldChange("equity", e.target.value)} />
                 ) : (
                   <p className="text-3xl font-extrabold" style={{ color: "var(--accent-indigo)", fontFamily: "'Playfair Display', serif" }}>
                     {form.equity}%
                   </p>
+                )}
+                {editing && getFieldError("equity") && (
+                  <p className="text-xs text-red-500 mt-1">{getFieldError("equity")}</p>
                 )}
               </div>
               <div>
                 <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Funding Goal (USD)</label>
                 {editing ? (
                   <input type="number" className="input" value={form.fundingGoal}
-                    onChange={e => setForm({ ...form, fundingGoal: e.target.value })} />
+                    onChange={e => handleFieldChange("fundingGoal", e.target.value)} />
                 ) : (
                   <p className="text-3xl font-extrabold" style={{ color: "#10B981", fontFamily: "'Playfair Display', serif" }}>
                     ${Number(form.fundingGoal).toLocaleString()}
                   </p>
+                )}
+                {editing && getFieldError("fundingGoal") && (
+                  <p className="text-xs text-red-500 mt-1">{getFieldError("fundingGoal")}</p>
                 )}
               </div>
             </div>
@@ -251,7 +345,7 @@ export default function MyVenturePage() {
               <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Traction / Milestones</label>
               {editing ? (
                 <textarea className="input" style={{ minHeight: 80 }} value={form.traction}
-                  onChange={e => setForm({ ...form, traction: e.target.value })} />
+                  onChange={e => handleFieldChange("traction", e.target.value)} />
               ) : (
                 <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>{form.traction || "—"}</p>
               )}
@@ -260,17 +354,20 @@ export default function MyVenturePage() {
               <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Pitch Deck URL (optional)</label>
               {editing ? (
                 <input type="url" className="input" placeholder="https://your-deck.com" value={form.pitchDeckUrl}
-                  onChange={e => setForm({ ...form, pitchDeckUrl: e.target.value })} />
+                  onChange={e => handleFieldChange("pitchDeckUrl", e.target.value)} />
               ) : (
                 <p className="text-sm" style={{ color: form.pitchDeckUrl ? "var(--accent-indigo)" : "var(--text-muted)" }}>
                   {form.pitchDeckUrl || "Not added yet"}
                 </p>
               )}
+              {editing && getFieldError("pitchDeckUrl") && (
+                <p className="text-xs text-red-500 mt-1">{getFieldError("pitchDeckUrl")}</p>
+              )}
             </div>
           </motion.div>
         </div>
 
-        {/* Traction metrics — static for now, editable in future */}
+        {/* Traction metrics */}
         <motion.div {...fadeUp(0.2)} className="card p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -280,7 +377,64 @@ export default function MyVenturePage() {
               <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Traction Summary</h2>
             </div>
           </div>
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{form.traction || "Add your traction details above to appear here."}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+            <div className="rounded-xl p-4" style={{ backgroundColor: "var(--bg-surface-2)" }}>
+              <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>Users</p>
+              <p className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>{usersNow.toLocaleString()}</p>
+              <p className="text-xs mt-1 flex items-center gap-1" style={{ color: usersDelta >= 0 ? "#10B981" : "#EF4444" }}>
+                {usersDelta >= 0 ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}
+                {usersDelta >= 0 ? "+" : ""}{usersDelta.toLocaleString()} vs previous
+              </p>
+            </div>
+            <div className="rounded-xl p-4" style={{ backgroundColor: "var(--bg-surface-2)" }}>
+              <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>MRR (USD)</p>
+              <p className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>${mrrNow.toLocaleString()}</p>
+              <p className="text-xs mt-1 flex items-center gap-1" style={{ color: mrrDelta >= 0 ? "#10B981" : "#EF4444" }}>
+                {mrrDelta >= 0 ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}
+                {mrrDelta >= 0 ? "+" : ""}${mrrDelta.toLocaleString()} vs previous
+              </p>
+            </div>
+            <div className="rounded-xl p-4" style={{ backgroundColor: "var(--bg-surface-2)" }}>
+              <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>Active Pilots</p>
+              <p className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>{pilots.toLocaleString()}</p>
+              <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Pilot partnerships running</p>
+            </div>
+            <div className="rounded-xl p-4" style={{ backgroundColor: "var(--bg-surface-2)" }}>
+              <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>Growth Rate</p>
+              <p className="text-2xl font-bold" style={{ color: growthRate >= 0 ? "#10B981" : "#EF4444" }}>
+                {growthRate >= 0 ? "+" : ""}{growthRate.toFixed(1)}%
+              </p>
+              <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Month-over-month</p>
+            </div>
+          </div>
+          {editing && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+              {[
+                { label: "Users", key: "users" },
+                { label: "Previous Users", key: "usersPrevious" },
+                { label: "MRR (USD)", key: "mrr" },
+                { label: "Previous MRR (USD)", key: "mrrPrevious" },
+                { label: "Pilots", key: "pilots" },
+                { label: "Growth Rate (%)", key: "growthRate" },
+              ].map(({ label, key }) => (
+                <div key={key}>
+                  <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>{label}</label>
+                  <input
+                    type="number"
+                    className="input"
+                    value={form.tractionMetrics[key as keyof FormState["tractionMetrics"]]}
+                    onChange={(e) => handleMetricChange(key as keyof FormState["tractionMetrics"], e.target.value)}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          {getFieldError("tractionMetrics") && (
+            <p className="text-xs text-red-500 mb-2">{getFieldError("tractionMetrics")}</p>
+          )}
+          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+            {form.traction || "Add qualitative traction details in the Traction / Milestones field above."}
+          </p>
         </motion.div>
 
         {/* Team */}

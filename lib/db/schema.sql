@@ -37,6 +37,59 @@ CREATE TABLE users (
 );
 
 -- ============================================================
+-- AVAILABILITY SLOTS TABLE
+-- ============================================================
+
+CREATE TABLE availability_slots (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  expert_clerk_id   VARCHAR(255) NOT NULL,
+  expert_name       VARCHAR(255) NOT NULL,
+  start_at          TIMESTAMPTZ NOT NULL,
+  end_at            TIMESTAMPTZ NOT NULL,
+  timezone          VARCHAR(100) DEFAULT 'Asia/Kolkata',
+  notes             TEXT DEFAULT '',
+  is_booked         BOOLEAN DEFAULT FALSE,
+  booked_by_clerk_id VARCHAR(255),
+  booked_session_id UUID,
+  created_at        TIMESTAMPTZ DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- NOTIFICATIONS TABLE (email log)
+-- ============================================================
+
+CREATE TABLE notifications (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id    UUID,
+  to_email      VARCHAR(255) NOT NULL,
+  type          VARCHAR(100) NOT NULL, -- booking_confirmation | reminder | recording_ready
+  status        VARCHAR(50) NOT NULL DEFAULT 'pending',
+  payload       JSONB DEFAULT '{}',
+  sent_at       TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_notifications_session ON notifications(session_id);
+
+-- ============================================================
+-- SESSION FEEDBACK TABLE (ratings & reviews)
+-- ============================================================
+
+CREATE TABLE session_feedback (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id        UUID NOT NULL,
+  founder_clerk_id  VARCHAR(255) NOT NULL,
+  expert_clerk_id   VARCHAR(255) NOT NULL,
+  rating            INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  feedback          TEXT,
+  created_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_session_feedback_session ON session_feedback(session_id);
+CREATE INDEX idx_session_feedback_expert ON session_feedback(expert_clerk_id);
+
+-- ============================================================
 -- COHORTS TABLE
 -- ============================================================
 
@@ -115,6 +168,8 @@ CREATE TABLE sessions (
   status         session_status NOT NULL DEFAULT 'scheduled',
   notes          TEXT,
   meeting_url    TEXT,
+  recording_url  TEXT,
+  recording_ready_at TIMESTAMPTZ,
   created_at     TIMESTAMPTZ DEFAULT NOW(),
   updated_at     TIMESTAMPTZ DEFAULT NOW()
 );
@@ -171,6 +226,8 @@ CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_clerk_id ON users(clerk_id);
 CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_users_cohort ON users(cohort_id);
+CREATE INDEX idx_availability_expert ON availability_slots(expert_clerk_id, start_at);
+CREATE INDEX idx_availability_future ON availability_slots(is_booked, start_at);
 CREATE INDEX idx_ideas_user ON ideas(user_id);
 CREATE INDEX idx_ideas_status ON ideas(status);
 CREATE INDEX idx_sessions_expert ON sessions(expert_id);
@@ -178,6 +235,68 @@ CREATE INDEX idx_sessions_student ON sessions(student_id);
 CREATE INDEX idx_sessions_scheduled ON sessions(scheduled_at);
 CREATE INDEX idx_modules_cohort ON modules(cohort_id, order_index);
 CREATE INDEX idx_progress_user ON student_progress(user_id);
+
+-- ============================================================
+-- ARTICLES TABLE (insights publishing)
+-- ============================================================
+
+CREATE TABLE articles (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  author_clerk_id VARCHAR(255) NOT NULL,
+  author_name     VARCHAR(255) NOT NULL,
+  title           VARCHAR(500) NOT NULL,
+  category        VARCHAR(100) NOT NULL,
+  body            TEXT NOT NULL,
+  status          VARCHAR(50) NOT NULL DEFAULT 'draft', -- draft | published
+  published_at    TIMESTAMPTZ,
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_articles_status ON articles(status);
+CREATE INDEX idx_articles_author ON articles(author_clerk_id);
+CREATE INDEX idx_articles_published ON articles(published_at DESC);
+
+-- ============================================================
+-- CONVERSATIONS TABLE (cross-role messaging)
+-- ============================================================
+
+CREATE TABLE conversations (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  founder_clerk_id VARCHAR(255) NOT NULL,
+  expert_clerk_id VARCHAR(255) NOT NULL,
+  founder_name    VARCHAR(255) NOT NULL,
+  expert_name     VARCHAR(255) NOT NULL,
+  founder_avatar_url TEXT,
+  expert_avatar_url  TEXT,
+  last_message    TEXT,
+  last_message_by VARCHAR(255),
+  founder_unread  INT DEFAULT 0,
+  expert_unread   INT DEFAULT 0,
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(founder_clerk_id, expert_clerk_id)
+);
+
+CREATE INDEX idx_conversations_founder ON conversations(founder_clerk_id, updated_at DESC);
+CREATE INDEX idx_conversations_expert ON conversations(expert_clerk_id, updated_at DESC);
+
+-- ============================================================
+-- MESSAGES TABLE
+-- ============================================================
+
+CREATE TABLE messages (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+  sender_clerk_id VARCHAR(255) NOT NULL,
+  sender_name     VARCHAR(255) NOT NULL,
+  body            TEXT NOT NULL,
+  read_at         TIMESTAMPTZ,
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_messages_conversation ON messages(conversation_id, created_at DESC);
+CREATE INDEX idx_messages_sender ON messages(sender_clerk_id);
 
 -- ============================================================
 -- UPDATED_AT TRIGGER
@@ -194,6 +313,9 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER users_updated_at BEFORE UPDATE ON users
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+CREATE TRIGGER availability_slots_updated_at BEFORE UPDATE ON availability_slots
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
 CREATE TRIGGER cohorts_updated_at BEFORE UPDATE ON cohorts
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
@@ -206,52 +328,8 @@ CREATE TRIGGER experts_updated_at BEFORE UPDATE ON experts
 CREATE TRIGGER sessions_updated_at BEFORE UPDATE ON sessions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
--- ============================================================
--- NOTIFICATIONS TABLE
--- ============================================================
+CREATE TRIGGER articles_updated_at BEFORE UPDATE ON articles
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-CREATE TABLE notifications (
-  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  clerk_user_id VARCHAR(255) NOT NULL,
-  type          VARCHAR(50) NOT NULL DEFAULT 'system',
-  title         VARCHAR(500) NOT NULL,
-  message       TEXT NOT NULL,
-  is_read       BOOLEAN DEFAULT FALSE,
-  created_at    TIMESTAMPTZ DEFAULT NOW()
-);
-
--- ============================================================
--- MESSAGES TABLE
--- ============================================================
-
-CREATE TABLE messages (
-  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  sender_id     VARCHAR(255) NOT NULL,
-  receiver_id   VARCHAR(255) NOT NULL,
-  text          TEXT NOT NULL,
-  is_read       BOOLEAN DEFAULT FALSE,
-  created_at    TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX idx_notifications_user ON notifications(clerk_user_id);
-CREATE INDEX idx_messages_sender ON messages(sender_id);
-CREATE INDEX idx_messages_receiver ON messages(receiver_id);
-
--- ============================================================
--- MATCHMAKING & DISCOVERY FEED UPDATES
--- ============================================================
-
-ALTER TABLE ventures ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';
-ALTER TABLE expert_profiles ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';
-
-CREATE TABLE feed_interactions (
-  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  clerk_user_id VARCHAR(255) NOT NULL,
-  target_id     VARCHAR(255) NOT NULL,
-  action        VARCHAR(50) NOT NULL,
-  created_at    TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX idx_feed_interactions_user ON feed_interactions(clerk_user_id);
-
-
+CREATE TRIGGER conversations_updated_at BEFORE UPDATE ON conversations
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();

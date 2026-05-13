@@ -158,8 +158,8 @@ function CreditWallet({ credits }: { credits: number }) {
   }, [credits]);
 
   return (
-    <div className="p-5 rounded-2xl relative overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(91,108,255,0.08), rgba(79,209,197,0.06))", border: "1px solid rgba(91,108,255,0.2)" }}>
-      <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] pointer-events-none" style={{ background: "rgba(91,108,255,0.15)" }} />
+    <div className="p-5 rounded-2xl relative overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(91,108,255,0.08), rgba(79,209,197,0.06))", border: "1px solid var(--border-default)" }}>
+      <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-[50px] pointer-events-none" style={{ background: "rgba(91,108,255,0.1)" }} />
 
       <div className="flex items-center gap-4">
         {/* Spinning credit orb */}
@@ -243,7 +243,7 @@ function CommunityFeedWidget() {
       {posts.map(p => (
         <Link key={p.id} href={`/community#${p.id}`}
           className="block p-3 rounded-xl transition-all hover:scale-[1.01]"
-          style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-soft)" }}>
+          style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-default)" }}>
           <p className="text-xs font-semibold line-clamp-2 mb-1.5" style={{ color: "var(--text-primary)" }}>{p.title}</p>
           <div className="flex items-center justify-between">
             <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>{p.author}</span>
@@ -301,10 +301,10 @@ export default function FounderDashboardPage() {
         {/* Top stat cards */}
         <motion.div {...fadeUp(0.05)} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: "Stage",         value: venture?.stage ?? "Ideation", icon: Target,   color: "#06B6D4", bg: "rgba(6,182,212,0.1)" },
-            { label: "Credits Left",  value: `${credits}`,                  icon: Coins,   color: "#5B6CFF", bg: "rgba(91,108,255,0.1)" },
-            { label: "Sessions Done", value: `${sessionStats.completed}`,   icon: Calendar,color: "#10B981", bg: "rgba(16,185,129,0.1)" },
-            { label: "Upcoming",      value: `${sessionStats.pending}`,     icon: BarChart2,color:"#F59E0B", bg: "rgba(245,158,11,0.1)" },
+            { label: "Stage",         value: venture?.stage ?? "Ideation", icon: Target,   color: "#06B6D4", bg: "rgba(6,182,212,0.15)" },
+            { label: "Credits Left",  value: `${credits}`,                  icon: Coins,   color: "#5B6CFF", bg: "rgba(91,108,255,0.15)" },
+            { label: "Sessions Done", value: `${sessionStats.completed}`,   icon: Calendar,color: "#10B981", bg: "rgba(16,185,129,0.15)" },
+            { label: "Upcoming",      value: `${sessionStats.pending}`,     icon: BarChart2,color:"#F59E0B", bg: "rgba(245,158,11,0.15)" },
           ].map(({ label, value, icon: Icon, color, bg }) => (
             <div key={label} className="stat-card hover-scale">
               <div className="flex items-center gap-3">
@@ -384,22 +384,80 @@ export default function FounderDashboardPage() {
 
                   {/* Financial terms */}
                   <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { label: "Equity Offered", value: venture.equity   ? `${venture.equity}%`  : "—", icon: TrendingUp },
-                      { label: "Funding Goal",   value: venture.fundingGoal ? `$${Number(venture.fundingGoal).toLocaleString()}` : "—", icon: Coins },
-                      { label: "Traction",       value: venture.traction || "—", icon: Zap },
-                      { label: "Team Size",      value: venture.teamSize  ? `${venture.teamSize} founder${venture.teamSize !== 1 ? "s" : ""}` : "—", icon: Users },
-                    ].map(({ label, value, icon: Icon }) => (
-                      <div
-                        key={label}
-                        className="p-3 rounded-xl text-center"
-                        style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-soft)" }}
-                      >
-                        <Icon className="size-4 mx-auto mb-1" style={{ color: "var(--accent-indigo)" }} />
-                        <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{value}</p>
-                        <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{label}</p>
-                      </div>
-                    ))}
+                    {(() => {
+                      const tm = (venture as any)?.tractionMetrics;
+                      const hasStructured = tm && typeof tm === "object" && !Array.isArray(tm);
+
+                      if (hasStructured) {
+                        const usersNow = Number((tm as any).users) || 0;
+                        const usersPrev = Number((tm as any).usersPrevious) || 0;
+                        const mrrNow = Number((tm as any).mrr) || 0;
+                        const mrrPrev = Number((tm as any).mrrPrevious) || 0;
+                        const pilots = Number((tm as any).pilots) || 0;
+                        const growthRate = Number((tm as any).growthRate) || 0;
+
+                        const usersDelta = usersNow - usersPrev;
+                        const mrrDelta = mrrNow - mrrPrev;
+
+                        return [
+                          {
+                            label: "Users",
+                            value: usersNow.toLocaleString(),
+                            icon: Users,
+                            sub: usersDelta === 0 ? "" : `${usersDelta >= 0 ? "+" : ""}${usersDelta.toLocaleString()} vs previous`,
+                            subColor: usersDelta >= 0 ? "#10B981" : "#EF4444",
+                          },
+                          {
+                            label: "MRR (USD)",
+                            value: `$${mrrNow.toLocaleString()}`,
+                            icon: Coins,
+                            sub: mrrDelta === 0 ? "" : `${mrrDelta >= 0 ? "+" : ""}${mrrDelta.toLocaleString()} vs previous`,
+                            subColor: mrrDelta >= 0 ? "#10B981" : "#EF4444",
+                          },
+                          {
+                            label: "Active Pilots",
+                            value: pilots.toLocaleString(),
+                            icon: Zap,
+                            sub: "Pilot partnerships running",
+                            subColor: "var(--text-muted)",
+                          },
+                          {
+                            label: "Growth Rate",
+                            value: `${growthRate.toFixed(1)}%`,
+                            icon: TrendingUp,
+                            sub: "Month-over-month",
+                            subColor: "var(--text-muted)",
+                          },
+                        ].map(({ label, value, icon: Icon, sub, subColor }) => (
+                          <div
+                            key={label}
+                            className="p-3 rounded-xl text-center"
+                            style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-default)" }}
+                          >
+                            <Icon className="size-4 mx-auto mb-1" style={{ color: "var(--accent-indigo)" }} />
+                            <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{value}</p>
+                            <p className="text-[10px]" style={{ color: subColor }}>{sub || "—"}</p>
+                          </div>
+                        ));
+                      }
+
+                      return [
+                        { label: "Equity Offered", value: venture.equity   ? `${venture.equity}%`  : "—", icon: TrendingUp },
+                        { label: "Funding Goal",   value: venture.fundingGoal ? `$${Number(venture.fundingGoal).toLocaleString()}` : "—", icon: Coins },
+                        { label: "Traction",       value: venture.traction || "—", icon: Zap },
+                        { label: "Team Size",      value: venture.teamSize  ? `${venture.teamSize} founder${venture.teamSize !== 1 ? "s" : ""}` : "—", icon: Users },
+                      ].map(({ label, value, icon: Icon }) => (
+                        <div
+                          key={label}
+                          className="p-3 rounded-xl text-center"
+                          style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-default)" }}
+                        >
+                          <Icon className="size-4 mx-auto mb-1" style={{ color: "var(--accent-indigo)" }} />
+                          <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{value}</p>
+                          <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{label}</p>
+                        </div>
+                      ));
+                    })()}
                   </div>
                 </div>
               )}
@@ -435,13 +493,18 @@ export default function FounderDashboardPage() {
                     <Link href="/dashboard/experts" style={{ color: "var(--accent-indigo)" }}>Book your first expert →</Link>
                   </p>
                 ) : [...doneSessions, ...upcomingSessions].slice(0, 4).map((s) => {
+                  const session = s as typeof s & {
+                    feedbackRating?: number | null;
+                    feedbackNotes?: string | null;
+                    feedbackCreatedAt?: string | null;
+                  };
                   const initials = (s.expertName ?? "??").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
                   const dateStr  = s.scheduledAt ? new Date(s.scheduledAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
                   return (
                     <div
                       key={s.id}
                       className="flex items-center gap-3 p-3 rounded-xl hover-scale cursor-pointer"
-                      style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-soft)" }}
+                      style={{ backgroundColor: "var(--bg-surface-2)", border: "1px solid var(--border-default)" }}
                     >
                       <div
                         className="size-9 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
@@ -452,6 +515,11 @@ export default function FounderDashboardPage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{s.expertName || "Expert"}</p>
                         <p className="text-xs" style={{ color: "var(--text-muted)" }}>{s.ventureName} · {dateStr} · {s.duration}min</p>
+                        {session.feedbackRating ? (
+                          <p className="text-[10px] mt-1 line-clamp-2" style={{ color: "var(--text-secondary)" }}>
+                            {session.feedbackRating}/5 stars{session.feedbackNotes ? ` · ${session.feedbackNotes}` : ""}
+                          </p>
+                        ) : null}
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <span className="text-xs font-medium" style={{ color: "var(--accent-indigo)" }}>-{s.creditsCost} cr</span>
@@ -500,7 +568,7 @@ export default function FounderDashboardPage() {
             </motion.div>
 
             {/* Upcoming session */}
-            <motion.div {...fadeUp(0.2)} className="p-5 rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(91,108,255,0.1), rgba(79,209,197,0.08))", border: "1px solid rgba(91,108,255,0.2)" }}>
+            <motion.div {...fadeUp(0.2)} className="p-5 rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(91,108,255,0.08), rgba(79,209,197,0.05))", border: "1px solid var(--border-default)" }}>
               <div className="flex items-center gap-2 mb-3">
                 <Calendar className="size-4" style={{ color: "var(--accent-indigo)" }} />
                 <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Next Session</p>

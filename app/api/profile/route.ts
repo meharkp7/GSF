@@ -4,10 +4,12 @@
 
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { errorResponse, parseJsonBody, withRouteErrorHandling } from "@/lib/api/route-helpers";
+import { profilePatchSchema } from "@/lib/validators/api-routes";
 
 export async function GET() {
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return errorResponse(401, "Unauthorized", { code: "UNAUTHORIZED" });
 
   const clerk = await clerkClient();
   const user = await clerk.users.getUser(userId);
@@ -30,11 +32,11 @@ export async function GET() {
   });
 }
 
-export async function PATCH(req: Request) {
+export const PATCH = withRouteErrorHandling(async (req: Request) => {
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId) return errorResponse(401, "Unauthorized", { code: "UNAUTHORIZED" });
 
-  const body = await req.json();
+  const body = await parseJsonBody(req, profilePatchSchema);
   const { bio, university, year, location, linkedin, website, name } = body;
 
   const clerk = await clerkClient();
@@ -63,4 +65,4 @@ export async function PATCH(req: Request) {
   });
 
   return NextResponse.json({ ok: true });
-}
+});

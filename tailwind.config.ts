@@ -1,6 +1,5 @@
-import type { Config } from "tailwindcss";
-
-const config: Config = {
+const config = {
+  darkMode: 'class',
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -36,15 +35,22 @@ const config: Config = {
           800: "#0E534B",
           900: "#073330",
         },
-        background: "#FAFAFA",
-        canvas: "#F5F7FB",
-        surface: "#FFFFFF",
-        border: "#E5E7EB",
+        background: "var(--bg-base)",
+        canvas: "var(--bg-canvas)",
+        surface: {
+          DEFAULT: "var(--bg-surface)",
+          2: "var(--bg-surface-2)",
+        },
+        border: {
+          DEFAULT: "var(--border-default)",
+          soft: "var(--border-soft)",
+          accent: "var(--border-accent)",
+        },
         text: {
-          primary: "#111827",
-          secondary: "#6B7280",
-          muted: "#9CA3AF",
-          inverse: "#FFFFFF",
+          primary: "var(--text-primary)",
+          secondary: "var(--text-secondary)",
+          muted: "var(--text-muted)",
+          inverse: "var(--text-inverse)",
         },
       },
       fontFamily: {

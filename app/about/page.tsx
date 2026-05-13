@@ -75,7 +75,7 @@ export default function AboutPage() {
         </section>
 
         {/* Mission */}
-        <section className="bg-white border-y border-[#D2C4B4]">
+        <section className="bg-white dark:bg-slate-900 border-y border-[#D2C4B4] dark:border-slate-700">
           <div className="section-container py-20">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <div>

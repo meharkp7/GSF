@@ -271,7 +271,9 @@ export default function ExpertDashboardPage() {
               </div>
 
               <div className="space-y-3">
-                {RECENT_SESSIONS.map(({ founder, venture, date, duration, status, earned: e, avatar }) => (
+                {RECENT_SESSIONS.map((session: any) => {
+                  const { founder, venture, date, duration, status, earned: e, avatar, feedbackRating, feedbackNotes } = session;
+                  return (
                   <div
                     key={founder}
                     className="flex items-center gap-3 p-3 rounded-xl hover-scale"
@@ -286,6 +288,11 @@ export default function ExpertDashboardPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{founder}</p>
                       <p className="text-xs" style={{ color: "var(--text-muted)" }}>{venture} · {date} · {duration}min</p>
+                      {feedbackRating ? (
+                        <p className="text-[10px] mt-1 line-clamp-2" style={{ color: "var(--text-secondary)" }}>
+                          {feedbackRating}/5 stars{feedbackNotes ? ` · ${feedbackNotes}` : ""}
+                        </p>
+                      ) : null}
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {status === "completed" && (
@@ -303,7 +310,8 @@ export default function ExpertDashboardPage() {
                       </span>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </motion.div>
           </div>
