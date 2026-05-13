@@ -7,6 +7,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Video, MessageSquare, Calendar, Search, Star, Clock, ArrowRight, Shield, Zap, Filter } from "lucide-react";
+import { cn } from "@/lib/utils";
 import EmptyState from "@/components/ui/EmptyState";
 import SkeletonCard from "@/components/ui/SkeletonCard";
 import { cn } from "@/lib/utils";

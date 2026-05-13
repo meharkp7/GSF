@@ -110,7 +110,7 @@ export default function VenturesPage() {
       safeName.toLowerCase().includes(search.toLowerCase()) ||
       safeFounder.toLowerCase().includes(search.toLowerCase()) ||
       safeTagline.toLowerCase().includes(search.toLowerCase()) ||
-      safeTags.some(t => t.toLowerCase().includes(search.toLowerCase()));
+      safeTags.some((t: string) => t.toLowerCase().includes(search.toLowerCase()));
       
     const matchIdea = ideaStageFilter === "All stages" || v.stage === ideaStageFilter;
     const matchSector = sectorFilter === "All sectors" || v.sector === sectorFilter;
