@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { clerkUserToAuthUser } from "@/lib/auth";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { NotificationBell } from "@/components/ui/NotificationBell";
 
 const NAV_LINKS = [
   { label: "Discover",  href: "/discover",  icon: Sparkles },
@@ -35,11 +36,10 @@ const NAV_LINKS = [
 ];
 
 export function Navbar() {
-  const [scrolled, setScrolled]     = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
-  const router   = useRouter();
-
+  const router = useRouter();
 
   // Clerk auth state
   const { user: clerkUser, isSignedIn, isLoaded } = useUser();
@@ -121,7 +121,6 @@ export function Navbar() {
             {/* Desktop CTA */}
             <div className="hidden lg:flex items-center gap-2">
               {!isLoaded ? (
-                // Loading skeleton
                 <div className="size-8 rounded-full animate-pulse" style={{ backgroundColor: "var(--bg-surface-2)" }} />
               ) : isSignedIn && user ? (
                 <>
@@ -133,7 +132,6 @@ export function Navbar() {
                     <LayoutDashboard className="size-3.5" />
                     Dashboard
                   </Link>
-                  {/* Avatar — shows profile image from Clerk if available */}
                   {clerkUser?.imageUrl ? (
                     <Image
                       src={clerkUser.imageUrl}
