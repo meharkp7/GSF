@@ -36,6 +36,7 @@ export const expertProfilePatchSchema = z
 export const sessionsPostSchema = z
   .object({
     expertClerkId: z.string().trim().min(1, "expertClerkId is required"),
+    slotId: z.string().uuid("slotId must be a valid UUID").optional(),
     scheduledAt: z.string().refine((value) => !Number.isNaN(Date.parse(value)), "scheduledAt must be a valid ISO date"),
     duration: z.number().int().min(1).max(480).optional().default(30),
     creditsCost: z.number().int().min(1).max(10000).optional().default(100),

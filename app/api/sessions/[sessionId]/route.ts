@@ -99,18 +99,33 @@ export async function PATCH(req: Request, context: { params: Promise<{ sessionId
 
   const body = await req.json().catch(() => ({}));
   const status = typeof body.status === "string" ? body.status : null;
+  const scheduledAt = body.scheduledAt ? new Date(body.scheduledAt) : null;
 
-  if (!status || !["pending", "confirmed", "completed", "cancelled"].includes(status)) {
-    return NextResponse.json({ error: "status is required and must be valid" }, { status: 400 });
+  if (!status && !scheduledAt) {
+    return NextResponse.json({ error: "Either status or scheduledAt must be provided" }, { status: 400 });
+  }
+
+  if (status && !["pending", "confirmed", "completed", "cancelled"].includes(status)) {
+    return NextResponse.json({ error: "status must be valid" }, { status: 400 });
+  }
+
+  if (scheduledAt && scheduledAt <= new Date()) {
+    return NextResponse.json({ error: "scheduledAt must be in the future" }, { status: 400 });
   }
 
   const updates: Record<string, unknown> = {
-    status,
     updatedAt: new Date(),
   };
 
-  if (status === "completed") {
-    updates.recordingReadyAt = new Date();
+  if (status) {
+    updates.status = status;
+    if (status === "completed") {
+      updates.recordingReadyAt = new Date();
+    }
+  }
+
+  if (scheduledAt) {
+    updates.scheduledAt = scheduledAt;
   }
 
   const [updated] = await db
