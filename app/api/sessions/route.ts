@@ -6,8 +6,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sessions, sessionFeedback } from "@/lib/schema";
-import { eq, or, desc } from "drizzle-orm";
-import { users, notifications } from "@/lib/schema";
+import { eq, or, desc, and } from "drizzle-orm";
+import { users, notifications, availabilitySlots } from "@/lib/schema";
 import { sendEmail } from "@/lib/email";
 import {
   deductCredits,
@@ -63,7 +63,7 @@ export const POST = withRouteErrorHandling(async (req: Request) => {
   if (!userId) return errorResponse(401, "Unauthorized", { code: "UNAUTHORIZED" });
 
   const body = await parseJsonBody(req, sessionsPostSchema);
-  const { expertClerkId, scheduledAt, duration, creditsCost, creditsEarned } = body;
+  const { expertClerkId, slotId, scheduledAt, duration, creditsCost, creditsEarned } = body;
 
   if (new Date(scheduledAt) <= new Date()) {
     throw new ApiRouteError(400, "scheduledAt must be in the future", {
@@ -81,6 +81,24 @@ export const POST = withRouteErrorHandling(async (req: Request) => {
   const cost = creditsCost;
   const earned = creditsEarned;
   const dur = duration;
+
+  // ── Step 0: Check if slot is available (if slotId provided) ────────────
+  if (slotId) {
+    const [slot] = await db
+      .select()
+      .from(availabilitySlots)
+      .where(
+        and(
+          eq(availabilitySlots.id, slotId),
+          eq(availabilitySlots.isBooked, false)
+        )
+      )
+      .limit(1);
+
+    if (!slot) {
+      return errorResponse(409, "Slot is already booked or does not exist", { code: "SLOT_NOT_AVAILABLE" });
+    }
+  }
 
   // ── Step 1: Insert the session row (status = "pending") ─────────────────
   // We insert first so we have a session ID to attach to the credit transaction.
@@ -139,6 +157,26 @@ export const POST = withRouteErrorHandling(async (req: Request) => {
     }
 
     return errorResponse(500, "Credit deduction failed. Please try again.", { code: "CREDIT_DEDUCTION_FAILED" });
+  }
+
+  // ── Step 3: Mark slot as booked (if slotId provided) ───────────────────
+  if (slotId) {
+    try {
+      await db
+        .update(availabilitySlots)
+        .set({
+          isBooked: true,
+          bookedByClerkId: userId,
+          bookedSessionId: created.id,
+          updatedAt: new Date(),
+        })
+        .where(eq(availabilitySlots.id, slotId));
+    } catch (err) {
+      console.error("Failed to mark slot as booked:", err);
+      // We don't roll back the session because credits are already deducted.
+      // The expert can still see the session, but the slot might remain "unbooked" in the UI.
+      // This is a rare edge case.
+    }
   }
 
   // ── Send confirmation emails (non-blocking)
