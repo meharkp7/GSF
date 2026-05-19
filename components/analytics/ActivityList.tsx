@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Heart, Clock } from "lucide-react";
+import { Eye, Heart } from "lucide-react";
 
 interface Activity {
   id: string;
