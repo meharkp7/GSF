@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sessionFeedback, sessions } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { awardSessionCompletionCredits } from "@/lib/credits-server";
 
 export async function POST(req: Request) {
   const { userId } = await auth();
@@ -55,13 +56,15 @@ export async function POST(req: Request) {
     const [created] = await db
       .insert(sessionFeedback)
       .values({
-        sessionId: sessionId as any,
+        sessionId,
         founderClerkId: userId,
         expertClerkId: session.expertClerkId,
         rating,
         feedback: feedback || "",
       })
       .returning();
+
+    const wasAlreadyCompleted = session.status === "completed";
 
     await db
       .update(sessions)
@@ -71,6 +74,18 @@ export async function POST(req: Request) {
         updatedAt: new Date(),
       })
       .where(eq(sessions.id, sessionId));
+
+    if (!wasAlreadyCompleted) {
+      try {
+        await awardSessionCompletionCredits(
+          sessionId,
+          session.expertClerkId,
+          session.creditsEarned,
+        );
+      } catch (err) {
+        console.error("Failed to award expert credits for session", sessionId, err);
+      }
+    }
 
     return NextResponse.json(created, { status: 201 });
   } catch (err) {
@@ -92,7 +107,7 @@ export async function GET(req: Request) {
     const rows = await db
       .select()
       .from(sessionFeedback)
-      .where(eq(sessionFeedback.sessionId, sessionId as any));
+      .where(eq(sessionFeedback.sessionId, sessionId));
     return NextResponse.json(rows);
   }
 

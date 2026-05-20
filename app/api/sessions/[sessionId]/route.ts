@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sessions, sessionFeedback } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { awardSessionCompletionCredits } from "@/lib/credits-server";
 
 const DEMO_SESSIONS: Record<string, Record<string, unknown>> = {
   "demo-1": {
@@ -62,7 +63,7 @@ export async function GET(_: Request, context: { params: Promise<{ sessionId: st
   const [feedback] = await db
     .select()
     .from(sessionFeedback)
-    .where(eq(sessionFeedback.sessionId, sessionId as any))
+    .where(eq(sessionFeedback.sessionId, sessionId))
     .limit(1);
 
   return NextResponse.json({
@@ -133,6 +134,18 @@ export async function PATCH(req: Request, context: { params: Promise<{ sessionId
     .set(updates)
     .where(eq(sessions.id, sessionId))
     .returning();
+
+  if (status === "completed" && session.status !== "completed") {
+    try {
+      await awardSessionCompletionCredits(
+        session.id,
+        session.expertClerkId,
+        session.creditsEarned,
+      );
+    } catch (err) {
+      console.error("Failed to award expert credits for session", session.id, err);
+    }
+  }
 
   return NextResponse.json(updated);
 }

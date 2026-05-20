@@ -12,10 +12,13 @@
 
 import { db } from "@/lib/db";
 import { creditBalances, creditTransactions } from "@/lib/schema";
-import { eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { clerkClient } from "@clerk/nextjs/server";
+import { EXPERT_SESSION_EARN } from "@/lib/credits";
+import { INITIAL_CREDITS, resolveStoredOrInitialBalance } from "@/lib/credits-balance";
 
-export const INITIAL_CREDITS = 600;
+export { INITIAL_CREDITS, resolveStoredOrInitialBalance } from "@/lib/credits-balance";
+export const SESSION_COMPLETION_REASON = "Session completed";
 
 // ---------------------------------------------------------------------------
 // getBalance
@@ -28,7 +31,7 @@ export async function getBalance(clerkUserId: string): Promise<number> {
     .from(creditBalances)
     .where(eq(creditBalances.clerkUserId, clerkUserId));
 
-  return rows[0]?.balance ?? INITIAL_CREDITS;
+  return resolveStoredOrInitialBalance(rows[0]?.balance);
 }
 
 // ---------------------------------------------------------------------------
@@ -76,7 +79,7 @@ export async function deductCredits(opts: {
       .where(eq(creditBalances.clerkUserId, clerkUserId))
       .for("update");
 
-    const currentBalance = rows[0]?.balance ?? INITIAL_CREDITS;
+    const currentBalance = resolveStoredOrInitialBalance(rows[0]?.balance);
 
     if (currentBalance < amount) {
       throw new InsufficientCreditsError(currentBalance, amount);
@@ -137,7 +140,7 @@ export async function addCredits(opts: {
       .where(eq(creditBalances.clerkUserId, clerkUserId))
       .for("update");
 
-    const currentBalance = rows[0]?.balance ?? 0;
+    const currentBalance = resolveStoredOrInitialBalance(rows[0]?.balance);
     const updated = currentBalance + amount;
 
     await tx
@@ -164,6 +167,43 @@ export async function addCredits(opts: {
   await syncBalanceToClerk(clerkUserId, newBalance).catch(() => {});
 
   return newBalance;
+}
+
+// ---------------------------------------------------------------------------
+// awardSessionCompletionCredits
+// Credits the expert once per completed session (idempotent via transaction log).
+// ---------------------------------------------------------------------------
+export async function awardSessionCompletionCredits(
+  sessionId: string,
+  expertClerkId: string,
+  creditsEarned?: number | null,
+): Promise<boolean> {
+  const amount = creditsEarned ?? EXPERT_SESSION_EARN;
+  if (amount <= 0) return false;
+
+  const existing = await db
+    .select({ id: creditTransactions.id })
+    .from(creditTransactions)
+    .where(
+      and(
+        eq(creditTransactions.relatedSessionId, sessionId),
+        eq(creditTransactions.clerkUserId, expertClerkId),
+        eq(creditTransactions.type, "credit"),
+        eq(creditTransactions.reason, SESSION_COMPLETION_REASON),
+      ),
+    )
+    .limit(1);
+
+  if (existing.length > 0) return false;
+
+  await addCredits({
+    clerkUserId: expertClerkId,
+    amount,
+    reason: SESSION_COMPLETION_REASON,
+    relatedSessionId: sessionId,
+  });
+
+  return true;
 }
 
 // ---------------------------------------------------------------------------
