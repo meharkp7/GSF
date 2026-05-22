@@ -2,13 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sessions, sessionFeedback } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import {
-  parseJsonBody,
-  requireAuth,
-  withRouteErrorHandling,
-  ApiRouteError,
-} from "@/lib/api/route-helpers";
-import { sessionsPatchSchema } from "@/lib/validators/api-routes";
+import { awardSessionCompletionCredits } from "@/lib/credits-server";
 
 const DEMO_SESSIONS: Record<string, Record<string, unknown>> = {
   "demo-1": {
@@ -126,6 +120,18 @@ export const PATCH = withRouteErrorHandling(async (req: Request, context: { para
     .set(updates)
     .where(eq(sessions.id, sessionId))
     .returning();
+
+  if (status === "completed" && session.status !== "completed") {
+    try {
+      await awardSessionCompletionCredits(
+        session.id,
+        session.expertClerkId,
+        session.creditsEarned,
+      );
+    } catch (err) {
+      console.error("Failed to award expert credits for session", session.id, err);
+    }
+  }
 
   return NextResponse.json(updated);
 });
