@@ -1,20 +1,20 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { and, eq, ne } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { conversations, messages } from "@/lib/schema";
+import {
+  requireAuth,
+  withRouteErrorHandling,
+  ApiRouteError,
+} from "@/lib/api/route-helpers";
 
 type RouteContext = {
   params: Promise<{ conversationId: string }>;
 };
 
-export async function POST(_: Request, context: RouteContext) {
+export const POST = withRouteErrorHandling(async (_: Request, context: RouteContext) => {
   const { conversationId } = await context.params;
-  const { userId } = await auth();
-
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const userId = await requireAuth();
 
   const [conversation] = await db
     .select()
@@ -23,11 +23,11 @@ export async function POST(_: Request, context: RouteContext) {
     .limit(1);
 
   if (!conversation) {
-    return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
+    throw new ApiRouteError(404, "Conversation not found");
   }
 
   if (conversation.founderClerkId !== userId && conversation.expertClerkId !== userId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    throw new ApiRouteError(403, "Forbidden");
   }
 
   await db
@@ -48,4 +48,5 @@ export async function POST(_: Request, context: RouteContext) {
   }
 
   return NextResponse.json({ ok: true });
-}
+});
+

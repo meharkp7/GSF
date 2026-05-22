@@ -1,8 +1,14 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { and, desc, eq, or } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { conversations, sessions } from "@/lib/schema";
+import {
+  parseJsonBody,
+  requireAuth,
+  withRouteErrorHandling,
+  ApiRouteError,
+} from "@/lib/api/route-helpers";
+import { conversationsPostSchema } from "@/lib/validators/api-routes";
 
 function formatConversation(row: typeof conversations.$inferSelect, userId: string) {
   const isFounder = row.founderClerkId === userId;
@@ -62,74 +68,51 @@ async function seedConversationsFromSessions(userId: string) {
   }
 }
 
-export async function GET() {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+export const GET = withRouteErrorHandling(async () => {
+  const userId = await requireAuth();
 
-    await seedConversationsFromSessions(userId);
+  await seedConversationsFromSessions(userId);
 
-    const rows = await db
-      .select()
-      .from(conversations)
-      .where(or(eq(conversations.founderClerkId, userId), eq(conversations.expertClerkId, userId)))
-      .orderBy(desc(conversations.updatedAt));
+  const rows = await db
+    .select()
+    .from(conversations)
+    .where(or(eq(conversations.founderClerkId, userId), eq(conversations.expertClerkId, userId)))
+    .orderBy(desc(conversations.updatedAt));
 
-    return NextResponse.json(rows.map((row) => formatConversation(row, userId)));
-  } catch (err) {
-    console.error("Failed to fetch conversations", err);
-    return NextResponse.json({ error: "Failed to fetch conversations" }, { status: 500 });
+  return NextResponse.json(rows.map((row) => formatConversation(row, userId)));
+});
+
+export const POST = withRouteErrorHandling(async (req: Request) => {
+  const userId = await requireAuth();
+  const body = await parseJsonBody(req, conversationsPostSchema);
+  const { founderClerkId, expertClerkId, founderName = "Founder", expertName = "Expert" } = body;
+
+  if (founderClerkId !== userId && expertClerkId !== userId) {
+    throw new ApiRouteError(403, "You can only create conversations that include your account");
   }
-}
 
-export async function POST(req: Request) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  const [existing] = await db
+    .select()
+    .from(conversations)
+    .where(and(eq(conversations.founderClerkId, founderClerkId), eq(conversations.expertClerkId, expertClerkId)))
+    .limit(1);
 
-    const body = await req.json();
-    const founderClerkId = typeof body.founderClerkId === "string" ? body.founderClerkId : "";
-    const expertClerkId = typeof body.expertClerkId === "string" ? body.expertClerkId : "";
-    const founderName = typeof body.founderName === "string" ? body.founderName : "Founder";
-    const expertName = typeof body.expertName === "string" ? body.expertName : "Expert";
-
-    if (!founderClerkId || !expertClerkId) {
-      return NextResponse.json({ error: "founderClerkId and expertClerkId are required" }, { status: 400 });
-    }
-
-    if (founderClerkId !== userId && expertClerkId !== userId) {
-      return NextResponse.json({ error: "You can only create conversations that include your account" }, { status: 403 });
-    }
-
-    const [existing] = await db
-      .select()
-      .from(conversations)
-      .where(and(eq(conversations.founderClerkId, founderClerkId), eq(conversations.expertClerkId, expertClerkId)))
-      .limit(1);
-
-    if (existing) {
-      return NextResponse.json(formatConversation(existing, userId));
-    }
-
-    const [created] = await db
-      .insert(conversations)
-      .values({
-        founderClerkId,
-        expertClerkId,
-        founderName,
-        expertName,
-        founderUnread: 0,
-        expertUnread: 0,
-      })
-      .returning();
-
-    return NextResponse.json(formatConversation(created, userId), { status: 201 });
-  } catch (err) {
-    console.error("Failed to create conversation", err);
-    return NextResponse.json({ error: "Failed to create conversation" }, { status: 500 });
+  if (existing) {
+    return NextResponse.json(formatConversation(existing, userId));
   }
-}
+
+  const [created] = await db
+    .insert(conversations)
+    .values({
+      founderClerkId,
+      expertClerkId,
+      founderName,
+      expertName,
+      founderUnread: 0,
+      expertUnread: 0,
+    })
+    .returning();
+
+  return NextResponse.json(formatConversation(created, userId), { status: 201 });
+});
+

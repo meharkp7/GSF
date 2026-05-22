@@ -1,11 +1,46 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
+
+const mocks = vi.hoisted(() => {
+  return {
+    mockAuth: vi.fn(),
+    mockDb: {
+      select: vi.fn(),
+    },
+  };
+});
+
+vi.mock("@clerk/nextjs/server", () => ({
+  auth: () => mocks.mockAuth(),
+}));
+
+vi.mock("@/lib/db", () => ({
+  db: mocks.mockDb,
+}));
+
 import {
   ApiRouteError,
   parseJsonBody,
   parseQuery,
   withRouteErrorHandling,
+  requireAuth,
+  requireUser,
+  requireRole,
 } from "./route-helpers";
+
+const mockSelect = vi.fn();
+const mockFrom = vi.fn();
+const mockWhere = vi.fn();
+const mockLimit = vi.fn();
+
+mocks.mockDb.select.mockImplementation(() => ({
+  from: mockFrom.mockImplementation(() => ({
+    where: mockWhere.mockImplementation(() => ({
+      limit: mockLimit,
+    })),
+  })),
+}));
+
 
 function getJsonFromResponse(res: Response) {
   return res.json() as Promise<{
@@ -156,5 +191,79 @@ describe("lib/api/route-helpers", () => {
       });
     });
   });
+
+  describe("requireAuth()", () => {
+    it("returns userId when authenticated", async () => {
+      mocks.mockAuth.mockResolvedValueOnce({ userId: "user_123" });
+      const userId = await requireAuth();
+      expect(userId).toBe("user_123");
+    });
+
+    it("throws 401 ApiRouteError when not authenticated", async () => {
+      mocks.mockAuth.mockResolvedValueOnce({ userId: null });
+      await expect(requireAuth()).rejects.toThrowError(ApiRouteError);
+      try {
+        mocks.mockAuth.mockResolvedValueOnce({ userId: null });
+        await requireAuth();
+      } catch (err) {
+        const e = err as ApiRouteError;
+        expect(e.status).toBe(401);
+        expect(e.code).toBe("UNAUTHORIZED");
+      }
+    });
+  });
+
+  describe("requireUser()", () => {
+    it("returns database user when found", async () => {
+      mocks.mockAuth.mockResolvedValueOnce({ userId: "user_123" });
+      mockLimit.mockResolvedValueOnce([{ id: "db_user_123", clerkId: "user_123", role: "expert" }]);
+
+      const user = await requireUser();
+      expect(user).toEqual({ id: "db_user_123", clerkId: "user_123", role: "expert" });
+    });
+
+    it("throws 404 ApiRouteError when user is not found in DB", async () => {
+      mocks.mockAuth.mockResolvedValueOnce({ userId: "user_123" });
+      mockLimit.mockResolvedValueOnce([]);
+
+      await expect(requireUser()).rejects.toThrowError(ApiRouteError);
+      try {
+        mocks.mockAuth.mockResolvedValueOnce({ userId: "user_123" });
+        mockLimit.mockResolvedValueOnce([]);
+        await requireUser();
+      } catch (err) {
+        const e = err as ApiRouteError;
+        expect(e.status).toBe(404);
+        expect(e.code).toBe("USER_NOT_FOUND");
+      }
+    });
+  });
+
+  describe("requireRole()", () => {
+    it("returns database user when user role matches allowed roles", async () => {
+      mocks.mockAuth.mockResolvedValueOnce({ userId: "user_123" });
+      mockLimit.mockResolvedValueOnce([{ id: "db_user_123", clerkId: "user_123", role: "expert" }]);
+
+      const user = await requireRole(["expert", "admin"]);
+      expect(user.role).toBe("expert");
+    });
+
+    it("throws 403 ApiRouteError when role does not match", async () => {
+      mocks.mockAuth.mockResolvedValueOnce({ userId: "user_123" });
+      mockLimit.mockResolvedValueOnce([{ id: "db_user_123", clerkId: "user_123", role: "founder" }]);
+
+      await expect(requireRole("expert")).rejects.toThrowError(ApiRouteError);
+      try {
+        mocks.mockAuth.mockResolvedValueOnce({ userId: "user_123" });
+        mockLimit.mockResolvedValueOnce([{ id: "db_user_123", clerkId: "user_123", role: "founder" }]);
+        await requireRole("expert");
+      } catch (err) {
+        const e = err as ApiRouteError;
+        expect(e.status).toBe(403);
+        expect(e.code).toBe("FORBIDDEN");
+      }
+    });
+  });
 });
+
 

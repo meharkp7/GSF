@@ -1,8 +1,14 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { conversations, messages } from "@/lib/schema";
+import {
+  parseJsonBody,
+  requireAuth,
+  withRouteErrorHandling,
+  ApiRouteError,
+} from "@/lib/api/route-helpers";
+import { conversationsMessagePostSchema } from "@/lib/validators/api-routes";
 
 type RouteContext = {
   params: Promise<{ conversationId: string }>;
@@ -18,21 +24,17 @@ async function getConversation(conversationId: string) {
   return conversation ?? null;
 }
 
-export async function GET(_: Request, context: RouteContext) {
+export const GET = withRouteErrorHandling(async (_: Request, context: RouteContext) => {
   const { conversationId } = await context.params;
-  const { userId } = await auth();
-
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const userId = await requireAuth();
 
   const conversation = await getConversation(conversationId);
   if (!conversation) {
-    return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
+    throw new ApiRouteError(404, "Conversation not found");
   }
 
   if (conversation.founderClerkId !== userId && conversation.expertClerkId !== userId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    throw new ApiRouteError(403, "Forbidden");
   }
 
   const rows = await db
@@ -42,32 +44,23 @@ export async function GET(_: Request, context: RouteContext) {
     .orderBy(desc(messages.createdAt));
 
   return NextResponse.json(rows.reverse());
-}
+});
 
-export async function POST(req: Request, context: RouteContext) {
+export const POST = withRouteErrorHandling(async (req: Request, context: RouteContext) => {
   const { conversationId } = await context.params;
-  const { userId } = await auth();
-
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const userId = await requireAuth();
 
   const conversation = await getConversation(conversationId);
   if (!conversation) {
-    return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
+    throw new ApiRouteError(404, "Conversation not found");
   }
 
   if (conversation.founderClerkId !== userId && conversation.expertClerkId !== userId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    throw new ApiRouteError(403, "Forbidden");
   }
 
-  const body = await req.json();
-  const messageText = typeof body.message === "string" ? body.message.trim() : "";
-  if (!messageText) {
-    return NextResponse.json({ error: "message is required" }, { status: 400 });
-  }
-
-  const senderName = typeof body.senderName === "string" && body.senderName.trim().length > 0 ? body.senderName.trim() : userId;
+  const body = await parseJsonBody(req, conversationsMessagePostSchema);
+  const { message: messageText, senderName = userId } = body;
 
   const [created] = await db
     .insert(messages)
@@ -102,4 +95,5 @@ export async function POST(req: Request, context: RouteContext) {
   }
 
   return NextResponse.json(created, { status: 201 });
-}
+});
+
