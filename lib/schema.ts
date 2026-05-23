@@ -242,6 +242,17 @@ export const messages = pgTable("messages", {
 });
 
 // ===================================================
+// FEED INTERACTIONS
+// ===================================================
+export const feedInteractions = pgTable("feed_interactions", {
+  id:            uuid("id").defaultRandom().primaryKey(),
+  clerkUserId:   text("clerk_user_id").notNull(),
+  targetId:      text("target_id").notNull(),
+  action:        text("action").notNull(), // connect | dismiss | save
+  createdAt:     timestamp("created_at").defaultNow(),
+});
+
+// ===================================================
 // TYPE EXPORTS
 // ===================================================
 export type User                 = typeof users.$inferSelect;
@@ -267,3 +278,6 @@ export type Conversation         = typeof conversations.$inferSelect;
 export type NewConversation      = typeof conversations.$inferInsert;
 export type Message              = typeof messages.$inferSelect;
 export type NewMessage           = typeof messages.$inferInsert;
+export type FeedInteraction     = typeof feedInteractions.$inferSelect;
+export type NewFeedInteraction  = typeof feedInteractions.$inferInsert;
+

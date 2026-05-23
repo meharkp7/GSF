@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Analytics } from "@/lib/analytics";
 
+type RouteContext = {
+  params: Promise<{ id: string }>;
+};
+
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
-  const ventureId = params.id;
+  const { id } = await context.params;
+  const ventureId = id;
   const body = await request.json();
   const { investorId, investorName } = body;
   

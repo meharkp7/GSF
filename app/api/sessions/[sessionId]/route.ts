@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sessions, sessionFeedback } from "@/lib/schema";
@@ -35,15 +34,14 @@ const DEMO_SESSIONS: Record<string, Record<string, unknown>> = {
   },
 };
 
-export async function GET(_: Request, context: { params: Promise<{ sessionId: string }> }) {
+export const GET = withRouteErrorHandling(async (_: Request, context: { params: Promise<{ sessionId: string }> }) => {
   const { sessionId } = await context.params;
 
   if (sessionId.startsWith("demo-") && DEMO_SESSIONS[sessionId]) {
     return NextResponse.json(DEMO_SESSIONS[sessionId]);
   }
 
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const userId = await requireAuth();
 
   const rows = await db
     .select()
@@ -52,12 +50,12 @@ export async function GET(_: Request, context: { params: Promise<{ sessionId: st
     .limit(1);
 
   if (rows.length === 0) {
-    return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    throw new ApiRouteError(404, "Session not found");
   }
 
   const session = rows[0];
   if (session.founderClerkId !== userId && session.expertClerkId !== userId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    throw new ApiRouteError(403, "Forbidden");
   }
 
   const [feedback] = await db
@@ -74,15 +72,11 @@ export async function GET(_: Request, context: { params: Promise<{ sessionId: st
     feedbackNotes: feedback?.feedback ?? null,
     feedbackCreatedAt: feedback?.createdAt ?? null,
   });
-}
+});
 
-export async function PATCH(req: Request, context: { params: Promise<{ sessionId: string }> }) {
+export const PATCH = withRouteErrorHandling(async (req: Request, context: { params: Promise<{ sessionId: string }> }) => {
   const { sessionId } = await context.params;
-  const { userId } = await auth();
-
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const userId = await requireAuth();
 
   const [session] = await db
     .select()
@@ -91,27 +85,19 @@ export async function PATCH(req: Request, context: { params: Promise<{ sessionId
     .limit(1);
 
   if (!session) {
-    return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    throw new ApiRouteError(404, "Session not found");
   }
 
   if (session.founderClerkId !== userId && session.expertClerkId !== userId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    throw new ApiRouteError(403, "Forbidden");
   }
 
-  const body = await req.json().catch(() => ({}));
-  const status = typeof body.status === "string" ? body.status : null;
+  const body = await parseJsonBody(req, sessionsPatchSchema);
+  const status = body.status;
   const scheduledAt = body.scheduledAt ? new Date(body.scheduledAt) : null;
 
-  if (!status && !scheduledAt) {
-    return NextResponse.json({ error: "Either status or scheduledAt must be provided" }, { status: 400 });
-  }
-
-  if (status && !["pending", "confirmed", "completed", "cancelled"].includes(status)) {
-    return NextResponse.json({ error: "status must be valid" }, { status: 400 });
-  }
-
   if (scheduledAt && scheduledAt <= new Date()) {
-    return NextResponse.json({ error: "scheduledAt must be in the future" }, { status: 400 });
+    throw new ApiRouteError(400, "scheduledAt must be in the future");
   }
 
   const updates: Record<string, unknown> = {
@@ -148,4 +134,4 @@ export async function PATCH(req: Request, context: { params: Promise<{ sessionId
   }
 
   return NextResponse.json(updated);
-}
+});

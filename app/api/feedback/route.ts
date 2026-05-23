@@ -1,24 +1,23 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sessionFeedback, sessions } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { awardSessionCompletionCredits } from "@/lib/credits-server";
+import {
+  parseJsonBody,
+  parseQuery,
+  requireAuth,
+  withRouteErrorHandling,
+  ApiRouteError,
+} from "@/lib/api/route-helpers";
+import {
+  feedbackPostSchema,
+  feedbackQuerySchema,
+} from "@/lib/validators/api-routes";
 
-export async function POST(req: Request) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const body = await req.json();
+export const POST = withRouteErrorHandling(async (req: Request) => {
+  const userId = await requireAuth();
+  const body = await parseJsonBody(req, feedbackPostSchema);
   const { sessionId, rating, feedback } = body;
-
-  if (!sessionId || typeof sessionId !== "string") {
-    return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
-  }
-
-  if (typeof rating !== "number" || rating < 1 || rating > 5) {
-    return NextResponse.json({ error: "rating must be 1-5" }, { status: 400 });
-  }
 
   // Verify session exists and user is the founder
   const [session] = await db
@@ -28,14 +27,11 @@ export async function POST(req: Request) {
     .limit(1);
 
   if (!session) {
-    return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    throw new ApiRouteError(404, "Session not found");
   }
 
   if (session.founderClerkId !== userId) {
-    return NextResponse.json(
-      { error: "Only the founder can leave feedback" },
-      { status: 403 }
-    );
+    throw new ApiRouteError(403, "Only the founder can leave feedback");
   }
 
   // Check if feedback already exists for this session
@@ -46,12 +42,31 @@ export async function POST(req: Request) {
     .limit(1);
 
   if (existing) {
-    return NextResponse.json(
-      { error: "Feedback already submitted for this session" },
-      { status: 409 }
-    );
+    throw new ApiRouteError(409, "Feedback already submitted for this session");
   }
 
+  const [created] = await db
+    .insert(sessionFeedback)
+    .values({
+      sessionId,
+      founderClerkId: userId,
+      expertClerkId: session.expertClerkId,
+      rating,
+      feedback: feedback || "",
+    })
+    .returning();
+
+  await db
+    .update(sessions)
+    .set({
+      status: "completed",
+      recordingReadyAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(sessions.id, sessionId));
+
+  return NextResponse.json(created, { status: 201 });
+});
   try {
     const [created] = await db
       .insert(sessionFeedback)
@@ -98,10 +113,9 @@ export async function POST(req: Request) {
 }
 
 // GET feedback for a session or expert
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const sessionId = searchParams.get("sessionId");
-  const expertClerkId = searchParams.get("expertClerkId");
+export const GET = withRouteErrorHandling(async (req: Request) => {
+  const query = parseQuery(req, feedbackQuerySchema);
+  const { sessionId, expertClerkId } = query;
 
   if (sessionId) {
     const rows = await db
@@ -130,5 +144,6 @@ export async function GET(req: Request) {
     });
   }
 
-  return NextResponse.json({ error: "sessionId or expertClerkId required" }, { status: 400 });
-}
+  throw new ApiRouteError(400, "sessionId or expertClerkId required");
+});
+

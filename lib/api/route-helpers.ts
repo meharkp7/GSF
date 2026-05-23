@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { ZodError, type z } from "zod";
+import { auth } from "@clerk/nextjs/server";
+import { db } from "@/lib/db";
+import { users } from "@/lib/schema";
+import { eq } from "drizzle-orm";
+import type { Role } from "@/lib/auth";
 
 export type ApiFieldErrors = Record<string, string[] | undefined>;
 
@@ -62,6 +67,37 @@ export function parseQuery<T>(req: Request, schema: z.ZodType<T>): T {
   return parsed.data;
 }
 
+export async function requireAuth(): Promise<string> {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new ApiRouteError(401, "Unauthorized", { code: "UNAUTHORIZED" });
+  }
+  return userId;
+}
+
+export async function requireUser() {
+  const userId = await requireAuth();
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.clerkId, userId))
+    .limit(1);
+
+  if (!user) {
+    throw new ApiRouteError(404, "User not found", { code: "USER_NOT_FOUND" });
+  }
+  return user;
+}
+
+export async function requireRole(allowedRoles: string | string[]) {
+  const user = await requireUser();
+  const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+  if (!user.role || !roles.includes(user.role)) {
+    throw new ApiRouteError(403, "Forbidden", { code: "FORBIDDEN" });
+  }
+  return user;
+}
+
 export function withRouteErrorHandling<TArgs extends unknown[]>(
   handler: (...args: TArgs) => Promise<Response>,
 ) {
@@ -81,3 +117,4 @@ export function withRouteErrorHandling<TArgs extends unknown[]>(
     }
   };
 }
+

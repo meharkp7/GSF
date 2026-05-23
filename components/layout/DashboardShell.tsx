@@ -54,7 +54,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
 
   const fetchNotifications = async () => {
     try {
-      const res = await fetch("/api/notifications");
+      const res = await fetch("/api/notifications?mine=1");
       if (res.ok) {
         const data = await res.json();
         setNotificationsList(data);
@@ -67,8 +67,14 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
 
   const markRead = async (id: string) => {
     try {
-      await fetch(`/api/notifications/${id}`, { method: "PATCH", body: JSON.stringify({ status: "read" }) });
-      await fetchNotifications();
+      const res = await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (res.ok) {
+        await fetchNotifications();
+      }
     } catch (err) {
       console.error("Failed to mark notification as read:", err);
     }
@@ -76,8 +82,14 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
 
   const markAllRead = async () => {
     try {
-      await fetch("/api/notifications/mark-all-read", { method: "POST" });
-      await fetchNotifications();
+      const res = await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "markAll" }),
+      });
+      if (res.ok) {
+        await fetchNotifications();
+      }
     } catch (err) {
       console.error("Failed to mark all notifications as read:", err);
     }
@@ -106,33 +118,6 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
     router.push("/");
   }
 
-  // Helper functions
-  async function fetchNotifications() {
-    try {
-      const res = await fetch('/api/notifications');
-      const data = await res.json();
-      setNotificationsList(data);
-      setNotifCount(data.filter((n: any) => n.status !== 'read').length);
-    } catch (e) {
-      console.error('Failed to fetch notifications', e);
-    }
-  }
-  async function markRead(id: string) {
-    try {
-      await fetch(`/api/notifications/${id}/read`, { method: 'POST' });
-      await fetchNotifications();
-    } catch (e) {
-      console.error('Failed to mark notification read', e);
-    }
-  }
-  async function markAllRead() {
-    try {
-      await fetch('/api/notifications/markAllRead', { method: 'POST' });
-      await fetchNotifications();
-    } catch (e) {
-      console.error('Failed to mark all read', e);
-    }
-  }
 
   const sidebarContent = (
     <div className="flex flex-col h-full">

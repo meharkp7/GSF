@@ -48,48 +48,8 @@ export function clerkUserToAuthUser(clerkUser: any): AuthUser {
   };
 }
 
-// ====================================================================
-// LEGACY SHIMS — keep working for pages that still use sessionStorage
-// These will be gradually replaced by Clerk hooks.
-// ====================================================================
-
-const SESSION_KEY = "gsf_session";
-
-export function setSession(user: AuthUser) {
-  if (typeof window === "undefined") return;
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
-}
-
-export function getSession(): AuthUser | null {
-  if (typeof window === "undefined") return null;
-  const raw = sessionStorage.getItem(SESSION_KEY);
-  if (!raw) return null;
-  try { return JSON.parse(raw) as AuthUser; } catch { return null; }
-}
-
-export function updateSession(updates: Partial<AuthUser>) {
-  const current = getSession();
-  if (!current) return;
-  const updated = { ...current, ...updates };
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(updated));
-  return updated;
-}
-
-export function logout() {
-  if (typeof window === "undefined") return;
-  sessionStorage.removeItem(SESSION_KEY);
-}
-
-export function isAuthenticated(): boolean {
-  return getSession() !== null;
-}
-
-export function requireRole(role: Role): boolean {
-  const user = getSession();
-  return user?.role === role;
-}
-
 export const REDIRECT_AFTER_LOGIN: Record<Role, string> = {
   founder: "/dashboard",
   expert:  "/expert-dashboard",
 };
+
