@@ -749,6 +749,41 @@ html.dark .glass-light {
   color: white;
 }
 
+/* ===== ROADMAP MILESTONE UTILITIES ===== */
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.bg-surface-2 {
+  background-color: var(--bg-surface-2);
+}
+
+.border-default {
+  border-color: var(--border-default);
+}
+
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 /* ===== CREDIT ORBS ===== */
 .credit-orb {
   width: 80px;

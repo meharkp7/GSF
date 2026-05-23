@@ -18,7 +18,8 @@ import {
   LogOut,
   LayoutDashboard,
   Moon,
-  Sun
+  Sun,
+  TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/nextjs";
@@ -31,6 +32,7 @@ const NAV_LINKS = [
   { label: "Connect",   href: "/connect",   icon: Video },
   { label: "Ventures",  href: "/ventures",  icon: Lightbulb },
   { label: "Experts",   href: "/experts",   icon: Users },
+  { label: "Roadmap",   href: "/roadmap",   icon: TrendingUp },
   { label: "Community", href: "/community", icon: BookOpen },
   { label: "Insights",  href: "/insights",  icon: Zap },
 ];
