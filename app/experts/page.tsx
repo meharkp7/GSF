@@ -1,10 +1,11 @@
 "use client";
-//app/experts/page.tsx
+// app/experts/page.tsx
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { ALL_EXPERTS, nameToSlug } from "@/lib/data/experts";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Star,
   MessageSquare,
@@ -14,31 +15,93 @@ import {
   Mail,
   Filter,
   X,
+  ArrowUpDown,
+  DollarSign,
 } from "lucide-react";
 
 import EmptyState from "@/components/ui/EmptyState";
 import SkeletonCard from "@/components/ui/SkeletonCard";
+
+// ── Constants ────────────────────────────────────────────────────────────────
 
 const DOMAINS = [
   "All",
   ...Array.from(new Set(ALL_EXPERTS.map((e) => e.domain))),
 ].sort();
 
+const PRICE_MIN = 0;
+const PRICE_MAX = 400;
+
+type SortOption = "relevance" | "rating" | "price_asc" | "price_desc" | "availability";
+
+const SORT_LABELS: Record<SortOption, string> = {
+  relevance:    "Relevance",
+  rating:       "Top Rated",
+  price_asc:    "Price: Low → High",
+  price_desc:   "Price: High → Low",
+  availability: "Available First",
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/** Read a URL param safely on the client */
+function readParam(params: URLSearchParams, key: string, fallback: string) {
+  return params.get(key) ?? fallback;
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
 export default function ExpertsPage() {
-  const [search, setSearch] = useState("");
-  const [domain, setDomain] = useState("All");
-  const [availOnly, setAvailOnly] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const router       = useRouter();
+  const searchParams = useSearchParams();
+
+  // ── State — initialise from URL params ──────────────────────────────────
+  const [search,    setSearch]    = useState(() => readParam(searchParams, "q",       ""));
+  const [domain,    setDomain]    = useState(() => readParam(searchParams, "domain",  "All"));
+  const [sort,      setSort]      = useState<SortOption>(() => (readParam(searchParams, "sort", "relevance") as SortOption));
+  const [priceMin,  setPriceMin]  = useState(() => Number(readParam(searchParams, "minPrice", String(PRICE_MIN))));
+  const [priceMax,  setPriceMax]  = useState(() => Number(readParam(searchParams, "maxPrice", String(PRICE_MAX))));
+  const [availOnly, setAvailOnly] = useState(() => readParam(searchParams, "available", "") === "1");
+  const [loading,   setLoading]   = useState(true);
+  const [sortOpen,  setSortOpen]  = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1500);
+    const timer = setTimeout(() => setLoading(false), 1200);
     return () => clearTimeout(timer);
   }, []);
 
+  // ── Sync state → URL params ──────────────────────────────────────────────
+  const syncURL = useCallback(
+    (overrides: Partial<{
+      q: string; domain: string; sort: string;
+      minPrice: number; maxPrice: number; available: string;
+    }>) => {
+      const params = new URLSearchParams();
+      const q         = overrides.q         ?? search;
+      const d         = overrides.domain    ?? domain;
+      const s         = overrides.sort      ?? sort;
+      const minP      = overrides.minPrice  ?? priceMin;
+      const maxP      = overrides.maxPrice  ?? priceMax;
+      const avail     = overrides.available ?? (availOnly ? "1" : "");
+
+      if (q)              params.set("q",         q);
+      if (d !== "All")    params.set("domain",    d);
+      if (s !== "relevance") params.set("sort",   s);
+      if (minP !== PRICE_MIN) params.set("minPrice", String(minP));
+      if (maxP !== PRICE_MAX) params.set("maxPrice", String(maxP));
+      if (avail === "1")  params.set("available", "1");
+
+      const qs = params.toString();
+      router.replace(qs ? `?${qs}` : "?", { scroll: false });
+    },
+    [search, domain, sort, priceMin, priceMax, availOnly, router]
+  );
+
+  // ── Filter + Sort ────────────────────────────────────────────────────────
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
 
-    return ALL_EXPERTS.filter((e) => {
+    const matched = ALL_EXPERTS.filter((e) => {
       const matchQ =
         !q ||
         e.name.toLowerCase().includes(q) ||
@@ -47,25 +110,85 @@ export default function ExpertsPage() {
         e.bio.toLowerCase().includes(q) ||
         e.tags.some((t) => t.toLowerCase().includes(q));
 
-      const matchD = domain === "All" || e.domain === domain;
-      const matchA = !availOnly || e.available;
+      const matchD    = domain === "All" || e.domain === domain;
+      const matchA    = !availOnly || e.available;
+      const matchP    = e.pricePerSession >= priceMin && e.pricePerSession <= priceMax;
 
-      return matchQ && matchD && matchA;
+      return matchQ && matchD && matchA && matchP;
     });
-  }, [search, domain, availOnly]);
+
+    // Sort
+    switch (sort) {
+      case "rating":
+        return [...matched].sort((a, b) => b.rating - a.rating);
+      case "price_asc":
+        return [...matched].sort((a, b) => a.pricePerSession - b.pricePerSession);
+      case "price_desc":
+        return [...matched].sort((a, b) => b.pricePerSession - a.pricePerSession);
+      case "availability":
+        return [...matched].sort((a, b) => Number(b.available) - Number(a.available));
+      default:
+        return matched;
+    }
+  }, [search, domain, availOnly, priceMin, priceMax, sort]);
+
+  // ── Actions ──────────────────────────────────────────────────────────────
+  const handleSearch = (val: string) => {
+    setSearch(val);
+    syncURL({ q: val });
+  };
+
+  const handleDomain = (val: string) => {
+    setDomain(val);
+    syncURL({ domain: val });
+  };
+
+  const handleSort = (val: SortOption) => {
+    setSort(val);
+    setSortOpen(false);
+    syncURL({ sort: val });
+  };
+
+  const handleAvail = () => {
+    const next = !availOnly;
+    setAvailOnly(next);
+    syncURL({ available: next ? "1" : "" });
+  };
+
+  const handlePriceMin = (val: number) => {
+    const v = Math.min(val, priceMax - 10);
+    setPriceMin(v);
+    syncURL({ minPrice: v });
+  };
+
+  const handlePriceMax = (val: number) => {
+    const v = Math.max(val, priceMin + 10);
+    setPriceMax(v);
+    syncURL({ maxPrice: v });
+  };
 
   const clearFilters = () => {
     setSearch("");
     setDomain("All");
     setAvailOnly(false);
+    setSort("relevance");
+    setPriceMin(PRICE_MIN);
+    setPriceMax(PRICE_MAX);
+    router.replace("?", { scroll: false });
   };
 
+  const hasActiveFilters =
+    search || domain !== "All" || availOnly ||
+    sort !== "relevance" || priceMin !== PRICE_MIN || priceMax !== PRICE_MAX;
+
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <>
       <Navbar />
 
       <main className="pt-24 min-h-screen bg-background">
-        {/* Hero */}
+
+        {/* ── Hero ── */}
         <section className="relative section-padding bg-soft-pattern dark:bg-gradient-to-b dark:from-slate-950 dark:to-slate-900 overflow-hidden">
           <div className="absolute inset-0 bg-dot-grid opacity-25" />
 
@@ -90,24 +213,22 @@ export default function ExpertsPage() {
               domain experts. Available directly to every GSF member.
             </p>
 
+            {/* ── Search row ── */}
             <div className="flex flex-col gap-4 max-w-4xl mx-auto">
-              {/* Search + CTA */}
               <div className="flex flex-col sm:flex-row items-center gap-3">
                 <div className="relative flex-1 w-full">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-text-muted" />
-
                   <input
                     id="expert-search"
                     type="text"
                     placeholder="Search by name, company, or expertise..."
                     className="input pl-10 w-full bg-surface border-border"
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={(e) => handleSearch(e.target.value)}
                   />
-
                   {search && (
                     <button
-                      onClick={() => setSearch("")}
+                      onClick={() => handleSearch("")}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
                     >
                       <X className="size-3.5" />
@@ -123,12 +244,12 @@ export default function ExpertsPage() {
                 </Link>
               </div>
 
-              {/* Domain filters */}
+              {/* ── Domain chips ── */}
               <div className="flex flex-wrap gap-2 justify-center">
                 {DOMAINS.map((d) => (
                   <button
                     key={d}
-                    onClick={() => setDomain(d)}
+                    onClick={() => handleDomain(d)}
                     className={`px-3 py-1.5 rounded-full text-sm transition-all whitespace-nowrap ${
                       domain === d
                         ? "bg-accent-indigo text-white shadow-md"
@@ -140,10 +261,10 @@ export default function ExpertsPage() {
                 ))}
               </div>
 
-              {/* Availability toggle */}
+              {/* ── Availability + clear ── */}
               <div className="flex items-center justify-center gap-4 mt-2">
                 <button
-                  onClick={() => setAvailOnly((v) => !v)}
+                  onClick={handleAvail}
                   className={`text-sm px-3 py-1.5 rounded-full border transition-all ${
                     availOnly
                       ? "bg-green-600 text-white border-green-600"
@@ -153,13 +274,12 @@ export default function ExpertsPage() {
                   ● Available now only
                 </button>
 
-                {(search || domain !== "All" || availOnly) && (
+                {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
                     className="text-xs text-text-muted hover:text-text-primary flex items-center gap-1"
                   >
-                    <X className="size-3" />
-                    Clear filters
+                    <X className="size-3" /> Clear filters
                   </button>
                 )}
               </div>
@@ -167,34 +287,101 @@ export default function ExpertsPage() {
           </div>
         </section>
 
-        {/* Results */}
-        <div className="section-container py-4 flex items-center justify-between">
+        {/* ── Toolbar: results count + sort + price range ── */}
+        <div className="section-container py-4 flex flex-wrap items-center gap-4 justify-between">
+
+          {/* Count */}
           <p className="text-sm text-text-secondary">
             Showing{" "}
-            <strong className="text-text-primary">
-              {filtered.length}
-            </strong>{" "}
+            <strong className="text-text-primary">{filtered.length}</strong>{" "}
             of{" "}
-            <strong className="text-text-primary">
-              {ALL_EXPERTS.length}
-            </strong>{" "}
+            <strong className="text-text-primary">{ALL_EXPERTS.length}</strong>{" "}
             experts
             {domain !== "All" && (
-              <>
-                {" "}
-                in{" "}
-                <strong className="text-accent-primary">{domain}</strong>
-              </>
+              <> in <strong className="text-accent-primary">{domain}</strong></>
             )}
           </p>
 
-          <div className="flex items-center gap-1.5 text-xs text-text-muted">
-            <Filter className="size-3.5" />
-            {filtered.length} results
+          <div className="flex items-center gap-3 flex-wrap">
+
+            {/* ── Price range ── */}
+            <div className="flex items-center gap-2 bg-surface border border-border rounded-xl px-3 py-2">
+              <DollarSign className="size-3.5 text-text-muted shrink-0" />
+              <div className="flex flex-col gap-1 min-w-[160px]">
+                <div className="flex justify-between text-[10px] text-text-muted">
+                  <span>${priceMin}</span>
+                  <span>${priceMax === PRICE_MAX ? `${PRICE_MAX}+` : priceMax}</span>
+                </div>
+                {/* Min slider */}
+                <input
+                  type="range"
+                  min={PRICE_MIN}
+                  max={PRICE_MAX}
+                  step={10}
+                  value={priceMin}
+                  onChange={(e) => handlePriceMin(Number(e.target.value))}
+                  className="w-full h-1 accent-blue-500 cursor-pointer"
+                  aria-label="Minimum price"
+                />
+                {/* Max slider */}
+                <input
+                  type="range"
+                  min={PRICE_MIN}
+                  max={PRICE_MAX}
+                  step={10}
+                  value={priceMax}
+                  onChange={(e) => handlePriceMax(Number(e.target.value))}
+                  className="w-full h-1 accent-blue-500 cursor-pointer"
+                  aria-label="Maximum price"
+                />
+                <p className="text-[10px] text-text-muted text-center">Price per session (USD)</p>
+              </div>
+            </div>
+
+            {/* ── Sort dropdown ── */}
+            <div className="relative">
+              <button
+                onClick={() => setSortOpen((v) => !v)}
+                className="flex items-center gap-2 text-sm bg-surface border border-border rounded-xl px-3 py-2 hover:bg-surface-2 transition-colors"
+              >
+                <ArrowUpDown className="size-3.5 text-text-muted" />
+                <span className="text-text-secondary">{SORT_LABELS[sort]}</span>
+              </button>
+
+              {sortOpen && (
+                <>
+                  {/* Backdrop to close */}
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setSortOpen(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-1 z-20 bg-surface border border-border rounded-xl shadow-lg py-1 min-w-[180px]">
+                    {(Object.keys(SORT_LABELS) as SortOption[]).map((key) => (
+                      <button
+                        key={key}
+                        onClick={() => handleSort(key)}
+                        className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                          sort === key
+                            ? "text-accent-primary bg-surface-2"
+                            : "text-text-secondary hover:bg-surface-2"
+                        }`}
+                      >
+                        {SORT_LABELS[key]}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs text-text-muted">
+              <Filter className="size-3.5" />
+              {filtered.length} results
+            </div>
           </div>
         </div>
 
-        {/* Experts Grid */}
+        {/* ── Experts Grid ── */}
         <section className="section-container pb-24 pt-2">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -210,7 +397,7 @@ export default function ExpertsPage() {
                   href={`/experts/${nameToSlug(expert.name)}`}
                   className="card p-6 card-hover flex flex-col gap-4 bg-surface border-border group"
                 >
-                  {/* Header */}
+                  {/* ── Card header ── */}
                   <div className="flex items-start gap-3">
                     <div
                       className="size-14 rounded-2xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
@@ -227,15 +414,17 @@ export default function ExpertsPage() {
                           {expert.name}
                         </h2>
 
-                        <span
-                          className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${
-                            expert.available
-                              ? "bg-green-50 text-green-700 border border-green-200 dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/20"
-                              : "bg-surface-2 text-text-muted dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600"
-                          }`}
-                        >
-                          {expert.available ? "● Available" : "Away"}
-                        </span>
+                        {/* ── Available Today badge ── */}
+                        {expert.available ? (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 bg-green-50 text-green-700 border border-green-200 dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/20 flex items-center gap-1">
+                            <span className="inline-block size-1.5 rounded-full bg-green-500 animate-pulse" />
+                            Available Today
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 bg-surface-2 text-text-muted dark:bg-slate-700 dark:text-slate-400">
+                            Away
+                          </span>
+                        )}
                       </div>
 
                       <p className="text-xs text-text-secondary truncate mt-0.5">
@@ -250,7 +439,6 @@ export default function ExpertsPage() {
                         <span className="badge badge-blue text-[10px]">
                           {expert.domain}
                         </span>
-
                         <span className="text-[10px] text-text-muted">
                           {expert.experience} exp
                         </span>
@@ -275,17 +463,23 @@ export default function ExpertsPage() {
                     ))}
                   </div>
 
-                  {/* Rating */}
-                  <div className="flex items-center gap-3 text-xs text-text-muted">
-                    <span className="flex items-center gap-1">
-                      <Star className="size-3 text-amber-400 fill-amber-400" />
-                      {expert.rating}
-                    </span>
+                  {/* Rating + price */}
+                  <div className="flex items-center justify-between text-xs text-text-muted">
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center gap-1">
+                        <Star className="size-3 text-amber-400 fill-amber-400" />
+                        {expert.rating}
+                      </span>
+                      <span>{expert.sessions} sessions</span>
+                    </div>
 
-                    <span>{expert.sessions} sessions</span>
+                    {/* Price badge */}
+                    <span className="font-semibold text-text-primary text-xs bg-surface-2 border border-border px-2 py-0.5 rounded-full">
+                      ${expert.pricePerSession}/session
+                    </span>
                   </div>
 
-                  {/* Footer */}
+                  {/* Footer actions */}
                   <div className="pt-2 border-t border-border space-y-2">
                     <div className="btn-primary w-full justify-center text-xs py-2 flex items-center gap-1.5 pointer-events-none">
                       <Video className="size-3.5" />
@@ -293,7 +487,6 @@ export default function ExpertsPage() {
                     </div>
 
                     <div className="flex items-center gap-1">
-                      {/* LinkedIn */}
                       <a
                         href={`https://${expert.linkedin}`}
                         target="_blank"
@@ -301,18 +494,12 @@ export default function ExpertsPage() {
                         onClick={(e) => e.stopPropagation()}
                         className="flex items-center gap-1.5 text-xs text-text-secondary hover:text-[#0077B5] transition-colors px-2 py-1 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 flex-1 justify-center"
                       >
-                        <svg
-                          className="size-3.5 flex-shrink-0"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
+                        <svg className="size-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
                         </svg>
-
                         LinkedIn
                       </a>
 
-                      {/* Email */}
                       <a
                         href={`mailto:${expert.email}`}
                         onClick={(e) => e.stopPropagation()}
@@ -322,7 +509,6 @@ export default function ExpertsPage() {
                         Email
                       </a>
 
-                      {/* Chat */}
                       <span className="flex items-center gap-1.5 text-xs text-text-secondary px-2 py-1 rounded-lg flex-1 justify-center">
                         <MessageSquare className="size-3.5 flex-shrink-0" />
                         Chat
@@ -336,20 +522,14 @@ export default function ExpertsPage() {
             <EmptyState
               icon="🔍"
               title="No experts found"
-              description="Try a different search term or domain filter. Our expert network spans fundraising, product, growth, legal, and impact."
-              primaryAction={{
-                label: "Browse All Experts",
-                href: "/experts",
-              }}
-              secondaryAction={{
-                label: "Join GSF",
-                href: "/sign-up",
-              }}
+              description="Try a different search term, domain filter, or adjust the price range. Our expert network spans fundraising, product, growth, legal, and impact."
+              primaryAction={{ label: "Browse All Experts", href: "/experts" }}
+              secondaryAction={{ label: "Join GSF", href: "/sign-up" }}
             />
           )}
         </section>
 
-        {/* CTA */}
+        {/* ── CTA ── */}
         <section className="bg-canvas border-t border-border py-20">
           <div className="section-container text-center max-w-2xl mx-auto">
             <div className="size-14 rounded-2xl bg-surface-2 dark:bg-slate-800 border border-border flex items-center justify-center mx-auto mb-6">
