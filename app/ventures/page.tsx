@@ -5,7 +5,8 @@ import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
-import { Lightbulb, TrendingUp, MessageSquare, Shield, Percent, Eye, Heart, Search, ArrowRight, SlidersHorizontal, BarChart2, Rocket, DollarSign, Building2, BookOpen, Loader2 } from "lucide-react";
+import { Lightbulb, TrendingUp, MessageSquare, Shield, Percent, Eye, Heart, Search, ArrowRight, SlidersHorizontal, BarChart2, Rocket, DollarSign, Building2, BookOpen, Loader2, Zap } from "lucide-react";
+import { computeValidationScore, getScoreColor } from "@/lib/utils/validationScore";
 import EmptyState from "@/components/ui/EmptyState";
 import SkeletonCard from "@/components/ui/SkeletonCard";
 
@@ -50,6 +51,7 @@ export default function VenturesPage() {
   const [ideaStageFilter, setIdeaStageFilter] = useState("All stages");
   const [sectorFilter, setSectorFilter] = useState("All sectors");
   const [fundingFilter, setFundingFilter] = useState("All");
+  const [minScore, setMinScore] = useState(0);
   
   const [ventures, setVentures] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,18 +107,20 @@ export default function VenturesPage() {
     const safeFounder = v.founderName || v.founder || "";
     const safeTagline = v.tagline || "";
     const safeTags = Array.isArray(v.tags) ? v.tags : [];
-    
+
     const matchSearch = search === "" ||
       safeName.toLowerCase().includes(search.toLowerCase()) ||
       safeFounder.toLowerCase().includes(search.toLowerCase()) ||
       safeTagline.toLowerCase().includes(search.toLowerCase()) ||
       safeTags.some((t: string) => t.toLowerCase().includes(search.toLowerCase()));
-      
+
     const matchIdea = ideaStageFilter === "All stages" || v.stage === ideaStageFilter;
     const matchSector = sectorFilter === "All sectors" || v.sector === sectorFilter;
     const matchFunding = fundingFilter === "All" || v.fundingStage === fundingFilter;
-    
-    return matchSearch && matchIdea && matchSector && matchFunding;
+    const score = v.validationScore ?? computeValidationScore(v);
+    const matchScore = score >= minScore;
+
+    return matchSearch && matchIdea && matchSector && matchFunding && matchScore;
   });
 
   return (
@@ -194,7 +198,7 @@ export default function VenturesPage() {
         {/* Filters + Grid */}
         <section className="bg-canvas py-12 transition-colors">
           <div className="section-container">
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <div className="flex flex-col sm:flex-row gap-3 mb-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-text-muted" />
                 <input
@@ -214,12 +218,32 @@ export default function VenturesPage() {
               </select>
             </div>
 
+            {/* Validation Score filter */}
+            <div className="flex items-center gap-2 flex-wrap mb-6">
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                <Zap className="size-3.5 text-amber-500" /> Min Score:
+              </span>
+              {[{ label: "Any", value: 0 }, { label: "4+", value: 4 }, { label: "6+", value: 6 }, { label: "8+", value: 8 }].map(({ label, value }) => (
+                <button
+                  key={label}
+                  onClick={() => setMinScore(value)}
+                  className="text-xs px-3 py-1.5 rounded-full border font-medium transition-all"
+                  style={minScore === value
+                    ? { backgroundColor: "var(--accent-indigo)", borderColor: "var(--accent-indigo)", color: "white" }
+                    : { backgroundColor: "var(--bg-surface)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }
+                  }
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
             {/* Result count */}
             <p className="text-xs text-text-muted mb-4 flex items-center gap-2">
               <SlidersHorizontal className="size-3.5" />
               Showing <span className="font-semibold text-text-primary">{filtered.length}</span> ventures
-              {(ideaStageFilter !== "All stages" || sectorFilter !== "All sectors" || fundingFilter !== "All" || search) && (
-                <button onClick={() => { setSearch(""); setIdeaStageFilter("All stages"); setSectorFilter("All sectors"); setFundingFilter("All"); }}
+              {(ideaStageFilter !== "All stages" || sectorFilter !== "All sectors" || fundingFilter !== "All" || search || minScore > 0) && (
+                <button onClick={() => { setSearch(""); setIdeaStageFilter("All stages"); setSectorFilter("All sectors"); setFundingFilter("All"); setMinScore(0); }}
                   className="text-accent-primary hover:underline">Clear filters</button>
               )}
             </p>
@@ -243,8 +267,10 @@ export default function VenturesPage() {
                 {filtered.map((v) => {
                   const stageStyle = STAGE_STYLES[v.stage] || STAGE_STYLES["Ideation"];
                   const avatarColor = AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)];
+                  const score = v.validationScore ?? computeValidationScore(v);
+                  const sc = getScoreColor(score);
                   return (
-                    <div key={v.id} className="card card-hover p-6 flex flex-col gap-4 bg-card">
+                      <div key={v.id} className="card card-hover p-6 flex flex-col gap-4 bg-card">
                       {/* Header */}
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-center gap-3">
@@ -258,9 +284,32 @@ export default function VenturesPage() {
                             <span className={`badge mt-1 text-[10px] ${v.fundingStage === "Seed" ? "badge-blue" : "badge-warm"}`}>{v.fundingStage || "Pre-seed"}</span>
                           </div>
                         </div>
-                        <span className={`text-[10px] px-2 py-1 rounded-full shrink-0 font-medium ${v.daysLeft <= 7 ? 'text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-300 border border-red-100 dark:border-red-500/20' : 'bg-surface-2 border border-border'}`} style={{ color: "var(--text-muted)" }}>
-                          {v.daysLeft || 30}d left
-                        </span>
+                        <div className="flex flex-col items-end gap-1.5 shrink-0">
+                          <span className={`text-[10px] px-2 py-1 rounded-full font-medium ${v.daysLeft <= 7 ? 'text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-300 border border-red-100 dark:border-red-500/20' : 'bg-surface-2 border border-border'}`} style={{ color: v.daysLeft <= 7 ? undefined : "var(--text-muted)" }}>
+                            {v.daysLeft || 30}d left
+                          </span>
+                          {/* Validation Score badge */}
+                          <span
+                            className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full border"
+                            style={{ background: sc.bg, color: sc.text, borderColor: sc.border }}
+                            title={`Validation Score: ${score}/10 — ${sc.label}`}
+                          >
+                            <Zap className="size-2.5" />
+                            {score}/10 · {sc.label}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Score bar */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted whitespace-nowrap">Validation</span>
+                        <div className="flex-1 h-1.5 rounded-full bg-surface-2 border border-border overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{ width: `${score * 10}%`, backgroundColor: sc.text }}
+                          />
+                        </div>
+                        <span className="text-[10px] font-bold" style={{ color: sc.text }}>{score}/10</span>
                       </div>
 
                       <p className="text-sm font-semibold leading-snug" style={{ color: "var(--text-primary)" }}>{v.tagline}</p>
@@ -300,11 +349,11 @@ export default function VenturesPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Link href={`mailto:founder@gsf.com?subject=Interested in ${v.name}`} className="btn-outline py-1.5 px-3 text-xs"><MessageSquare className="size-3.5" /> Chat</Link>
-                          <button 
-                            onClick={() => handleFundThis(v.id)} 
+                          <button
+                            onClick={() => handleFundThis(v.id)}
                             disabled={fundingActionStatus[v.id] === 'loading' || fundingActionStatus[v.id] === 'success'}
                             className="btn-primary py-1.5 px-4 text-xs disabled:opacity-50 disabled:cursor-not-allowed">
-                            {fundingActionStatus[v.id] === 'loading' ? <Loader2 className="size-3.5 animate-spin" /> : <TrendingUp className="size-3.5" />} 
+                            {fundingActionStatus[v.id] === 'loading' ? <Loader2 className="size-3.5 animate-spin" /> : <TrendingUp className="size-3.5" />}
                             {fundingActionStatus[v.id] === 'success' ? 'Funded' : 'Fund This'}
                           </button>
                         </div>
